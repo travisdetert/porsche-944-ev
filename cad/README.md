@@ -14,7 +14,7 @@ Most of the 944 EV is reused (Leaf) or kept (944). These are the few parts we **
 ## Workflow (every custom part)
 1. **Measure** the mating hardware (teardown / donor extraction).
 2. **Model** it parametrically — fill the measured values into the model.
-3. **Fit-check cheaply** — cardboard / plywood mock, or a 3D-printed PLA proxy.
+3. **Fit-check cheaply** — **cardboard / plywood mock or paper/acrylic template** (no 3D printer here).
 4. **Export** a DXF (2D profile) or STEP + a dimensioned drawing for the shop / your bender.
 5. **Make it**, then **dry-fit** — that's the gate (adapter = G2).
 
@@ -24,9 +24,13 @@ Most of the 944 EV is reused (Leaf) or kept (944). These are the few parts we **
 - **FreeCAD** / **Fusion 360 (free hobby)** — GUI option for organic/complex parts.
 - **Cardboard + marker** — the honest first prototype for enclosures and mounts.
 
+## Toolchain (locked: OpenSCAD, no 3D printer)
+Models live in the repo as `.scad`; fit-checks use **cardboard / paper / acrylic** templates.
+
 ## Files
 - `adapter-plate.scad` + `adapter-spec.md` — EM57 → torque-tube adapter (the critical part).
-- enclosures / mounts / skid: specs added when we design them.
+- `battery-enclosure.scad` + `battery-enclosure-spec.md` — the two low battery boxes (6 + 8).
+- mounts / skid: specs added when we design them.
 
 ## Using the .scad models
 Install OpenSCAD → open the file → replace every `// MEASURE` placeholder with your real
