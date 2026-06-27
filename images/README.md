@@ -11,6 +11,8 @@ These are rough working diagrams — to be refined once the real layout is measu
 | 3 | `step-3-motor-mounted.svg` | EM57 motor + adapter onto the torque tube |
 | 4 | `step-4-batteries.svg` | Battery packs mounted low (front + main), ~50/50 |
 | 5 | `step-5-complete.svg` | Wired: battery → inverter → motor → wheels, charge port, subs |
+| + | `top-down-layout.svg` | Top-down: front/main pack split around the tunnel, transaxle + subs rear |
+| + | `adapter-joint.svg` | Exploded: EM57 → coupler → adapter plate → torque-tube driveshaft |
 
 SVGs render in any browser or GitHub. Open them directly, or view inline in the repo.
 Related: `docs/drivetrain-diagrams.md` (detailed) · `docs/power-and-reuse-diagrams.md` (power/reuse).

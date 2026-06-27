@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 340" font-family="Helvetica,Arial,sans-serif">
+  <rect width="820" height="340" fill="#f7f7f5"/>
+  <text x="20" y="30" font-size="20" font-weight="bold" fill="#222">944 EV — The adapter joint (exploded)</text>
+  <text x="20" y="52" font-size="13" fill="#666">The one custom-machined part: it bolts the EM57 to the torque tube and joins the shafts, concentric.</text>
+  <line x1="60" y1="180" x2="780" y2="180" stroke="#bbb" stroke-width="1.5" stroke-dasharray="8 6"/>
+  <text x="640" y="172" font-size="10" fill="#999">centerline — must be concentric</text>
+  <rect x="80" y="120" width="150" height="120" rx="10" fill="#1565c0" stroke="#0d47a1" stroke-width="2"/>
+  <text x="155" y="172" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">EM57</text>
+  <text x="155" y="192" font-size="12" fill="#fff" text-anchor="middle">motor</text>
+  <rect x="230" y="172" width="46" height="16" fill="#0d47a1"/>
+  <text x="253" y="208" font-size="9" fill="#0d47a1" text-anchor="middle">output shaft</text>
+  <polygon points="300,156 336,156 348,180 336,204 300,204 312,180" fill="#e67e22" stroke="#bf360c" stroke-width="2"/>
+  <text x="324" y="232" font-size="10" fill="#bf360c" text-anchor="middle">coupler</text>
+  <text x="324" y="244" font-size="9" fill="#bf360c" text-anchor="middle">(splined)</text>
+  <rect x="380" y="96" width="26" height="168" rx="6" fill="#e67e22" stroke="#bf360c" stroke-width="2"/>
+  <text x="393" y="86" font-size="10" fill="#bf360c" text-anchor="middle">adapter plate</text>
+  <circle cx="393" cy="120" r="4" fill="#fff"/><circle cx="393" cy="240" r="4" fill="#fff"/>
+  <rect x="470" y="100" width="22" height="160" rx="5" fill="#2e7d32" stroke="#1b5e20" stroke-width="2"/>
+  <text x="481" y="90" font-size="10" fill="#1b5e20" text-anchor="middle">bellhousing flange</text>
+  <rect x="492" y="172" width="240" height="16" fill="#2e7d32"/>
+  <text x="612" y="208" font-size="11" fill="#1b5e20" text-anchor="middle" font-weight="bold">torque tube driveshaft → transaxle</text>
+  <text x="225" y="124" font-size="9" fill="#666">bolts to motor face ▶</text>
+  <text x="408" y="288" font-size="9" fill="#666">◀ plate bolts to the torque-tube bellhousing</text>
+  <path d="M276 180 L300 180" stroke="#888" stroke-width="1.5"/>
+  <path d="M348 180 L380 180" stroke="#888" stroke-width="1.5"/>
+  <path d="M406 180 L470 180" stroke="#888" stroke-width="1.5"/>
+  <text x="40" y="316" font-size="11" fill="#bf360c" font-weight="bold">No off-the-shelf 944 part exists — a machine shop makes this; alignment is make-or-break.</text>
+  <g font-size="11">
+    <rect x="560" y="306" width="14" height="14" fill="#1565c0"/><text x="580" y="318" fill="#333">Leaf</text>
+    <rect x="630" y="306" width="14" height="14" fill="#e67e22"/><text x="650" y="318" fill="#333">new (machined)</text>
+    <rect x="750" y="306" width="14" height="14" fill="#2e7d32"/><text x="770" y="318" fill="#333">944</text>
+  </g>
+</svg>
