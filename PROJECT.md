@@ -27,7 +27,7 @@ and DIY labor.
 | **Motor** | NetGain HyPer9 *(bolt-on)* **or** Nissan Leaf EM57 *(cheaper, more fab)* | Decision pending — see Now/Next |
 | **Controller/VCU** | HyPer9 controller, **or** ZombieVerter VCU + stock Leaf inverter | Pairs with motor choice |
 | **Drivetrain** | **Keep stock 944 transaxle** (adapter plate, run in one gear) | The Tier 2 cost-saver |
-| **Battery** | Path B: **10 Tesla modules, 5S2P, 53 kWh, 114 V** (~159 mi). Path A (Leaf): ~14S, 74 kWh | Voltage window sets count — see `docs/module-placement-map.md` |
+| **Battery** | Path B: **10 modules, 5S2P, 53 kWh, 114 V** (~159 mi). HV/Leaf: **14 modules, 74 kWh** (7S2P 160 V / 14S1P 319 V), ~222 mi | Voltage window sets count — see `docs/module-placement-map.md` + `docs/module-placement-leaf-hv.md` |
 | **BMS** | Open-source (simpBMS) or budget commercial | Sized to module count |
 | **Charger** | Used Leaf OBC or aftermarket (Elcon/TC) | AC L1/L2 to start |
 | **DC-DC** | Salvage or new (12V system) | Required |
