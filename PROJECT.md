@@ -27,7 +27,7 @@ and DIY labor.
 | **Motor** | NetGain HyPer9 *(bolt-on)* **or** Nissan Leaf EM57 *(cheaper, more fab)* | Decision pending — see Now/Next |
 | **Controller/VCU** | HyPer9 controller, **or** ZombieVerter VCU + stock Leaf inverter | Pairs with motor choice |
 | **Drivetrain** | **Keep stock 944 transaxle** (adapter plate, run in one gear) | The Tier 2 cost-saver |
-| **Battery** | ~50 kWh usable — Chevy Bolt or Tesla Model S/X modules | Densest packs fit the 944 best |
+| **Battery** | Path B: **10 Tesla modules, 5S2P, 53 kWh, 114 V** (~159 mi). Path A (Leaf): ~14S, 74 kWh | Voltage window sets count — see `docs/module-placement-map.md` |
 | **BMS** | Open-source (simpBMS) or budget commercial | Sized to module count |
 | **Charger** | Used Leaf OBC or aftermarket (Elcon/TC) | AC L1/L2 to start |
 | **DC-DC** | Salvage or new (12V system) | Required |
@@ -68,6 +68,14 @@ _Cheapest verified bench-to-battery core: HyPer9 kit $5,400 + ZombieVerter $380 
 - **Battery is the budget swing.** Tesla module prices have a ~2× vendor spread
   ($690 vs ~$1,500 each) — shopping vendors is the single biggest lever. A whole
   salvage Bolt pack (~$3–4.5k for 60+ kWh) is cheapest per kWh but harder to repackage.
+- **Controller voltage caps the pack (Path B).** HyPer9-std's ~132 V ceiling limits
+  Tesla modules to **5S**, so the clean pack is **5S2P = 10 modules / 53 kWh** (~159 mi
+  @ 300 Wh/mi; ~139 at worst-case 343). For guaranteed worst-case 150-mi margin, the
+  higher-voltage **HV or Leaf path** allows more series modules → more kWh. See
+  `docs/module-placement-map.md`.
+- **Converted balance ≈ 49.3 % front / 50.7 % rear at ~3,255 lb** (10 modules split
+  5 front / 5 main), with a lower CG than stock. Pulling the heavy engine means the
+  battery is used to add weight *forward*. See `docs/weight-balance-layout.md`.
 - **HyPer9 controller availability:** standalone X1 controller noted on backorder to
   ~April 2026 at some vendors; full kits were in stock at EV West.
 
