@@ -92,7 +92,11 @@ with a whisker of rear bias (ideal for RWD traction), and a **lower CG than stoc
 |---|---|---|
 | **7 / 7** | **49.0%** | recommended — even, easy routing |
 | 8 / 6 | ~49.8% | true-ish 50/50 |
-| 6 / 8 (+hatch) | ~47–48% | more rear bias for launch traction |
+| 6 / 8 | ~47–48% | more rear bias; **the packaging-realistic choice** |
+
+> **In-car design = 6 front / 8 main (~48% front).** The front bay also holds the inverter,
+> PDM, VCU, and contactor/fuse box, so 6 modules up front is the *buildable* number (vs. the
+> theoretical 7/7). Concrete placement: `944-layout-design.md`.
 
 ---
 
