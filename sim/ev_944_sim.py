@@ -172,6 +172,49 @@ def gear_sweep(motor="Leaf EM57", batt=50):
     print("  ~7-8 is the streetable sweet spot for the EM57 in the 944.")
 
 
+def scatter():
+    """ASCII 0-60 vs range scatter across motor x battery configs."""
+    W, H = 64, 18
+    XMAX, YMIN, YMAX = 320.0, 5.0, 13.0      # range axis, 0-60 axis (s)
+    grid = [[" "] * W for _ in range(H)]
+    configs = [
+        ("a", "Leaf EM57", 30), ("b", "Leaf EM57", 50),
+        ("c", "Leaf EM57", 74), ("d", "Leaf EM57", 90),
+        ("e", "HyPer9", 50), ("f", "HiTorque AC", 74),
+        ("g", "Dual EM57", 40), ("h", "Dual EM57", 74),
+    ]
+    legend = []
+    for tag, mname, kwh in configs:
+        v = Vehicle(MOTORS[mname], kwh)
+        z, rng = v.zero_to_60(), v.range_mi()[0]
+        legend.append((tag, mname, kwh, z, rng))
+        cx = max(0, min(W - 1, int(rng / XMAX * (W - 1))))
+        cy = max(0, min(H - 1, int((z - YMIN) / (YMAX - YMIN) * (H - 1))))
+        grid[cy][cx] = tag
+    # stock gas reference
+    cx = min(W - 1, int(350 / XMAX * (W - 1)))
+    grid[min(H - 1, int((8.4 - YMIN) / (YMAX - YMIN) * (H - 1)))][cx] = "S"
+
+    print("\n  0-60 vs RANGE  (UP = quicker, RIGHT = farther; top-right = best of both)")
+    for r in range(H):
+        ylab = YMIN + r * (YMAX - YMIN) / (H - 1)
+        print(f"  {ylab:4.1f}s |" + "".join(grid[r]))
+    print("        +" + "-" * W)
+    xax = [" "] * W
+    for s, col in [("0", 0), ("80", 16), ("160", 32), ("240", 48), ("320", W - 3)]:
+        for i, ch in enumerate(s):
+            if 0 <= col + i < W:
+                xax[col + i] = ch
+    print("         " + "".join(xax) + "   range (mi)")
+    line()
+    for tag, mname, kwh, z, rng in legend:
+        print(f"   {tag}  {mname:<12}{kwh:>3} kWh   {z:>4.1f}s {rng:>4.0f} mi")
+    print(f"   S  {'STOCK gas':<12}{'ref':>3}       8.4s  350 mi")
+    line()
+    print("  The EM57 line (a-d) sweeps battery: same quickness, more range rightward.")
+    print("  Dual EM57 (g,h) buys ~1.5s up but no range; HyPer9 (e) is just slow. Battery wins.")
+
+
 def main():
     R, P = faceoff()
     z, rr = R.zero_to_60() - P.zero_to_60(), R.range_mi()[0] / P.range_mi()[0]
@@ -187,6 +230,7 @@ def main():
     motor_sweep()
     battery_sweep()
     gear_sweep()
+    scatter()
 
 
 if __name__ == "__main__":
