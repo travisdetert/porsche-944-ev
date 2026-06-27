@@ -120,6 +120,7 @@ v1 is done when all of these are true:
 - State registration requirements for a converted EV?
 
 ## Links
+**▶ Start here:** `docs/next-steps.md` (one-page runbook) · **`steps/`** (step-by-step, `000-…`) ·
 **Safety (read first):** `SECURITY.md` · **Build guide:** `docs/build-guide.md` ·
 **Parts ledger (master):** `docs/parts-inventory.md` ·
 **Money:** `docs/procurement-plan.md` + `docs/parts-list.md` + `docs/parts-shopping-list.md` · **Phase 1:** `docs/phase1-donor-hunt.md`
