@@ -13,3 +13,5 @@
 .env.*
 *.pem
 *.key
+*.pyc
+__pycache__/
