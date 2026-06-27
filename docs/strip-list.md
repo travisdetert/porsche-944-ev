@@ -62,12 +62,12 @@ HVAC ducting/blower.
 | Item | Parts | ~Weight | Note |
 |---|---|---|---|
 | **A/C system** | condenser, evaporator, dryer, lines (compressor already gone) | ~30–40 lb | delete entirely |
-| **Audio** | head unit, amp, speakers, antenna | ~15–25 lb | |
+| ~~Audio~~ | **KEPT & UPGRADED** — real stereo + subs | +30–50 lb | the one indulgence — see `adr/0009` |
 | **Sound deadening + carpet** | tar mats, carpet, jute | ~40–70 lb | old cars hide real weight here |
 | **Rear seats** | frames + cushions | ~25–35 lb | |
 | **Non-essential trim** | console, extra panels, cruise | ~20–40 lb | keep it spartan |
 | **Spare + jack** (optional) | spare, jack, tools | ~30–40 lb | frees the rear well for a battery box |
-| **Go-kart cut total** | | **~150–250 lb** | lighter, simpler wiring, more raw feel |
+| **Go-kart cut total** | | **~135–225 lb** (audio stays) | lighter, simpler wiring, more raw feel |
 
 ## The go-kart payoff (weight)
 Strip the ICE *and* the comfort gear and the math gets fun — especially the **Stage-1 mule on
@@ -76,14 +76,25 @@ a small donor pack**:
 ```
   stock 944 ................... 2,900 lb
   - ICE removed .............. -  560
-  - go-kart cut ............. -  200
+  - go-kart cut (audio kept) . -  160
   + motor + electronics ..... +  285
   + Stage-1 donor pack (24kWh) +  480
+  + stereo + subwoofers ..... +   45
   ============================================
-  = ~2,905 lb  ~= STOCK WEIGHT -- but instant torque, lower CG, nothing to rattle
+  = ~2,990 lb  ~= STOCK WEIGHT -- instant torque, lower CG, and it SLAPS
 ```
 A genuine **electric go-kart**: about stock weight, a *lower* CG, and EV punch off the line.
 (Full Stage-2 74 kWh adds ~400 lb for range — still stripped and low.)
+
+## The one indulgence — a real stereo + subs
+We strip the comfort gear but **keep and upgrade the audio** — proper head unit, amp, speakers,
+and subwoofer(s). Two things to plan for:
+- **Power:** big bass pulls real current. Size the **12 V / DC-DC** for the amp, and add a
+  **stiffening capacitor or a small aux 12 V battery** for the audio so peaks don't sag the system.
+- **Install:** EVs are *quiet*, so the stereo is the dominant sound — do it right. Add
+  **localized sound deadening** around the subs (a little weight back) for tight bass and no
+  rattles. The **sub enclosure competes with the rear-well battery box** for space — pick one.
+  See `adr/0009`.
 
 ## Keep the street-legal minimum (for grocery runs on public roads)
 Light is great; legal matters if it touches the road:

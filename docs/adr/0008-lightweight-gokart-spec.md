@@ -1,6 +1,6 @@
 # ADR-0008: Strip to a lightweight "electric go-kart" spec
 
-**Status:** Accepted
+**Status:** Accepted — *audio-deletion clause superseded by [ADR-0009](0009-keep-stereo-and-subs.md)*
 **Date:** 2026-06-26
 **Deciders:** Travis
 

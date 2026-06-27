@@ -13,7 +13,8 @@ a reversal gets a new ADR that supersedes the old one. The value is the *why* an
 | [0005](0005-low-split-battery-layout.md) | Low, split battery layout — 6 front / 8 main | Accepted |
 | [0006](0006-ac-l2-charging-v1.md) | AC Level-2 charging for v1 (defer DC fast charge) | Accepted |
 | [0007](0007-bms-strategy-per-stage.md) | BMS: Leaf LBC for Stage 1, simpBMS for Stage 2 | Accepted |
-| [0008](0008-lightweight-gokart-spec.md) | Strip to a lightweight "electric go-kart" spec | Accepted |
+| [0008](0008-lightweight-gokart-spec.md) | Strip to a lightweight "electric go-kart" spec | Accepted *(audio clause superseded by 0009)* |
+| [0009](0009-keep-stereo-and-subs.md) | Keep a real stereo + subwoofers | Accepted |
 
 ## Decisions still open (future ADRs)
 - DC fast charging (CCS) if road-tripping becomes a goal — supersedes part of ADR-0006.
