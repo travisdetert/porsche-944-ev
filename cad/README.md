@@ -30,7 +30,14 @@ Models live in the repo as `.scad`; fit-checks use **cardboard / paper / acrylic
 ## Files
 - `adapter-plate.scad` + `adapter-spec.md` — EM57 → torque-tube adapter (the critical part).
 - `battery-enclosure.scad` + `battery-enclosure-spec.md` — the two low battery boxes (6 + 8).
+- `*.svg` — **quick previews** (no OpenSCAD needed): `adapter-plate.svg`, `battery-enclosure.svg`.
+- `gen_previews.py` — regenerates the SVGs from the part parameters (`python3 cad/gen_previews.py`).
 - mounts / skid: specs added when we design them.
+
+## Previews
+`adapter-plate.svg` (front view: bolt circles, bore, register) and `battery-enclosure.svg`
+(top view: module grid, flanges, vents) render in any browser. After you edit dims in a
+`.scad`, mirror them in `gen_previews.py` and re-run it to refresh the previews.
 
 ## Using the .scad models
 Install OpenSCAD → open the file → replace every `// MEASURE` placeholder with your real
