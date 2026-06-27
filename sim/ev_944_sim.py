@@ -18,14 +18,15 @@ G, RHO, MPH = 9.81, 1.2, 2.2369
 
 BASE_GLIDER_KG = 1050      # stripped 944: body + electronics, NO motor, NO battery
 PACK_KG_PER_KWH = 5.5      # cells + enclosure
+USD_PER_KWH = 130          # Tesla salvage modules, cheapest vendor (~$690 / 5.3 kWh)
 TX_TORQUE_LIMIT = 350      # Nm the stock transaxle input will take (ADR-0004) -- verify
 
-# Motor catalog: name, torque Nm, power W, max rpm, mass kg, $ tier
+# Motor catalog: torque Nm, power W, max rpm, mass kg, approx salvage/kit $
 MOTORS = {
-    "HyPer9":     dict(T=160, P=88000,  rpm=8000,  kg=68),
-    "Leaf EM57":  dict(T=320, P=110000, rpm=10500, kg=70),   # baseline
-    "HiTorque AC":dict(T=350, P=130000, rpm=9000,  kg=80),
-    "Dual EM57":  dict(T=640, P=220000, rpm=10500, kg=140),  # torque clamped by transaxle
+    "HyPer9":     dict(T=160, P=88000,  rpm=8000,  kg=68,  usd=5400),
+    "Leaf EM57":  dict(T=320, P=110000, rpm=10500, kg=70,  usd=1000),  # baseline
+    "HiTorque AC":dict(T=350, P=130000, rpm=9000,  kg=80,  usd=3000),
+    "Dual EM57":  dict(T=640, P=220000, rpm=10500, kg=140, usd=2200),  # torque clamped by transaxle
 }
 
 
@@ -79,6 +80,12 @@ class Vehicle:
         v = mph / MPH
         wh_per_mi = (self.road_load(v) * v / self.eff + 300) / mph * mix
         return self.kwh * self.usable * 1000 / wh_per_mi, wh_per_mi
+
+    def pack_cost(self):
+        return self.kwh * USD_PER_KWH
+
+    def cost_per_mile_range(self):
+        return self.pack_cost() / self.range_mi()[0]
 
     def lbs(self):
         return self.m * 2.2046
@@ -136,15 +143,33 @@ def battery_sweep(motor="Leaf EM57"):
     mo = MOTORS[motor]
     print(f"\n  BATTERY SWAP  (fixed motor: {motor}, {mo['P']//1000} kW)")
     line()
-    print(f"  {'Pack kWh':<10}{'lb':>7}{'0-60':>8}{'top':>6}{'range mix':>11}{'Wh/mi':>8}")
+    print(f"  {'Pack kWh':<9}{'lb':>6}{'0-60':>7}{'range':>9}{'pack $':>9}{'$/mi-range':>12}")
     line()
     for kwh in (30, 50, 74, 90):
         v = Vehicle(mo, kwh)
-        rng, whmi = v.range_mi()
-        print(f"  {kwh:<10}{v.lbs():>7.0f}{v.zero_to_60():>7.1f}s{v.top_speed():>6.0f}"
-              f"{rng:>9.0f}mi{whmi:>8.0f}")
+        rng, _ = v.range_mi()
+        print(f"  {kwh:<9}{v.lbs():>6.0f}{v.zero_to_60():>6.1f}s{rng:>7.0f}mi"
+              f"{'$'+format(v.pack_cost(), ',.0f'):>9}"
+              f"{'$'+format(v.cost_per_mile_range(), '.0f'):>12}")
     line()
-    print("  Range scales ~linearly with kWh; weight only nibbles 0-60 (~0.1s per 20 kWh).")
+    print("  Range scales ~linearly with kWh, so $/mile-of-range is ~flat (~$40). Weight barely")
+    print("  touches 0-60 -- battery is near-pure upside: ~$40 per added mile, kept forever.")
+
+
+def gear_sweep(motor="Leaf EM57", batt=50):
+    mo = MOTORS[motor]
+    print(f"\n  GEAR-RATIO SWAP  (single fixed gear; {motor}, {batt} kWh)")
+    line()
+    print(f"  {'overall ratio':<15}{'0-60':>7}{'top mph':>9}   trade")
+    line()
+    for R in (4.0, 5.0, 6.0, 7.2, 8.5, 10.0):
+        v = Vehicle(mo, batt, gear_R=R)
+        trade = ("top-speed biased" if R <= 5
+                 else "quick launch, low top" if R >= 9 else "balanced")
+        print(f"  {R:<15.1f}{v.zero_to_60():>6.1f}s{v.top_speed():>8.0f}   {trade}")
+    line()
+    print("  Higher ratio = quicker 0-60 but lower (rpm-limited) top speed, and vice-versa.")
+    print("  ~7-8 is the streetable sweet spot for the EM57 in the 944.")
 
 
 def main():
@@ -156,9 +181,12 @@ def main():
     print(f"         POWER {bar(P.range_mi()[0],R.range_mi()[0]):<20} {P.range_mi()[0]:.0f} mi")
     print(f"\n  => POWER is only ~{z:.1f}s quicker but RANGE goes ~{rr:.1f}x farther. "
           f"Reinvest in BATTERY. (ADR-0011)")
+    print(f"     At ${USD_PER_KWH}/kWh: RANGE pack ${R.pack_cost():,.0f} -> {R.range_mi()[0]:.0f}mi "
+          f"(~${R.cost_per_mile_range():.0f}/mi); POWER pack ${P.pack_cost():,.0f} -> {P.range_mi()[0]:.0f}mi.")
 
     motor_sweep()
     battery_sweep()
+    gear_sweep()
 
 
 if __name__ == "__main__":
