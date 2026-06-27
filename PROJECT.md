@@ -92,8 +92,9 @@ v1 is done when all of these are true:
 - **Now:** Leaf path committed; **Stage 1 is a realistic ~5-month build** (~20–30 hrs/wk) —
   see `docs/stage1-plan.md`. Expected: drives ~late Nov/Dec 2026, registered ~Dec–Jan.
   (4-week "sprint" is the best-case floor, not the plan.)
-- **Next — Phase 1 (plan & source, ~4 wks):**
-  1. Hunt the **right Leaf donor** (ideally one that already runs — cuts debug later).
+- **Next — Phase 1 (plan & source, ~4 wks):** follow `docs/phase1-donor-hunt.md` +
+  `docs/hv-bom.md`; full procedure in `docs/build-guide.md`. **Read `SECURITY.md` first.**
+  1. Hunt the **right Leaf donor** (LeafSpy SOH check; one that already runs cuts debug later).
   2. Finalize + quote the **EM57 adapter** at 2 shops; line up a backup.
   3. Batch-order **ZombieVerter + HV bits + small parts** (the re-order cycle is the hidden tax).
 - **Then (Stage 2):** build the **Tesla 14S1P / 74 kWh** pack and swap the battery for 150 mi.
@@ -105,7 +106,8 @@ v1 is done when all of these are true:
 - State registration requirements for a converted EV?
 
 ## Links
-Stage 1 sprint plan: `docs/stage1-plan.md` · Stage 1 rationale: `docs/mvp-mule.md` ·
-Drivetrain & HV diagrams: `docs/drivetrain-diagrams.md`
-· Pack & balance: `docs/battery-pack-and-balance.md` · Range: `docs/range-analysis.md` ·
-Build order: `docs/build-order.md` · Decisions: `docs/adr/` · Security/HV-safety: `SECURITY.md`
+**Safety (read first):** `SECURITY.md` · **Build guide (step-by-step):** `docs/build-guide.md`
+· **Phase 1:** `docs/phase1-donor-hunt.md` + `docs/hv-bom.md` · **Timeline:** `docs/stage1-plan.md`
+· **Why staged:** `docs/mvp-mule.md` · **Design:** `docs/drivetrain-diagrams.md`,
+`docs/battery-pack-and-balance.md`, `docs/range-analysis.md` · **Sequence:** `docs/build-order.md`
+· Decisions: `docs/adr/`
