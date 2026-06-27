@@ -89,12 +89,13 @@ v1 is done when all of these are true:
 - [ ] Build documented well enough to fault-find from a fresh look (README/wiring diagram)
 
 ## Now / Next
-- **Now:** Leaf path committed; **Stage 1 is a dated 4-week sprint** — see
-  `docs/stage1-plan.md`. Target: driving mule by **Fri 2026-07-24**, grocery loop that weekend.
-- **Next — first 48 hours (the dependencies that gate the date):**
-  1. Finalize + quote the **EM57 adapter** at 2 shops; commit one to **due Jul 10**.
-  2. Find + commit a **Leaf donor**; pickup **≤ Jul 4**.
-  3. Order **ZombieVerter + HV bits** Day 1 (shipping is its own lead time).
+- **Now:** Leaf path committed; **Stage 1 is a realistic ~5-month build** (~20–30 hrs/wk) —
+  see `docs/stage1-plan.md`. Expected: drives ~late Nov/Dec 2026, registered ~Dec–Jan.
+  (4-week "sprint" is the best-case floor, not the plan.)
+- **Next — Phase 1 (plan & source, ~4 wks):**
+  1. Hunt the **right Leaf donor** (ideally one that already runs — cuts debug later).
+  2. Finalize + quote the **EM57 adapter** at 2 shops; line up a backup.
+  3. Batch-order **ZombieVerter + HV bits + small parts** (the re-order cycle is the hidden tax).
 - **Then (Stage 2):** build the **Tesla 14S1P / 74 kWh** pack and swap the battery for 150 mi.
 - **Later:** CCS DC fast charging; range/efficiency tuning; interior gauges/telemetry.
 

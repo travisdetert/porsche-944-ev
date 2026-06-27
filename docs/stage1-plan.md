@@ -1,111 +1,102 @@
-# Stage 1 Mule — 4-Week Sprint Plan
+# Stage 1 Mule — Realistic Timeline
 
-A **forcing-function timeline**: aggressive, dated, and built to hold *other people* to
-commitments — the machine shop, the donor seller, the parts vendors. Hit the dates by
-making them hit theirs.
+The honest version. The 4-week "sprint" (kept below as the **best-case floor**) assumed
+every external dependency broke your way and you hit zero commissioning gremlins — which
+never happens on a first-time, part-time conversion of a 39-year-old car. **Plan to ~5
+months at ~20–30 nominal hrs/week.** Here is why, and the phased plan that gets you there.
 
-**Assumptions** (from calibration): ~20–30 hrs/week hands-on · adapter **outsourced** to a
-machine shop · fully equipped shop (hoist, welder, HV PPE/meter).
-
-**Anchor:** Day 1 = **Mon 2026-06-29** → driving-mule target **Fri 2026-07-24**, first
-grocery loop that weekend. (Shift the anchor if you start later; keep the *durations*.)
+**Assumptions:** ~20–30 hrs/week *nominal* · adapter outsourced · fully equipped shop ·
+first serious HV/EV build.
 
 ---
 
-## The one hard truth: the adapter gates everything
-The custom EM57→torque-tube adapter is **outsourced**, so the schedule is only as fast as
-the shop. **Everything else can be done in ~3 weeks of part-time work; the adapter is the
-only thing you don't control.** So you protect the date by:
-1. Designing + quoting it in the **first 48 hours**.
-2. Handing the shop a **hard due date (≤9 days)** and getting them to commit to it.
-3. Having a **backup shop** quoted in case shop #1 says "3 weeks."
-
-If no shop will commit to ≤2 weeks, the 4-week target moves — better to know on Day 2 than Day 20.
-
----
-
-## First 48 hours — the timeline-protecting moves (do these before anything fun)
-- [ ] **Adapter:** finalize the drawing, send to 2 machine shops, get quotes + lead times. Pick the one that commits to **due ≤ Fri Jul 10**.
-- [ ] **Donor:** find + commit to a salvage Leaf; set a **pickup date ≤ Sat Jul 4**.
-- [ ] **Order electronics same day:** ZombieVerter VCU, main contactor, precharge resistor, HV fuse, MSD, 2 AWG cable + lugs. (Shipping is its own lead time — start the clock.)
-
-> These three are all **other-people dependencies**. Push them now; they're what slips.
+## Why personal car projects slip (so the number is credible, not padded)
+- **Effective hours < nominal.** Life, fatigue, and eaten weekends turn 20–30 "available"
+  into **~12–18 effective**. Plan on ~60–70% realization.
+- **Learning curve.** First HV build, first ZombieVerter config — every unknown is a few
+  evenings of reading/forums before you turn a wrench.
+- **Lead times stack.** Finding the *right* donor (not the first), adapter machining **plus
+  a test-fit and a likely revision**, parts shipping, and the re-order cycle ("wrong lug,
+  need another connector") — these run in series more than you expect.
+- **Commissioning gremlins.** CAN comms, throttle calibration, contactor sequencing, BMS
+  faults. This is the **widest-variance phase** — it can be a weekend or a month.
+- **A 39-year-old car fights back.** Seized fasteners, rust, a transaxle that wants
+  attention while it is out.
+- **DMV is not on your schedule.** Converted-EV registration/inspection runs weeks to
+  months and is mostly out of your hands.
 
 ---
 
-## Sprint Gantt
+## Three-point estimate (heavy part-time)
+| Scenario | Duration | What it assumes |
+|---|---|---|
+| **Stretch (floor)** | **~3 months** | Lucky on donor + adapter, no major gremlins, hours hold |
+| **Expected (plan to this)** | **~5 months** | Normal slips, one adapter revision, a real debug phase |
+| **Conservative (don't be shocked)** | **~7–9 months** | First-timer reality: lead-time stacking + a stubborn gremlin or two |
 
-```mermaid
-gantt
-  title Stage 1 Mule — 4-Week Sprint
-  dateFormat YYYY-MM-DD
-  axisFormat %m-%d
-  section CRITICAL PATH (others)
-  Design + quote adapter        :a1, 2026-06-29, 2d
-  Shop builds adapter (PUSH)    :crit, a2, 2026-07-01, 9d
-  Mount EM57 to transaxle       :a3, 2026-07-13, 3d
-  section Donor + teardown (you)
-  Source + buy donor Leaf       :b1, 2026-06-29, 5d
-  Extract motor/inverter/charger/pack :b2, 2026-07-06, 3d
-  944 teardown (engine out)     :b3, 2026-06-29, 5d
-  section Electrical (you)
-  Order parts (ships)           :c0, 2026-06-29, 1d
-  Build HV safety box           :c1, 2026-07-06, 4d
-  Bench-config ZombieVerter     :c2, 2026-07-09, 3d
-  Install pack + wire HV/12V    :c3, 2026-07-16, 4d
-  section Commission (you)
-  Spin on stands + debug        :d1, 2026-07-20, 3d
-  First drive + grocery loop    :crit, d2, 2026-07-23, 2d
-  section Trailing (parallel)
-  Registration / inspection     :e1, 2026-07-13, 14d
-```
+**Plan to Expected. Protect it like Stretch. Don't panic at Conservative.**
 
 ---
 
-## Week by week (dated milestones)
+## Phased plan (anchor: Month 1 = July 2026 — shift if you start later)
 
-### Week 1 · Jun 29 – Jul 5 — *Commit the dependencies, strip the car*
-**Tracks run in parallel.**
-- **You:** Pull the engine, fuel tank, exhaust. Weigh the stripped car (balance baseline). Buy + collect the donor Leaf; extract EM57, inverter, charger, **battery**, harness.
-- **Others (push):** Adapter in a shop with **due Jul 10**. Electronics ordered Day 1 and shipping.
-- **🏁 Milestone (Jul 5):** Engine out · donor parts in hand · adapter in the shop · electronics en route.
+| # | Phase | Stretch | **Expected** | Conservative | Target done |
+|---|---|---|---|---|---|
+| 1 | **Plan & source** — donor hunt, adapter design + quotes, order long-lead parts | 2 wk | **4 wk** | 6 wk | **end Jul** |
+| 2 | **Teardown & adapter** — engine out + strip; machine adapter + test-fit + revise | 3 wk | **5 wk** | 8 wk | **mid-Sep** |
+| 3 | **Mechanical** — mount EM57, align driveline, fit donor pack + mounts | 2 wk | **3 wk** | 5 wk | **early Oct** |
+| 4 | **Electrical** — HV box, wiring, VCU config, DC-DC, charger, 12V | 2 wk | **4 wk** | 6 wk | **early Nov** |
+| 5 | **Commission & debug** — power-up, on-stands spin, chase gremlins | 2 wk | **4 wk** | 8 wk | **late Nov** |
+| 6 | **Shakedown & register** — brakes/suspension, real driving, fixes, DMV | 2 wk | **4 wk** | 6 wk | **Dec–Jan** |
 
-### Week 2 · Jul 6 – Jul 12 — *Build the electrical, adapter inbound*
-- **You:** Build the HV safety box (contactor, precharge, fuse, MSD on a plate). Bench-config the ZombieVerter against the Leaf inverter (firmware, throttle map). Mock up donor-pack location + DC-DC + 12V.
-- **Others (push):** Adapter **delivered Jul 10**. If it's late, escalate or pull the backup shop *now*.
-- **🏁 Milestone (Jul 12):** HV box built · VCU configured · adapter in hand.
+Phases overlap (sourcing/ordering bleeds into teardown), so calendar end is a bit less
+than the raw sum. **Expected: drives under its own power ~late Nov/early Dec; registered &
+shaken-down ~Dec–Jan 2027.**
 
-### Week 3 · Jul 13 – Jul 19 — *Integrate*
-- **You:** Mount EM57 to the transaxle via the adapter; check driveline alignment. Install donor pack + HV box; wire the HV loop, charger, DC-DC, throttle, 12V, brake booster.
-- **Parallel:** Start the registration/inspection paperwork (it trails — begin now).
-- **🏁 Milestone (Jul 19):** Motor mounted · car wired · ready for first power-up.
-
-### Week 4 · Jul 20 – Jul 26 — *Commission & drive*
-- **You:** Precharge test → on-stands spin (both directions, regen). Fix what shows up (budget real debug time here — this is where mules bite). First low-speed drive in a safe area, then the **grocery loop**.
-- **🏁 Milestone (Jul 24):** Drives under its own power. **(Jul 25–26): first grocery run.**
+### Milestones (expected, to push toward)
+- **🏁 End Jul** — donor bought, parts ordered, adapter at the shop, engine coming out.
+- **🏁 Mid-Sep** — adapter fitted, EM57 mounted to the transaxle, driveline aligned.
+- **🏁 Early Oct** — donor pack fitted; mechanicals done.
+- **🏁 Early Nov** — fully wired; ready for first power-up.
+- **🏁 Late Nov/Dec** — **drives under its own power; grocery loop on private property.**
+- **🏁 Dec–Jan** — registered, shaken down, daily-able.
 
 ---
 
-## Commitments to extract from others (your push list)
-Hold these parties to *their* dates and your date holds.
+## Still hold *others* to dates (the forcing-function part survives)
+Realistic lead times, but you still make these parties commit so *their* slips don't become *your* surprises.
 
-| Party | Commitment to get | Due | If they slip |
+| Party | Commitment | Realistic due | If they slip |
 |---|---|---|---|
-| Machine shop | Adapter built to drawing | **Fri Jul 10** | Pull pre-quoted backup shop; offer rush fee |
-| Donor seller | Leaf available for pickup | **Sat Jul 4** | Have a 2nd donor listing lined up |
-| Parts vendors | ZombieVerter + HV bits shipped | **ships Jun 29** | Pay for expedited; source contactor/fuse locally |
-| DMV / inspector | Converted-EV requirements + slot | **ask Week 3** | Drive on private property until cleared |
+| Machine shop | Adapter built (expect a revision) | quote says ≤3 wk → hold them to it | Backup shop quoted up front |
+| Donor seller | The *right* Leaf, not the first | within Phase 1 | Keep 2–3 listings warm; don't overpay to rush |
+| Parts vendors | ZombieVerter + HV bits | order at Phase 1 start | Order early; the re-order cycle is the hidden tax |
+| DMV / inspector | Requirements + a slot | ask in Phase 4 | Drive private property until cleared |
 
 ---
 
-## Slip plan (know the failure modes)
-- **Adapter late** → the whole date moves. *Mitigation:* hard due date + backup shop quoted Day 2. This is 80% of your schedule risk.
-- **Commissioning debug overruns** (wrong rotation, VCU comms, HV gremlins) → *Mitigation:* the early bench-config (Week 2) and on-stands spin (Week 4) surface these before they're buried.
-- **Registration trails past Jul 26** → *Mitigation:* it's parallel and partly out of your hands; the *driving* milestone doesn't depend on it. Grocery-loop on private property until the paperwork clears.
-- **Hours dip below ~20/wk** → Week 4 commissioning is the buffer that compresses or extends.
+## What actually buys you speed (levers, not wishful hours)
+- **Buy a donor that already runs/drives** — a known-good EM57 + inverter + pack cuts the
+  commissioning gremlin phase (your biggest variance) dramatically.
+- **Reuse a proven 944 adapter design** if a prior builder shares one — skips a revision.
+- **Batch the small-parts order** (lugs, connectors, fuses, fittings) so you're not losing
+  weeks to one-at-a-time re-orders. The re-order cycle is the silent killer.
+- **Protect a weekly cadence** — steady 15 effective hrs beats sporadic 30s; momentum is
+  the whole game on personal projects.
 
-## Stage 1 = done when (target Jul 24–26)
+## Stage 1 = done when (target late-Nov → Jan)
 - [ ] EM57 on the stock transaxle via the adapter; spins on stands under power
 - [ ] Running on the donor Leaf pack through the HV safety loop
 - [ ] Charges (Leaf OBC); drives a ~5–15 mi grocery loop
-- [ ] (Trailing) registered/inspected for public road use
+- [ ] (Trailing) registered/inspected for public-road use
+
+---
+
+<details>
+<summary><b>Best-case floor — the original 4-week sprint (reference only)</b></summary>
+
+The aggressive version is achievable *only* if: donor in hand week 1, adapter delivered in
+≤9 days, zero commissioning gremlins, and ~30 effective hrs/week sustained. Treat it as the
+**physical lower bound**, not a schedule. The realistic plan above is what to actually
+commit to and communicate.
+</details>
