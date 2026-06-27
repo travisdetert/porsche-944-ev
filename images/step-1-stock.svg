@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 360" font-family="Helvetica,Arial,sans-serif">
+  <rect width="820" height="360" fill="#f7f7f5"/>
+  <text x="20" y="32" font-size="20" font-weight="bold" fill="#222">944 EV — Step 1: Stock gas car</text>
+  <text x="20" y="54" font-size="13" fill="#666">Front 2.5L engine drives the rear transaxle through the torque tube. ~50/50 balance.</text>
+  <line x1="20" y1="272" x2="800" y2="272" stroke="#bbb" stroke-width="2"/>
+  <path d="M60 252 Q60 240 80 234 L150 198 L330 190 Q360 190 374 170 L420 132 Q430 124 444 124 L590 124 Q606 124 616 136 L740 186 L788 202 Q800 208 800 224 L800 252 Z" fill="#e9eef2" stroke="#5b6b78" stroke-width="2"/>
+  <path d="M404 152 L446 128 L588 128 L618 152 L588 170 L430 170 Z" fill="#cfe0ec" stroke="#5b6b78" stroke-width="1.5"/>
+  <circle cx="200" cy="252" r="42" fill="#2b2b2b"/><circle cx="200" cy="252" r="17" fill="#888"/>
+  <circle cx="660" cy="252" r="42" fill="#2b2b2b"/><circle cx="660" cy="252" r="17" fill="#888"/>
+  <rect x="252" y="228" width="356" height="12" rx="3" fill="#9aa6ad" stroke="#5b6b78"/>
+  <text x="340" y="222" font-size="11" fill="#5b6b78">torque tube (driveshaft)</text>
+  <rect x="120" y="180" width="140" height="58" rx="6" fill="#c0392b" stroke="#7b241c" stroke-width="2"/>
+  <text x="190" y="206" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">2.5L GAS</text>
+  <text x="190" y="222" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">ENGINE</text>
+  <rect x="470" y="208" width="96" height="30" rx="4" fill="#c0392b" stroke="#7b241c"/>
+  <text x="518" y="227" font-size="11" fill="#fff" text-anchor="middle">fuel tank</text>
+  <rect x="600" y="202" width="96" height="44" rx="6" fill="#2e7d32" stroke="#1b5e20" stroke-width="2"/>
+  <text x="648" y="220" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">TRANSAXLE</text>
+  <text x="648" y="234" font-size="10" fill="#fff" text-anchor="middle">gearbox + diff</text>
+  <g font-size="11">
+    <rect x="20" y="312" width="14" height="14" fill="#c0392b"/><text x="40" y="324" fill="#333">gas / to remove</text>
+    <rect x="170" y="312" width="14" height="14" fill="#2e7d32"/><text x="190" y="324" fill="#333">kept (944)</text>
+    <rect x="290" y="312" width="14" height="14" fill="#1565c0"/><text x="310" y="324" fill="#333">electric (Leaf)</text>
+    <rect x="430" y="312" width="14" height="14" fill="#e67e22"/><text x="450" y="324" fill="#333">new part</text>
+  </g>
+</svg>

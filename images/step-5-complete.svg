@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 360" font-family="Helvetica,Arial,sans-serif">
+  <rect width="820" height="360" fill="#f7f7f5"/>
+  <text x="20" y="32" font-size="20" font-weight="bold" fill="#222">944 EV — Step 5: Wired &amp; driving</text>
+  <text x="20" y="54" font-size="13" fill="#666">Battery → inverter → EM57 → torque tube → transaxle → wheels. Charge at the old fuel door.</text>
+  <line x1="20" y1="272" x2="800" y2="272" stroke="#bbb" stroke-width="2"/>
+  <path d="M60 252 Q60 240 80 234 L150 198 L330 190 Q360 190 374 170 L420 132 Q430 124 444 124 L590 124 Q606 124 616 136 L740 186 L788 202 Q800 208 800 224 L800 252 Z" fill="#e9eef2" stroke="#5b6b78" stroke-width="2"/>
+  <path d="M404 152 L446 128 L588 128 L618 152 L588 170 L430 170 Z" fill="#cfe0ec" stroke="#5b6b78" stroke-width="1.5"/>
+  <circle cx="200" cy="252" r="42" fill="#2b2b2b"/><circle cx="200" cy="252" r="17" fill="#888"/>
+  <circle cx="660" cy="252" r="42" fill="#2b2b2b"/><circle cx="660" cy="252" r="17" fill="#888"/>
+  <rect x="276" y="230" width="332" height="10" rx="3" fill="#2e7d32" stroke="#1b5e20"/>
+  <rect x="150" y="160" width="86" height="20" rx="4" fill="#0d47a1" stroke="#08306b"/>
+  <text x="193" y="174" font-size="10" fill="#fff" text-anchor="middle">inverter + VCU</text>
+  <rect x="132" y="182" width="120" height="40" rx="8" fill="#1565c0" stroke="#0d47a1" stroke-width="2"/>
+  <text x="192" y="206" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">EM57</text>
+  <rect x="252" y="196" width="16" height="26" rx="3" fill="#e67e22" stroke="#bf360c"/>
+  <rect x="430" y="212" width="160" height="24" rx="4" fill="#1976d2" stroke="#0d47a1" stroke-width="2"/>
+  <text x="510" y="228" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">BATTERY (74 kWh)</text>
+  <rect x="596" y="148" width="74" height="26" rx="4" fill="#6a1b9a" stroke="#4a148c"/>
+  <text x="633" y="165" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">SUBS</text>
+  <rect x="600" y="202" width="96" height="44" rx="6" fill="#2e7d32" stroke="#1b5e20" stroke-width="2"/>
+  <text x="648" y="224" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">TRANSAXLE</text>
+  <circle cx="92" cy="206" r="10" fill="#e67e22" stroke="#bf360c"/>
+  <text x="92" y="232" font-size="9" fill="#bf360c" text-anchor="middle">J1772</text>
+  <polyline points="430,224 360,224 360,200 236,200" fill="none" stroke="#e67e22" stroke-width="3"/>
+  <polyline points="236,196 220,180" fill="none" stroke="#e67e22" stroke-width="3"/>
+  <polyline points="102,206 150,206" fill="none" stroke="#e67e22" stroke-width="3" stroke-dasharray="5 4"/>
+  <text x="300" y="300" font-size="13" fill="#0d47a1" font-weight="bold">A 944 electric go-kart — light, low, instant torque, and it slaps.</text>
+  <g font-size="11">
+    <rect x="20" y="312" width="14" height="14" fill="#c0392b"/><text x="40" y="324" fill="#333">gas / removed</text>
+    <rect x="170" y="312" width="14" height="14" fill="#2e7d32"/><text x="190" y="324" fill="#333">kept (944)</text>
+    <rect x="290" y="312" width="14" height="14" fill="#1565c0"/><text x="310" y="324" fill="#333">electric (Leaf)</text>
+    <rect x="430" y="312" width="14" height="14" fill="#e67e22"/><text x="450" y="324" fill="#333">new / HV</text>
+    <rect x="540" y="312" width="14" height="14" fill="#6a1b9a"/><text x="560" y="324" fill="#333">audio</text>
+  </g>
+</svg>
