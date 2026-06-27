@@ -5,8 +5,8 @@
 -->
 # 944 EV Conversion — Charter
 
-**Status:** Building
-**Updated:** 2026-06-26
+**Status:** Building (planned end-to-end; teardown active)
+**Updated:** 2026-06-27
 
 > ✅ **Prices verified against 2026 vendor pages** (deep-research pass, June 2026).
 > Figures marked _(unverified)_ are sourced leads that didn't clear the fact-check.
@@ -23,6 +23,10 @@ cheap as possible without giving up the stock transaxle** — proving it out as 
 first (Stage 1), then growing to **~150 miles of real-world range** (Stage 2), built mostly
 with salvaged parts and DIY labor.
 
+**Character:** stripped to a lightweight **electric go-kart** — no A/C, carpet, or rear seats
+(the gas parts fund the build) — but with a proper **stereo + subwoofers**. Light, low, raw,
+and loud. See `docs/strip-list.md` and ADR-0008/0009/0010.
+
 ## The build (Leaf path)
 
 | System | Choice | Notes |
@@ -37,7 +41,8 @@ with salvaged parts and DIY labor.
 | **HV plumbing** | MSD, HV fuse, main + precharge contactors, wiring | Build/test first — see `docs/drivetrain-diagrams.md` §6 |
 
 **Target range:** ~150 mi (build is capable of ~222) · **Est. 0–60:** ~7 s ·
-**Est. weight:** ~3,475 lb (+575 over stock), **49 / 51 front/rear**
+**Est. weight:** Stage 1 ≈ **stock (~2,990 lb, stripped)**; Stage 2 ~3,320 lb · **~48 % front**
+(6 front / 8 main, two bays)
 
 ### Two stages (prove it cheap, then scale the pack)
 - **Stage 1 — grocery-getter mule (~$3.5–5.5k):** build the full Leaf drivetrain but run
@@ -72,18 +77,19 @@ with salvaged parts and DIY labor.
   fabrication task and primary schedule risk.
 - **Battery is the budget swing.** 14 Tesla modules run ~$9.7k at the cheapest vendor
   (~2× spread to premium); a whole salvage **Bolt pack (~$3–4.5k)** is far cheaper but
-  pouch-format and harder to split across the 944's three bays.
+  pouch-format and harder to split across the 944's **two battery bays** (rear well → subs).
 - **Leaf inverter at 319 V** (14S) is near its happy zone and gives low current
   (~345 A) → thin 2 AWG cable. **Validate inverter + ZombieVerter at 319 V / target
   power before committing all 14 modules.**
-- **Converted balance ≈ 49.0 % front / 51.0 % rear at ~3,475 lb**, lower CG than stock.
-  Pulling the heavy engine means the battery adds weight *forward* — split 7 front / 7
-  main. See `docs/battery-pack-and-balance.md`.
+- **Converted balance ≈ 48 % front / 52 % rear**, lower CG than stock (stripped, mass in the
+  floor). Pulling the heavy engine means the battery adds weight *forward* — split **6 front /
+  8 main** across two bays. See `docs/944-layout-design.md` + `docs/battery-fit.md`.
 
 ## Definition of Done
 v1 is done when all of these are true:
 - [ ] EM57 mounted to stock transaxle via custom adapter, spins under power on the stand
-- [ ] **74 kWh (14S1P) Tesla pack** assembled, BMS monitoring all modules, balanced 7/7 for ~49/51
+- [ ] **74 kWh (14S1P) Tesla pack** assembled (6 front / 8 main), BMS monitoring all modules, ~48 % front
+- [ ] Stripped to go-kart spec; **stereo + subwoofers** installed and powered (ADR-0008/0009)
 - [ ] Charges from a standard L2 EVSE
 - [ ] Drives under its own power; **150 mi verified on a real drive**
 - [ ] Brakes & suspension sorted for the added ~575 lb
