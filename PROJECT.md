@@ -13,12 +13,15 @@
 > **Build committed: the Leaf path** (see The build).
 
 ## Goal
-Convert a 1987 Porsche 944 (currently sidelined by a hard-starting issue) into a
-street-legal, daily-drivable EV with **~150 miles of real-world range** and
-performance noticeably better than the stock car — built **"Tier 2": as cheaply as
-possible without giving up the stock transaxle.** The north star is a registered,
-reliable EV that road-trips 150 miles on a charge, built mostly with salvaged parts
-and DIY labor.
+**Get this 1987 Porsche 944 running again — as cheaply as possible.** It's been benched by
+a hard-starting engine; rather than scrap a great car or rebuild a 39-year-old motor, give
+it an electric heart from salvaged parts, keep everything that makes it a Porsche, and get
+it driving again — starting with a grocery run. *Resurrection on a budget.*
+
+In engineering terms: convert it to a street-legal, daily-drivable EV — **"Tier 2": as
+cheap as possible without giving up the stock transaxle** — proving it out as a cheap mule
+first (Stage 1), then growing to **~150 miles of real-world range** (Stage 2), built mostly
+with salvaged parts and DIY labor.
 
 ## The build (Leaf path)
 
