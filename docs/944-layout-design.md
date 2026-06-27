@@ -81,7 +81,7 @@ was; everything else packs around it, **all mounted low to the subframe**.
 |---|---|---|---|---|
 | **Front box** | engine bay, beside motor | **6** | ~32 | adds weight forward (engine was heavy; motor is light) |
 | **Main box** | fuel-tank bay, low/central | **8** | ~42 | the prime low spot; bulk of the mass, lowest CG |
-| **Rear well** | spare-tire well | 0 (reserve) | — | optional trim/expansion; clears torsion tube |
+| **Rear well** | spare-tire well | 0 | — | **subwoofer enclosure** (ADR-0010), not a battery box |
 | **Total** | | **14** | **~74** | **~48% front / 52% rear** — slight rear bias, ideal RWD |
 
 **Stage 1 (mule):** the **donor Leaf modules** reconfigure into these *same two boxes* (the

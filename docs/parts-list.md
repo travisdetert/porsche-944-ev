@@ -106,6 +106,17 @@ headline; the **all-in** is higher because of the long tail — be honest with y
 
 ---
 
+## Audio system (chosen indulgence — ADR-0009; not in the core driving total)
+| Part | ~Cost | Note |
+|---|---|---|
+| Head unit | $100–300 | |
+| Amplifier | $150–400 | |
+| Component speakers (front) | $100–300 | |
+| Subwoofer(s) + enclosure | $150–400 | rear spare-well (ADR-0010) |
+| Aux 12 V audio battery + stiffening cap | $50–200 | so bass peaks don't sag the system |
+| Wiring / localized deadening / install | $50–150 | |
+| **Audio subtotal** | **~$600–1,750** | powered off the DC-DC — **size it for the amp**; adds ~45 lb |
+
 ## Stage 2 — the range upgrade (NOT in Stage-1 total; buy later)
 | Part | Qty | Cost | Note |
 |---|---|---|---|
