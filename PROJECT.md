@@ -121,6 +121,7 @@ v1 is done when all of these are true:
 
 ## Links
 **Safety (read first):** `SECURITY.md` · **Build guide:** `docs/build-guide.md` ·
+**Parts ledger (master):** `docs/parts-inventory.md` ·
 **Money:** `docs/procurement-plan.md` + `docs/parts-list.md` + `docs/parts-shopping-list.md` · **Phase 1:** `docs/phase1-donor-hunt.md`
 + `docs/hv-bom.md` · **Timeline:** `docs/stage1-plan.md` · **Drive plan:** `docs/drive-plan.md` ·
 **Strip list:** `docs/strip-list.md` ·
