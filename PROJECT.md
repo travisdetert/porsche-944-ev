@@ -36,6 +36,14 @@ and DIY labor.
 **Target range:** ~150 mi (build is capable of ~222) · **Est. 0–60:** ~7 s ·
 **Est. weight:** ~3,475 lb (+575 over stock), **49 / 51 front/rear**
 
+### Two stages (prove it cheap, then scale the pack)
+- **Stage 1 — grocery-getter mule (~$3.5–5.5k):** build the full Leaf drivetrain but run
+  on the **donor Leaf's own battery** (free with the motor/inverter, ~50–100 mi). Proves
+  the adapter, transaxle, VCU, and HV loop. **True extra cost ≈ $0** — deferred, not extra
+  spend. See `docs/mvp-mule.md`.
+- **Stage 2 — 150-mi pack:** build the **Tesla 14S1P / 74 kWh** pack and **swap the battery
+  only** (~319 V is compatible with the Leaf inverter). Everything else carries forward.
+
 ## Budget (parts only, DIY labor — verified June 2026)
 
 | Item | Cost | Source basis |
@@ -81,12 +89,14 @@ v1 is done when all of these are true:
 - [ ] Build documented well enough to fault-find from a fresh look (README/wiring diagram)
 
 ## Now / Next
-- **Now:** Leaf path committed; pack spec'd (14S1P / 74 kWh) and balance modeled.
-- **Next:**
-  1. Source the **Leaf donor** (EM57 motor + inverter + OBC) and a **ZombieVerter VCU**.
-  2. Source **14 Tesla modules** (shop vendors — 2× spread) **or** a whole **Bolt pack**.
-  3. Design the **EM57→torque-tube adapter** (the main fab task).
-  4. **Bench-validate** the Leaf inverter at 319 V with ZombieVerter before full pack.
+- **Now:** Leaf path committed; staged plan set — **Stage 1 mule first** (run on donor
+  battery), Tesla pack deferred to Stage 2.
+- **Next (Stage 1):**
+  1. Source the **Leaf donor** (EM57 motor + inverter + OBC + **its battery**) and a **ZombieVerter VCU**.
+  2. Design + machine the **EM57→torque-tube adapter** (the main fab task).
+  3. Build the **HV safety loop** and bench-spin the EM57 on the donor pack.
+  4. First grocery-loop drive; (if road-driven) register.
+- **Then (Stage 2):** build the **Tesla 14S1P / 74 kWh** pack and swap the battery for 150 mi.
 - **Later:** CCS DC fast charging; range/efficiency tuning; interior gauges/telemetry.
 
 ## Open questions
@@ -95,6 +105,6 @@ v1 is done when all of these are true:
 - State registration requirements for a converted EV?
 
 ## Links
-Drivetrain & HV diagrams: `docs/drivetrain-diagrams.md` · Pack & balance:
-`docs/battery-pack-and-balance.md` · Range: `docs/range-analysis.md` · Build order:
-`docs/build-order.md` · Decisions: `docs/adr/` · Security/HV-safety: `SECURITY.md`
+Stage 1 mule: `docs/mvp-mule.md` · Drivetrain & HV diagrams: `docs/drivetrain-diagrams.md`
+· Pack & balance: `docs/battery-pack-and-balance.md` · Range: `docs/range-analysis.md` ·
+Build order: `docs/build-order.md` · Decisions: `docs/adr/` · Security/HV-safety: `SECURITY.md`

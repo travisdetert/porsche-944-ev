@@ -4,6 +4,11 @@ The order that minimizes rework and keeps you safe. Rule of thumb: **prove the
 mechanical fit before you build the pack, and build/test the HV safety loop before
 the motor ever spins under power.**
 
+> **Two stages.** Phases 0–7 below are run **first as the Stage 1 mule** on the donor
+> Leaf battery (Phase 3 = "install the donor pack", near-zero work), proving the
+> drivetrain for ~$3.5–5.5k. **Stage 2** then revisits Phase 3 only — build the Tesla
+> 14S1P / 74 kWh pack and swap it in for 150 mi. See `mvp-mule.md`.
+
 ```mermaid
 flowchart TD
   P0["0 · Plan & Source<br/>buy Leaf donor + Tesla modules · design EM57 adapter · check state EV-registration rules"]
@@ -39,7 +44,8 @@ flowchart TD
 - [ ] **Bench-spin the motor at low voltage** to confirm rotation/controller comms early
 
 **3 · Battery build**
-- [ ] Build the **14S1P / 74 kWh** Tesla pack, split **7 front box / 7 main box** (see `battery-pack-and-balance.md`)
+- [ ] **Stage 1:** install the **donor Leaf pack** (matched to the inverter — minimal work) and its BMS
+- [ ] **Stage 2:** build the **14S1P / 74 kWh** Tesla pack, split **7 front / 7 main** (see `battery-pack-and-balance.md`)
 - [ ] Build sealed, vented enclosures; route the one 319 V series link through the tunnel
 - [ ] Wire BMS to every module group; bench-check cell readings before install
 
