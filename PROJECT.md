@@ -109,8 +109,9 @@ v1 is done when all of these are true:
 - State registration requirements for a converted EV?
 
 ## Links
-**Safety (read first):** `SECURITY.md` · **Build guide (step-by-step):** `docs/build-guide.md`
-· **Phase 1:** `docs/phase1-donor-hunt.md` + `docs/hv-bom.md` · **Timeline:** `docs/stage1-plan.md`
-· **Why staged:** `docs/mvp-mule.md` · **Design:** `docs/drivetrain-diagrams.md`,
-`docs/battery-pack-and-balance.md`, `docs/range-analysis.md` · **Sequence:** `docs/build-order.md`
-· Decisions: `docs/adr/`
+**Safety (read first):** `SECURITY.md` · **Build guide:** `docs/build-guide.md` ·
+**Money:** `docs/procurement-plan.md` + `docs/parts-list.md` · **Phase 1:** `docs/phase1-donor-hunt.md`
++ `docs/hv-bom.md` · **Timeline:** `docs/stage1-plan.md` · **Drive plan:** `docs/drive-plan.md` ·
+**Design:** `docs/944-layout-design.md`, `docs/battery-pack-and-balance.md`, `docs/low-cg-packaging.md`,
+`docs/drivetrain-diagrams.md`, `docs/range-analysis.md` · **Sequence:** `docs/build-order.md` ·
+**Why staged:** `docs/mvp-mule.md` · **Decisions:** `docs/adr/`

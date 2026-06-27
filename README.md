@@ -24,6 +24,23 @@ mechanicals, and prove it drives **cheap first** — then grow the range later.
 The cheapest way to honor the mission *is* the plan: prove it with parts you already have,
 defer every dollar you can.
 
+## Mental model: it's a big RC car
+Strip away the scale and this is the *same machine* as a hobby RC car:
+
+| RC car | This 944 |
+|---|---|
+| LiPo battery | ~880 lb traction pack |
+| ESC (speed controller) | inverter + ZombieVerter VCU |
+| brushless motor | Nissan Leaf EM57 |
+| throttle on the transmitter | the accelerator pedal |
+| balance charger | onboard charger + J1772 |
+
+**Battery → speed controller → motor → wheels.** That's the whole machine. Everything *extra*
+in this project exists for two reasons the RC car doesn't have: it runs **lethal voltage**
+(so — contactors, precharge, fuses, a service disconnect, isolation, real PPE: non-negotiable,
+see `SECURITY.md`), and it **carries you** (so the Porsche's brakes, suspension, and transaxle
+stay). It's an RC car you can sit in — scaled up, and treated with respect.
+
 ## Start here
 | If you want… | Read |
 |---|---|
