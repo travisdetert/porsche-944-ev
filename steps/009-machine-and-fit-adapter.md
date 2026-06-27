@@ -13,6 +13,7 @@
 The adapter + coupler dry-fit cleanly to **both** the motor and the bellhousing.
 
 ## Refs
+`../cad/adapter-spec.md` + `../cad/adapter-plate.scad` (parametric model) ·
 `../docs/build-guide.md` §2B · `../images/adapter-joint.svg`
 
 ## Notes
