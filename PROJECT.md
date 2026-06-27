@@ -89,13 +89,12 @@ v1 is done when all of these are true:
 - [ ] Build documented well enough to fault-find from a fresh look (README/wiring diagram)
 
 ## Now / Next
-- **Now:** Leaf path committed; staged plan set — **Stage 1 mule first** (run on donor
-  battery), Tesla pack deferred to Stage 2.
-- **Next (Stage 1):**
-  1. Source the **Leaf donor** (EM57 motor + inverter + OBC + **its battery**) and a **ZombieVerter VCU**.
-  2. Design + machine the **EM57→torque-tube adapter** (the main fab task).
-  3. Build the **HV safety loop** and bench-spin the EM57 on the donor pack.
-  4. First grocery-loop drive; (if road-driven) register.
+- **Now:** Leaf path committed; **Stage 1 is a dated 4-week sprint** — see
+  `docs/stage1-plan.md`. Target: driving mule by **Fri 2026-07-24**, grocery loop that weekend.
+- **Next — first 48 hours (the dependencies that gate the date):**
+  1. Finalize + quote the **EM57 adapter** at 2 shops; commit one to **due Jul 10**.
+  2. Find + commit a **Leaf donor**; pickup **≤ Jul 4**.
+  3. Order **ZombieVerter + HV bits** Day 1 (shipping is its own lead time).
 - **Then (Stage 2):** build the **Tesla 14S1P / 74 kWh** pack and swap the battery for 150 mi.
 - **Later:** CCS DC fast charging; range/efficiency tuning; interior gauges/telemetry.
 
@@ -105,6 +104,7 @@ v1 is done when all of these are true:
 - State registration requirements for a converted EV?
 
 ## Links
-Stage 1 mule: `docs/mvp-mule.md` · Drivetrain & HV diagrams: `docs/drivetrain-diagrams.md`
+Stage 1 sprint plan: `docs/stage1-plan.md` · Stage 1 rationale: `docs/mvp-mule.md` ·
+Drivetrain & HV diagrams: `docs/drivetrain-diagrams.md`
 · Pack & balance: `docs/battery-pack-and-balance.md` · Range: `docs/range-analysis.md` ·
 Build order: `docs/build-order.md` · Decisions: `docs/adr/` · Security/HV-safety: `SECURITY.md`
