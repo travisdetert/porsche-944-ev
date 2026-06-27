@@ -116,7 +116,7 @@ v1 is done when all of these are true:
 
 ## Links
 **Safety (read first):** `SECURITY.md` · **Build guide:** `docs/build-guide.md` ·
-**Money:** `docs/procurement-plan.md` + `docs/parts-list.md` · **Phase 1:** `docs/phase1-donor-hunt.md`
+**Money:** `docs/procurement-plan.md` + `docs/parts-list.md` + `docs/parts-shopping-list.md` · **Phase 1:** `docs/phase1-donor-hunt.md`
 + `docs/hv-bom.md` · **Timeline:** `docs/stage1-plan.md` · **Drive plan:** `docs/drive-plan.md` ·
 **Strip list:** `docs/strip-list.md` ·
 **Design:** `docs/944-layout-design.md`, `docs/battery-fit.md`, `docs/battery-pack-and-balance.md`, `docs/low-cg-packaging.md`,
