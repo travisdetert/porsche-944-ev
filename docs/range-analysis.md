@@ -1,8 +1,10 @@
 # Can a Tier-2 944 (~50 kWh, stock transaxle) actually do 150 miles?
 
-**Short answer:** Yes — but ~50 kWh is the *floor*, not a cushion. To hit 150 miles
-*reliably* (cold, highway, and after a few years of battery fade), size the pack to
-**~55–58 kWh nominal (11 Tesla 5.3 kWh modules)**, not the round "50."
+**Short answer:** Yes, comfortably. The committed **Leaf-path pack is 74 kWh (14 Tesla
+modules)** → **~222 mi** at the realistic 300 Wh/mi, and **~194 mi** even at worst-case
+343 Wh/mi. That's 45–70 mi of margin over the 150-mi target — enough to absorb cold,
+highway speed, and years of battery fade. (The high-voltage Leaf inverter wants a long
+series string, which is *why* the pack is this big — range margin is a happy side effect.)
 
 This conclusion is triangulated from three independent sources: two real-world data
 points and a first-principles energy model. They agree within a sensible band.
@@ -34,8 +36,9 @@ the average at speed, since aero dominates highway draw.
 
 ## First-principles check (so we're not just trusting forum numbers)
 
-Road load at a steady **65 mph (29 m/s)**, converted 944 ≈ **1,500 kg** (~3,300 lb
-after engine-out / motor + ~600 lb pack in):
+Road load at a steady **65 mph (29 m/s)**, converted 944 ≈ **1,575 kg** (~3,475 lb
+after engine-out / EM57 + 880 lb pack in — aero dominates at speed, so the exact mass
+barely moves the highway number):
 
 | Force | Formula | Value |
 |---|---|---|
@@ -59,28 +62,28 @@ Using a **planning figure of 300 Wh/mi** (the measured 944 mixed-driving number)
 
 | Pack (nominal) | Usable (~90%) | Range @ 300 Wh/mi | Range @ 343 Wh/mi (worst case) |
 |---|---|---|---|
-| 50 kWh (10 Tesla modules) | 45 kWh | **150 mi** | 131 mi |
-| 55 kWh | 49.5 kWh | 165 mi | 144 mi |
-| **58 kWh (11 modules)** | **52.3 kWh** | **174 mi** | **152 mi** |
+| 50 kWh (10 Tesla modules) | 45 kWh | 150 mi | 131 mi |
+| 58 kWh (11 modules) | 52.3 kWh | 174 mi | 152 mi |
+| **74 kWh (14 modules — this build)** | **66.6 kWh** | **222 mi** | **194 mi** |
 
 **Reading the table:**
-- **50 kWh** hits 150 mi *only* at the favorable 300 Wh/mi rate. On a cold highway at
-  ~343 Wh/mi you'd see ~130 — and battery fade over years only makes that worse.
-- **58 kWh (11 modules)** clears 150 mi even at the worst-case rate, and still holds
-  ~150 after ~15% degradation. That's an honest, durable 150-mile car.
+- A 50 kWh pack hits 150 mi *only* at the favorable 300 Wh/mi rate, and battery fade
+  erodes that. It would be the floor, not a cushion.
+- **The committed 74 kWh build clears 150 mi at every rate**, holds ~150 even after
+  heavy degradation, and leaves real margin for cold and highway speed. The big pack
+  isn't over-building for range — it's what the 319 V Leaf inverter wants electrically.
 
 ---
 
 ## Verdict & recommendation
-- **150 miles is realistic for the Tier-2 (stock-transaxle) build** — this is *not*
-  contradicted by the "no documented 944 does both" finding; that gap was about a
-  published *blueprint*, not about physics. The energy budget closes comfortably.
-- **Size to 11 Tesla 5.3 kWh modules (~58 kWh nominal)**, not 10. The extra module is
-  the cheapest insurance against cold weather, highway speed, and battery aging — at
-  ampREVOLT's ~$690/module that's ~$690 to turn "150 on a good day" into "150 always."
+- **150 miles is comfortably met by the committed 74 kWh Leaf build** (~222 mi typical,
+  ~194 worst-case). The "no documented 944 keeps the transaxle *and* does 150 mi" finding
+  was a *blueprint* gap, not a physics one — the energy budget closes with room to spare.
+- **The pack size is driven by electrics, not range padding:** the Leaf inverter wants
+  ~319 V, i.e. a 14-module series string, which happens to deliver ~70 mi of margin.
 - **Confidence:** medium-high. Two of three inputs are real-world; the third is
-  first-principles and lands in the same band. The remaining variance is driving style
-  and climate, which the 11-module margin absorbs.
+  first-principles and lands in the same band. Driving style and climate are the only
+  real variables, and the margin absorbs them.
 
 ## Caveats (honest limits of this analysis)
 - Data point 2 (48 kWh / 140 mi) is a single *estimate*, not a logged result.

@@ -37,9 +37,9 @@ then splits power to the rear wheels. ~50/50 weight balance falls out of this.
    ══════════════════════════════════════════════════════════════════════
     ┌──────────┐                                          ┌────────────┐
     │ E-MOTOR  │                                          │  TRANSAXLE │
-    │ HyPer9   │====== torque tube (driveshaft) ==========│  STOCK 944 │
-    │  -or-    │        (unchanged, reused)               │ left in ONE │
-    │ Leaf EM57│                                          │ gear (3rd)  │
+    │  Nissan  │====== torque tube (driveshaft) ==========│  STOCK 944 │
+    │  Leaf    │        (unchanged, reused)               │ left in ONE │
+    │  EM57    │                                          │ gear (3rd)  │
     └────┬─────┘                                          └──┬──────┬──┘
       adapter                                            half-shafts
       plate + coupler                                    ╱          ╲
@@ -79,18 +79,19 @@ torque-tube bellhousing, (b) join the motor shaft to the driveshaft, concentric.
      driveshaft, or you get driveline vibration.
 ```
 
-- **Path A (Leaf EM57):** motor has an integrated reduction-gear output, **not** a
-  plain shaft — needs a custom coupler/adapter (more fab). Cheapest in $.
-- **Path B (HyPer9):** standard 1‑1/8" keyed shaft, B-face mount — far friendlier to
-  a simple plate + coupler. Bolt-on-ish, ~$4.5k more.
+- **The Leaf EM57** has an integrated reduction-gear output, **not** a plain shaft, so
+  the coupler/adapter is custom-fabricated to mate it to the driveshaft. This is the
+  **main fabrication task of the build** — the trade for the EM57's low cost. Budget
+  machine-shop time to get the bore concentric.
 
 ---
 
 ## 4. Battery placement (top-down — keeping ~50/50 balance)
 
-~50 kWh of modules ≈ 600–700 lb. Split it to preserve balance: some in the freed-up
-front engine bay, the bulk low and central where the fuel tank sat (ahead of the
-rear axle).
+The 74 kWh pack (14 Tesla modules) ≈ ~880 lb. Split it 7 front / 7 main to preserve
+balance: front group in the freed-up engine bay, the rest low and central where the
+fuel tank sat (ahead of the rear axle). Full worksheet in
+`battery-pack-and-balance.md`.
 
 ```
             ┌─────────────────────── TOP-DOWN ───────────────────────┐
@@ -109,11 +110,13 @@ a 944. Plan on uprated springs/dampers for the added mass.
 
 ## 5. Electrical system — power & control flow
 
-### Path A — Leaf EM57 + ZombieVerter VCU + stock Leaf inverter
+The Leaf path drives a **reused stock Nissan Leaf inverter** with a **ZombieVerter
+VCU** translating the throttle pedal into motor commands. Pack is **14S1P Tesla,
+74 kWh, 319 V** (see `battery-pack-and-balance.md`).
 
 ```mermaid
 flowchart LR
-  HV["HV Battery ~50 kWh<br/>(Tesla or Bolt modules)"]
+  HV["HV Battery 74 kWh<br/>(14S1P Tesla, 319V)"]
   BMS["BMS<br/>(simpBMS / Orion)"]
   INV["Nissan Leaf Inverter<br/>(stock, reused)"]
   M["Leaf EM57 Motor"]
@@ -134,32 +137,10 @@ flowchart LR
   M --> DRV
 ```
 
-### Path B — NetGain HyPer9 + integrated X1 controller
-
-```mermaid
-flowchart LR
-  HV["HV Battery ~50 kWh<br/>(Tesla or Bolt modules)"]
-  BMS["BMS<br/>(simpBMS / Orion)"]
-  CTRL["HyPer9 X1 Controller<br/>(motor + inverter matched kit)"]
-  M["HyPer9 AC Motor"]
-  THR["Throttle pedal"]
-  DCDC["DC-DC Converter"]
-  LV["12V battery<br/>lights / ECU / accessories"]
-  DRV["Torque tube → stock transaxle → rear wheels"]
-
-  HV -->|HV DC| CTRL
-  CTRL -->|3-phase AC| M
-  THR -->|0-5V signal| CTRL
-  BMS -. monitors .-> HV
-  HV -->|HV DC| DCDC
-  DCDC -->|12V| LV
-  M --> DRV
-```
-
-**Shared HV safety plumbing (both paths, not drawn above):** main contactor +
-precharge resistor + HV fuse between battery and controller, plus a service
-disconnect. The charger (Leaf OBC or aftermarket) feeds the HV battery through the
-BMS. These are common to every build and required before the motor turns.
+**HV safety plumbing (not drawn above):** main contactor + precharge resistor + HV
+fuse between battery and inverter, plus a service disconnect. The charger (Leaf OBC
+or aftermarket) feeds the HV battery through the BMS. Required before the motor turns
+— see section 6.
 
 ---
 
@@ -169,7 +150,7 @@ Everything between the battery and the controller exists to make the pack *safe 
 connect and disconnect*. Nothing turns until this is correct.
 
 ```
-   ┌──────────────────────────  HV BATTERY ~50 kWh  ──────────────────────────┐
+   ┌──────────────────────────  HV BATTERY 74 kWh (14S1P)  ────────────────────┐
    │  [mod]-[mod]-[mod] ─── [MSD] ─── [mod]-[mod]-[mod]                        │
    │   +                service disconnect                  -                  │
    │                  (manual midpack split)                                   │
@@ -186,7 +167,7 @@ connect and disconnect*. Nothing turns until this is correct.
         │ switched HV+                                             │ HV−
         ▼                                                          ▼
    ┌──────────────────────────────────────────────────────────────────┐
-   │     CONTROLLER / INVERTER   (HyPer9 X1  ·or·  Leaf inverter)       │
+   │     INVERTER   (reused Nissan Leaf inverter · ZombieVerter VCU)    │
    └───────┬──────────────────────────────────────┬───────────────────┘
            │ 3-phase AC                            │ HV tap
            ▼                                       ▼
@@ -214,7 +195,7 @@ precharge opens → ready to drive. The HV fuse and the manual **service disconn
 
 **Non-negotiables:** one HV fuse sized to the pack, a contactor that the BMS can
 *force open*, an inertia/crash switch in the contactor-coil circuit, and the MSD.
-These are identical for Path A and Path B.
+At 319 V (full pack) every connection is live HV — strict isolation discipline.
 
 ---
 
@@ -269,9 +250,9 @@ so the car still balances.
 ### Reading guide
 - **Mechanical** (sections 1–4): the motor sits where the engine was; everything
   from the torque tube back is stock 944, gearbox left in one gear.
-- **Electrical** (section 5): battery → controller/inverter → motor; a VCU (Path A)
-  or the kit controller (Path B) turns the throttle pedal into motor torque; a
-  DC-DC keeps the normal 12V car alive.
+- **Electrical** (section 5): 74 kWh pack → reused Leaf inverter → EM57; the
+  ZombieVerter VCU turns the throttle pedal into motor torque; a DC-DC keeps the
+  normal 12V car alive.
 - **HV safety** (section 6): fuse + contactor + precharge + service disconnect +
   BMS-forced-open + crash switch — build and test this before the motor ever turns.
 - **Packaging** (section 7): three volumes (engine bay, fuel-tank bay, hatch/spare

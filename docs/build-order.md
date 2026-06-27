@@ -6,7 +6,7 @@ the motor ever spins under power.**
 
 ```mermaid
 flowchart TD
-  P0["0 · Plan & Source<br/>pick Path A/B · buy donor parts · check state EV-registration rules"]
+  P0["0 · Plan & Source<br/>buy Leaf donor + Tesla modules · design EM57 adapter · check state EV-registration rules"]
   P1["1 · Teardown<br/>remove engine, fuel tank, exhaust, cooling not needed"]
   P2["2 · Motor mount<br/>machine adapter plate · couple motor to torque tube · check alignment"]
   P3["3 · Battery build<br/>module layout in 3 bays · enclosures · BMS wiring"]
@@ -22,8 +22,9 @@ flowchart TD
 ## Phase checklist
 
 **0 · Plan & source**
-- [ ] Decide **Path A (Leaf+ZombieVerter)** vs **Path B (HyPer9 kit)** — drives the adapter design
-- [ ] Source donor parts (motor, modules, controller, charger, DC-DC, contactors)
+- [ ] Source the **Leaf donor** (EM57 motor + inverter + OBC) + **ZombieVerter VCU**
+- [ ] Source **14 Tesla modules** (shop vendors — 2× spread) or a whole **Bolt pack**; + DC-DC, contactors
+- [ ] Design the **custom EM57→torque-tube adapter** (the build's main fab task)
 - [ ] **Check your state's converted-EV registration/inspection rules now** (weight, brakes, lighting) — before spending
 - [ ] Confirm tools/space: engine hoist, welder, HV-rated gloves + insulated tools + DMM
 
@@ -38,8 +39,8 @@ flowchart TD
 - [ ] **Bench-spin the motor at low voltage** to confirm rotation/controller comms early
 
 **3 · Battery build**
-- [ ] Finalize module count/series config for target voltage + ~55 kWh (see charter)
-- [ ] Build sealed, vented enclosures in the 3 bays (engine bay / fuel-tank bay / hatch well)
+- [ ] Build the **14S1P / 74 kWh** Tesla pack, split **7 front box / 7 main box** (see `battery-pack-and-balance.md`)
+- [ ] Build sealed, vented enclosures; route the one 319 V series link through the tunnel
 - [ ] Wire BMS to every module group; bench-check cell readings before install
 
 **4 · HV wiring** *(the safety loop — section 6 of the diagrams doc)*
@@ -48,7 +49,7 @@ flowchart TD
 - [ ] Crash/inertia switch + BMS in the contactor-coil circuit; HV isolated from chassis
 
 **5 · Low-voltage integration**
-- [ ] Throttle/pedal → VCU (Path A) or controller (Path B); configure & calibrate
+- [ ] Throttle/pedal → ZombieVerter VCU → Leaf inverter; configure & calibrate (validate at 319 V)
 - [ ] Restore 12V accessories, lights, brake booster (vacuum or iBooster), gauges
 - [ ] Map interlocks: no torque unless BMS healthy + in "drive"
 
