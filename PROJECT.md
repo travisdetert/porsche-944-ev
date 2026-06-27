@@ -27,6 +27,11 @@ with salvaged parts and DIY labor.
 (the gas parts fund the build) — but with a proper **stereo + subwoofers**. Light, low, raw,
 and loud. See `docs/strip-list.md` and ADR-0008/0009/0010.
 
+**The one rule (ADR-0011):** every part taken out saves money *and* weight, and **both go
+straight into the drivetrain** — more battery (range) or more motor (power) — held at ≈ stock
+weight and **true 50/50** (motor up front + transaxle at the rear are the balance anchors).
+*Strip the fat, feed the muscle.*
+
 ## The build (Leaf path)
 
 | System | Choice | Notes |

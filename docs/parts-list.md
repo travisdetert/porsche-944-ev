@@ -100,9 +100,10 @@ Penetrating oil, sealant, dielectric grease, zip ties, heat-shrink assortment, f
 | − Gas-parts resale | −$500–1,500 |
 | **Net all-in** | **~$4,500–8,000** (realistic mid **~$5.5–6.5k**) |
 
-**Cheapest realistic path** (cheap donor, own some tools, defer the sort phase): **~$4–5k net.**
-The "core to driving" (A + B + C, skipping PPE/sort if you have gear) is the **$3.5–5.5k**
-headline; the **all-in** is higher because of the long tail — be honest with yourself about it.
+**Cheapest-viable path** — reuse the donor's HV system + sell the gas parts: **~$2.5–3.5k net**
+to driving (see `parts-shopping-list.md`). **Every dollar saved here goes into batteries / motor**
+(ADR-0011) — stripping the car *funds* the drivetrain. The all-in rises only if you choose to
+spend it on more range/power, which is the whole point.
 
 ---
 

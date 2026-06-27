@@ -10,6 +10,54 @@ community-standard parts to buy. Organized to be shoppable.
 
 ---
 
+## 💰 CHEAPEST-VIABLE FIRST — the donor *is* your HV BOM
+The specific picks below are the *standard* choices. But the mission is **cheapest possible**,
+and the biggest lever is this: **one wrecked Leaf already contains a complete, matched HV
+system.** For **Stage 1, reuse it** and buy almost nothing. The standalone contactor/fuse/cable
+picks below are really **Stage-2 costs** (when the Leaf pack + its junction box come out).
+
+| Item | Standard buy | **Cheapest (Stage 1): reuse / salvage / budget** |
+|---|---|---|
+| Contactors + pack fuse + current sensor | EV200 + FWP, $200–350 | **reuse the Leaf pack junction box** — $0 |
+| Service disconnect (MSD) | $50–150 | **reuse the Leaf MSD plug** — $0 |
+| HV cable | 2/0 new, $100–160 | **reuse the donor's orange HV cables** — $0 |
+| Charger + DC-DC | aftermarket, $650–1.2k | **reuse the Leaf PDM** — $0 |
+| BMS (Stage 1) | simpBMS/Orion | **reuse the Leaf LBC** — $0 |
+| Battery (Stage 1) | — | **donor pack** — $0 |
+| Brake vacuum | Hella UP30, $80–200 | **salvage-EV vacuum pump** — ~$40 |
+| Defrost heater | aftermarket | **salvage Volt/Leaf PTC** — ~$40 |
+| DC meter | Fluke, $200–400 | **budget CAT III DC meter** (AstroAI/Kaiweets) — ~$40 |
+| Insulation tester | Fluke 1507, ~$300 | **budget megger ~$60**, or **borrow** |
+| Crimper | — | **harbor-freight hydraulic** ~$40 |
+| Audio | new | **used amp + subs** — ~half |
+
+**Must-buy (no donor equivalent / don't cheap out):**
+- **ZombieVerter VCU** — $380 (the brain).
+- **Adapter + coupler** — ~$400–600 machined (the one unavoidable custom part; ~$0 in parts if
+  you have lathe/mill access).
+- **Class-0 (1000 V) gloves** — ~$80. **Never** go below the rating — this is your life, not a line item.
+
+**Cheapest-viable Stage-1 net:**
+```
+  cheap donor Leaf (degraded pack is fine) .. $2,500
+  ZombieVerter .............................. +  380
+  adapter + coupler (machined) .............. +  500
+  reuse ALL donor HV gear ................... +    0
+  budget PPE + tools ........................ +  150
+  salvage brake-vac + PTC + small parts ..... +  150
+  - sell the gas parts ...................... -1,000
+  ============================================================
+  ~= $2,680 to a driving electric go-kart
+```
+**Floor: ~$2.5–3.5k net** to driving — by reusing the donor's HV system and selling the gas
+parts. The three things you must *not* cheap out on: **HV gloves, the fuse rating, and adapter
+alignment** (safety / works-or-it-doesn't).
+
+> Reuse donor HV parts **only if undamaged and correctly rated** — inspect, confirm the fuse
+> rating (PF2). **Cheap ≠ unsafe.**
+
+---
+
 ## A. Drivetrain & control
 | Need | Specific pick | Vendor | ~$ | Note |
 |---|---|---|---|---|

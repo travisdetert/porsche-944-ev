@@ -100,6 +100,24 @@ with a whisker of rear bias (ideal for RWD traction), and a **lower CG than stoc
 
 ---
 
+## Strip to reinvest — the weight budget (stripping *buys* range)
+Stripping isn't about being light for its own sake — it's a **weight budget you spend on
+battery.** Removing ~760 lb (ICE + comfort) lets you carry that much more battery than a
+non-stripped conversion **at the same final weight.**
+
+| Build | − engine | − comfort | + motor/elec | + battery | = weight |
+|---|---|---|---|---|---|
+| Non-stripped EV (typical) | −560 | (kept) | +285 | 74 kWh / +880 | ~3,505 lb |
+| **Stripped go-kart, 74 kWh** | −560 | −200 | +285 | +880 +45 stereo | **~3,350 lb** |
+| **Stripped, same weight as typical** | −560 | −200 | +285 | **~90 kWh / +1,075** | ~3,505 lb |
+
+So stripping **buys ~3 extra Tesla modules of range for free** (weight-wise), and the **sold gas
+parts fund the cells** — money and weight both flow into the drivetrain (ADR-0011). Hold true
+50/50 by **front-biasing the split** (the front lost the heavy engine, so battery goes forward).
+
+> The kept transaxle **caps usable motor power** (ADR-0004), so past the EM57's output, spend the
+> savings on **battery (range)**, not a bigger motor — better return for the weight and dollars.
+
 ## Mounting & CG notes
 - **Lowest CG wins** — mount every box as low as the floor/bellypan allows; CG height
   matters more for feel than the exact front/rear split.

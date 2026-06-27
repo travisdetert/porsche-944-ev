@@ -16,6 +16,7 @@ a reversal gets a new ADR that supersedes the old one. The value is the *why* an
 | [0008](0008-lightweight-gokart-spec.md) | Strip to a lightweight "electric go-kart" spec | Accepted *(audio clause superseded by 0009)* |
 | [0009](0009-keep-stereo-and-subs.md) | Keep a real stereo + subwoofers | Accepted |
 | [0010](0010-rear-well-to-subs.md) | Rear spare-well goes to the subwoofer (not a battery box) | Accepted |
+| [0011](0011-light-and-5050.md) | Strip to reinvest — saved money & weight feed the drivetrain (≈ stock weight, 50/50) | Accepted |
 
 ## Decisions still open (future ADRs)
 - DC fast charging (CCS) if road-tripping becomes a goal — supersedes part of ADR-0006.
