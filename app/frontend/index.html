@@ -725,12 +725,12 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
     g.add(new THREE.Mesh(new THREE.CylinderGeometry(R*0.16,R*0.16,width*1.1,12), rimMat));
     return g;
   }
-  const W = (x,z) => { const w = makeWheel(0.44,0.32); w.rotation.x = Math.PI/2; w.position.set(x,0.42,z); chassis.add(w); wheels.push(w); };
-  W(1.35,0.9); W(1.35,-0.9); W(-1.4,0.9); W(-1.4,-0.9);
+  const W = (x,z) => { const w = makeWheel(0.32,0.22); w.rotation.x = Math.PI/2; w.position.set(x,0.32,z); chassis.add(w); wheels.push(w); };
+  W(1.35,0.82); W(1.35,-0.82); W(-1.4,0.82); W(-1.4,-0.82);
   // axle bars + centerline as a persistent chassis reference for placing components
   const refMat = new THREE.MeshBasicMaterial({color:0x5a6170});
-  [1.35,-1.4].forEach(x => { const a = new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,2.0,8), refMat); a.rotation.x = Math.PI/2; a.position.set(x,0.42,0); chassis.add(a); });
-  const spine = new THREE.Mesh(new THREE.BoxGeometry(3.0,0.025,0.025), refMat); spine.position.set(-0.02,0.42,0); chassis.add(spine);
+  [1.35,-1.4].forEach(x => { const a = new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.022,1.7,8), refMat); a.rotation.x = Math.PI/2; a.position.set(x,0.32,0); chassis.add(a); });
+  const spine = new THREE.Mesh(new THREE.BoxGeometry(3.0,0.022,0.022), refMat); spine.position.set(-0.02,0.32,0); chassis.add(spine);
   const hood = new THREE.Group(); hood.position.set(0.35,0.7,0);
   hood.add(B(1.55,0.08,1.62, paint, 0.78,0,0)); hood.add(B(1.55,0.03,0.26, stripeMat, 0.78,0.06,0)); schem.add(hood);
   const pods = [];
