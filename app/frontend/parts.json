@@ -55,6 +55,14 @@
       "cad": "cad/dash-panel.scad", "preview": "parts/dash-panel.svg"
     },
     {
+      "name": "Console touchscreen mount + bezel",
+      "gate": "—", "status": "unproven",
+      "what": "Drops the Pi head-unit's ~7\" touchscreen into the 944 center-stack radio aperture (where the stock radio/cassette lives), keeping the HVAC controls below usable.",
+      "risk": "Must fit the factory opening (≈ DIN width), hold the Pi + driver board with airflow behind it, manage glare, stay removable for service, and not crack the dash trim. No model yet — measure first.",
+      "prove": "Measure the aperture + depth → mock up in cardboard/print → screen sits flush & readable, HVAC still reachable → Pi stays < 70°C in a hot cabin → one-hand removable, no rattles.",
+      "cad": "cad/console-mount-spec.md", "preview": "parts/console-mount.svg"
+    },
+    {
       "name": "CAN → gauge adapter",
       "gate": "—", "status": "unproven",
       "what": "Small board translating ZombieVerter / openinverter CAN frames into the analog signals the stock 944 cluster needs (ADR-0012).",
