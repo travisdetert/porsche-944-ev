@@ -13,9 +13,14 @@ any phone on the car's WiFi opens the same URL. Design: `../docs/control-compute
 ```
 python3 app/backend/server.py      # then open http://localhost:8080
 ```
-Pure stdlib. You'll see live telemetry, a moving map, drive-mode buttons, and a **"Simulate car
-condition"** row — flip between **CITY / HIGHWAY / CHARGING / HOT DAY / LOW BATTERY / FAULT** and
-watch the dashboard react (charging icon, derate + hot warnings, low-battery chip, fault power cut).
+Pure stdlib. Three tabs:
+- **DRIVE** — live telemetry + moving map + drive-mode buttons + a **"Simulate car condition"**
+  row: flip between **CITY / HIGHWAY / CHARGING / HOT DAY / LOW BATTERY / FAULT** and watch the
+  dashboard react (charging icon, derate + hot warnings, low-battery chip, fault power cut).
+- **TUNE** — live **sliders** for the VCU params (max torque/current, regen, throttle deadband +
+  curve, ramp, creep, speed limit). **Bounded** — out-of-range values clamp; the VCU clamps again.
+- **TRIPS** — **canvas graphs** (no chart library) of the logged telemetry: speed, power
+  (negative = regen/charge), charge %, and motor/inverter temps over the last ~2 min.
 
 ## What's mocked vs real
 - `backend/server.py` → **`MockCan`** generates scenario-driven telemetry. On the Pi, replace
@@ -40,6 +45,8 @@ app/
 | `GET /api/telemetry` | live telemetry (speed, kW, SOC, temps, pack, GPS, status, warnings) |
 | `GET /api/modes` · `POST /api/mode {mode}` | drive modes / set mode |
 | `GET /api/scenarios` · `POST /api/scenario {scenario}` | mock conditions / set condition |
+| `GET /api/params` · `POST /api/params {name,value}` | tunable params (bounded; clamps to min/max) |
+| `GET /api/history` | logged telemetry samples for the trip graphs |
 
 ## Deploy to the Pi (later)
 SocketCAN (`can0`) + swap in the real CAN reader · kiosk Chromium full-screen · Pi as WiFi **AP**

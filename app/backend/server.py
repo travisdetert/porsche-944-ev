@@ -27,6 +27,21 @@ with open(MODES_FILE) as f:
 SCENARIOS = ["CITY", "HIGHWAY", "CHARGING", "HOT DAY", "LOW BATTERY", "FAULT"]
 STATE = {"mode": "NORMAL", "scenario": "CITY", "soc": 78.0, "t0": time.time()}
 
+# Tunable VCU parameters (UI enforces these bounds; the VCU STILL clamps to hard limits).
+PARAMS = {
+    "max_torque_pct":       {"value": 100, "min": 20, "max": 100, "step": 5,  "unit": "%",   "label": "Max torque"},
+    "max_current_a":        {"value": 350, "min": 50, "max": 450, "step": 10, "unit": "A",   "label": "Max current"},
+    "regen_pct":            {"value": 60,  "min": 0,  "max": 100, "step": 5,  "unit": "%",   "label": "Regen strength"},
+    "throttle_deadband_pct":{"value": 4,   "min": 0,  "max": 20,  "step": 1,  "unit": "%",   "label": "Throttle deadband"},
+    "throttle_curve":       {"value": 50,  "min": 0,  "max": 100, "step": 5,  "unit": "",    "label": "Throttle curve (lin→sharp)"},
+    "ramp_rate":            {"value": 50,  "min": 5,  "max": 100, "step": 5,  "unit": "",    "label": "Torque ramp"},
+    "creep_torque_pct":     {"value": 0,   "min": 0,  "max": 30,  "step": 2,  "unit": "%",   "label": "Creep torque"},
+    "speed_limit_mph":      {"value": 0,   "min": 0,  "max": 120, "step": 5,  "unit": "mph", "label": "Speed limit (0=off)"},
+}
+
+HISTORY = []          # rolling telemetry log for the trip graphs
+HIST_MAX = 240        # ~2 min at 0.5 s sampling
+
 
 class MockCan:
     """Scenario-driven mock of the openinverter CAN telemetry. On the Pi, replace
@@ -106,11 +121,21 @@ class Handler(BaseHTTPRequestHandler):
             except FileNotFoundError:
                 self._send(404, "frontend/index.html not found")
         elif self.path == "/api/telemetry":
-            self._send(200, json.dumps(CAN.read()))
+            data = CAN.read()
+            HISTORY.append({"t": data and round(time.time() - STATE["t0"], 1),
+                            "speed": data["speed_mph"], "power": data["power_kw"],
+                            "soc": data["soc_pct"], "motor": data["motor_c"], "inv": data["inverter_c"]})
+            if len(HISTORY) > HIST_MAX:
+                del HISTORY[0]
+            self._send(200, json.dumps(data))
         elif self.path == "/api/modes":
             self._send(200, json.dumps({"active": STATE["mode"], "modes": MODES}))
         elif self.path == "/api/scenarios":
             self._send(200, json.dumps({"active": STATE["scenario"], "scenarios": SCENARIOS}))
+        elif self.path == "/api/params":
+            self._send(200, json.dumps({"params": PARAMS}))
+        elif self.path == "/api/history":
+            self._send(200, json.dumps({"samples": HISTORY}))
         else:
             self._send(404, "not found")
 
@@ -132,6 +157,16 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, json.dumps({"active": s}))
             else:
                 self._send(400, json.dumps({"error": "unknown scenario"}))
+        elif self.path == "/api/params":
+            n = int(self.headers.get("Content-Length", 0) or 0)
+            d = json.loads(self.rfile.read(n) or b"{}")
+            name, val = d.get("name"), d.get("value")
+            if name in PARAMS:
+                p = PARAMS[name]
+                p["value"] = max(p["min"], min(p["max"], val))   # BOUNDED clamp (VCU clamps again)
+                self._send(200, json.dumps({"name": name, "value": p["value"]}))
+            else:
+                self._send(400, json.dumps({"error": "unknown param"}))
         else:
             self._send(404, "not found")
 
