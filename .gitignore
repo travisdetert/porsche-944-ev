@@ -18,3 +18,8 @@ __pycache__/
 
 # App runtime data (SQLite trip DB)
 app/data/
+
+# 3D model assets (licensed — provide locally, don't commit)
+app/frontend/models/*.glb
+app/frontend/models/*.gltf
+app/frontend/models/*.zip

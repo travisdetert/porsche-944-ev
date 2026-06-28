@@ -244,6 +244,7 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
 
 <!-- 3D car view (Three.js). If offline / CDN blocked, this no-ops and the rest still works. -->
 <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 (function () {
   if (!window.THREE) return;
@@ -303,6 +304,21 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   const portMat = new THREE.MeshStandardMaterial({color:0x113311, emissive:0x000000});
   car.add(box(0.04,0.18,0.18, portMat, 0.9,0.62,0.9));
   scene.add(car);
+  let active = car;
+
+  // If a real glTF model is present at frontend/models/944.glb, use it (see models/README).
+  if (THREE.GLTFLoader) {
+    new THREE.GLTFLoader().load('models/944.glb', (gltf) => {
+      const m = gltf.scene;
+      const bb = new THREE.Box3().setFromObject(m);
+      const sz = bb.getSize(new THREE.Vector3()), ctr = bb.getCenter(new THREE.Vector3());
+      const s = 4.4 / Math.max(sz.x, sz.z, 0.001);
+      m.scale.setScalar(s);
+      m.position.set(-ctr.x * s, -bb.min.y * s, -ctr.z * s);
+      scene.remove(car); scene.add(m); active = m;
+      const pl = document.getElementById('poplights'); if (pl) pl.style.display = 'none';
+    }, undefined, () => { /* no model file → keep the built-in primitive 944 */ });
+  }
 
   let popTarget = 0, popAngle = 0, lightsOn = false;
   const btn = document.getElementById('poplights');
@@ -315,10 +331,12 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   window.carResize = resize; window.addEventListener('resize', resize); resize();
   (function animate(){
     requestAnimationFrame(animate);
-    car.rotation.y += 0.004;
-    popAngle += (popTarget - popAngle) * 0.12;
-    lensMat.emissive.setHex(lightsOn ? 0xffffee : 0x000000);
-    pods.forEach(p => p.rotation.z = popAngle);
+    active.rotation.y += 0.004;
+    if (active === car) {                       // pop-up animation is for the built-in model
+      popAngle += (popTarget - popAngle) * 0.12;
+      lensMat.emissive.setHex(lightsOn ? 0xffffee : 0x000000);
+      pods.forEach(p => p.rotation.z = popAngle);
+    }
     renderer.render(scene, camera);
   })();
 })();

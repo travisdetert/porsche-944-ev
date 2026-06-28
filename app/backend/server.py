@@ -14,6 +14,7 @@ import csv
 import io
 import json
 import math
+import mimetypes
 import os
 import sqlite3
 import threading
@@ -22,7 +23,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FRONTEND = os.path.join(HERE, "..", "frontend")
+FRONTEND = os.path.abspath(os.path.join(HERE, "..", "frontend"))
 MODES_FILE = os.path.join(HERE, "..", "drive_modes.json")
 
 with open(MODES_FILE) as f:
@@ -289,7 +290,21 @@ class Handler(BaseHTTPRequestHandler):
             tid = int(parse_qs(urlparse(self.path).query).get("id", ["0"])[0])
             self._send(200, json.dumps({"id": tid, "samples": trip_samples(tid)}))
         else:
+            self._serve_static(self.path)
+
+    def _serve_static(self, path):
+        full = os.path.normpath(os.path.join(FRONTEND, urlparse(path).path.lstrip("/")))
+        if not full.startswith(FRONTEND) or not os.path.isfile(full):   # no path traversal
             self._send(404, "not found")
+            return
+        if full.endswith(".glb"):
+            ctype = "model/gltf-binary"
+        elif full.endswith(".gltf"):
+            ctype = "model/gltf+json"
+        else:
+            ctype = mimetypes.guess_type(full)[0] or "application/octet-stream"
+        with open(full, "rb") as f:
+            self._send(200, f.read(), ctype)
 
     def do_POST(self):
         if self.path == "/api/mode":
