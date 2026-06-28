@@ -14,9 +14,10 @@ any phone on the car's WiFi opens the same URL. Design: `../docs/control-compute
 python3 app/backend/server.py      # then open http://localhost:8080
 ```
 Pure stdlib. Three tabs:
-- **DRIVE** — live telemetry + moving map + drive-mode buttons + a **"Simulate car condition"**
-  row: flip between **CITY / HIGHWAY / CHARGING / HOT DAY / LOW BATTERY / FAULT** and watch the
-  dashboard react (charging icon, derate + hot warnings, low-battery chip, fault power cut).
+- **DRIVE** — live telemetry + a map where the marker **drives a mock GPS route paced by speed**
+  (it stops when charging) + drive-mode buttons + a **"Simulate car condition"** row: flip between
+  **CITY / HIGHWAY / CHARGING / HOT DAY / LOW BATTERY / FAULT** and watch the dashboard react
+  (charging icon, derate + hot warnings, low-battery chip, fault power cut).
 - **TUNE** — live **sliders** for the VCU params (max torque/current, regen, throttle deadband +
   curve, ramp, creep, speed limit). **Bounded** — out-of-range values clamp; the VCU clamps again.
 - **TRIPS** — **canvas graphs** (no chart library) of the logged telemetry: speed, power

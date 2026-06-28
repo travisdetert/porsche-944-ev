@@ -25,7 +25,8 @@ with open(MODES_FILE) as f:
 
 # Simulated car conditions you can flip between to see the UI react.
 SCENARIOS = ["CITY", "HIGHWAY", "CHARGING", "HOT DAY", "LOW BATTERY", "FAULT"]
-STATE = {"mode": "NORMAL", "scenario": "CITY", "soc": 78.0, "t0": time.time()}
+STATE = {"mode": "NORMAL", "scenario": "CITY", "soc": 78.0, "t0": time.time(),
+         "route_d": 0.0, "last_t": time.time()}
 
 # Tunable VCU parameters (UI enforces these bounds; the VCU STILL clamps to hard limits).
 PARAMS = {
@@ -41,6 +42,39 @@ PARAMS = {
 
 HISTORY = []          # rolling telemetry log for the trip graphs
 HIST_MAX = 240        # ~2 min at 0.5 s sampling
+
+# Mock GPS route — a loop the marker drives along, paced by the simulated speed.
+ROUTE = [
+    [37.7785, -122.4256], [37.7806, -122.4180], [37.7799, -122.4100],
+    [37.7742, -122.4072], [37.7698, -122.4128], [37.7693, -122.4212],
+    [37.7726, -122.4271], [37.7785, -122.4256],
+]
+
+
+def _haversine(a, b):
+    R = 6371000.0
+    la1, lo1, la2, lo2 = map(math.radians, [a[0], a[1], b[0], b[1]])
+    h = math.sin((la2-la1)/2)**2 + math.cos(la1)*math.cos(la2)*math.sin((lo2-lo1)/2)**2
+    return 2 * R * math.asin(math.sqrt(h))
+
+
+_SEGS, _cum = [], 0.0
+for _i in range(len(ROUTE) - 1):
+    _L = _haversine(ROUTE[_i], ROUTE[_i + 1])
+    _SEGS.append((_cum, ROUTE[_i], ROUTE[_i + 1], _L))
+    _cum += _L
+_TOTAL = _cum
+
+
+def _pos_at(d):
+    if _TOTAL <= 0:
+        return ROUTE[0]
+    d %= _TOTAL
+    for start, p0, p1, L in _SEGS:
+        if d <= start + L:
+            f = (d - start) / L if L > 0 else 0.0
+            return [p0[0] + (p1[0]-p0[0])*f, p0[1] + (p1[1]-p0[1])*f]
+    return ROUTE[-1]
 
 
 class MockCan:
@@ -81,8 +115,11 @@ class MockCan:
         if motor_c >= 95:
             warnings.append("MOTOR HOT")
 
-        lat = 37.7749 + 0.012 * math.sin(t / 30)
-        lon = -122.4194 + 0.012 * math.cos(t / 30)
+        now = time.time()
+        dt = max(0.0, min(2.0, now - STATE["last_t"]))
+        STATE["last_t"] = now
+        STATE["route_d"] += speed * 0.447 * dt          # mph→m/s, advance along the route
+        lat, lon = _pos_at(STATE["route_d"])
         return {
             "mode": STATE["mode"], "scenario": sc, "status": status, "charging": charging,
             "warnings": warnings,
@@ -136,6 +173,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, json.dumps({"params": PARAMS}))
         elif self.path == "/api/history":
             self._send(200, json.dumps({"samples": HISTORY}))
+        elif self.path == "/api/route":
+            self._send(200, json.dumps({"route": ROUTE}))
         else:
             self._send(404, "not found")
 

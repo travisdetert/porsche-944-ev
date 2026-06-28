@@ -109,6 +109,10 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
 // map
 const map = L.map('map', {zoomControl:false}).setView([37.7749,-122.4194], 14);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
+fetch('/api/route').then(r => r.json()).then(d => {
+  const line = L.polyline(d.route, {color:'#4a9eff', weight:4, opacity:0.45}).addTo(map);
+  map.fitBounds(line.getBounds(), {padding:[30,30]});
+});
 const me = L.circleMarker([37.7749,-122.4194], {radius:9, color:'#1565c0', fillColor:'#4a9eff', fillOpacity:1, weight:3}).addTo(map);
 
 async function buildModes() {
@@ -188,7 +192,7 @@ async function tick() {
   (t.warnings||[]).forEach(m => { const c=document.createElement('span'); c.className='chip'; c.textContent='⚠ '+m; wbox.appendChild(c); });
   document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('active', b.dataset.mode===t.mode));
   document.querySelectorAll('#scenarios button').forEach(b => b.classList.toggle('active', b.dataset.scn===t.scenario));
-  me.setLatLng([t.lat, t.lon]); map.panTo([t.lat, t.lon], {animate:false});
+  me.setLatLng([t.lat, t.lon]);
   hist.push({speed:t.speed_mph, power:t.power_kw, soc:t.soc_pct, motor:t.motor_c, inv:t.inverter_c});
   if (hist.length > 240) hist.shift();
   if ($('view-trips').classList.contains('active')) drawTrips();
