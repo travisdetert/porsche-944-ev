@@ -898,6 +898,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   const realBtn = document.getElementById('realBtn');
   function showRealistic(on) {
     showReal = on; if (realBtn) realBtn.classList.toggle('active', on); schem.visible = !on;
+    chassis.visible = !on;     // the glTF has its own wheels — only show the reference wheels with the schematic
     if (on && !realModel && THREE.GLTFLoader) {
       new THREE.GLTFLoader().load('models/944.glb', g => {
         const mdl = g.scene;
