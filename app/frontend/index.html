@@ -608,10 +608,10 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   scene.add(new THREE.GridHelper(14, 14, 0x333344, 0x222233));
 
   const B = (w,h,d,mat,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat); m.position.set(x,y,z); return m; };
-  const paint = new THREE.MeshStandardMaterial({color:0xd81414, metalness:0.55, roughness:0.32, transparent:true, opacity:0.7, depthWrite:false});
+  const paint = new THREE.MeshStandardMaterial({color:0x17191d, metalness:0.6, roughness:0.34, transparent:true, opacity:0.7, depthWrite:false});  // black 944 — matches the real car
   const glass = new THREE.MeshStandardMaterial({color:0x0c0f12, metalness:0.3, roughness:0.15, transparent:true, opacity:0.7, depthWrite:false});
   const tireMat = new THREE.MeshStandardMaterial({color:0x111111, roughness:0.9});
-  const stripeMat = new THREE.MeshStandardMaterial({color:0x3a3a3d, roughness:0.5});
+  const stripeMat = new THREE.MeshStandardMaterial({color:0x17191d, roughness:0.5});  // no stripe — the real car is plain black
   const lensMat = new THREE.MeshStandardMaterial({color:0xffffff, emissive:0x000000});
 
   const car = new THREE.Group(); scene.add(car);
@@ -894,7 +894,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
 
   const Bx = (w,h,d,col,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshStandardMaterial({color:col,metalness:0.4,roughness:0.45})); m.position.set(x,y,z); return m; };
   const car = new THREE.Group();
-  car.add(Bx(1.8,0.5,4.2, 0xd81414, 0,0.5,0));         // body, length along Z
+  car.add(Bx(1.8,0.5,4.2, 0x17191d, 0,0.5,0));         // black body, length along Z
   car.add(Bx(1.6,0.45,1.7, 0x0c0f12, 0,0.95,-0.5));    // cabin (rear)
   car.add(Bx(0.25,0.04,4.0, 0x3a3a3d, 0,0.78,0));      // stripe
   const tireMat = new THREE.MeshStandardMaterial({color:0x111111, roughness:0.9});
