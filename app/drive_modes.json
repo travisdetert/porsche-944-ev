@@ -1,0 +1,9 @@
+{
+  "modes": {
+    "ECO":    {"power_cap_kw": 45,  "regen": "max",    "throttle": "gentle", "speed_cap_mph": null, "color": "#2e7d32"},
+    "NORMAL": {"power_cap_kw": 90,  "regen": "medium", "throttle": "linear", "speed_cap_mph": null, "color": "#1565c0"},
+    "SPORT":  {"power_cap_kw": 110, "regen": "low",    "throttle": "sharp",  "speed_cap_mph": null, "color": "#c0392b"},
+    "VALET":  {"power_cap_kw": 25,  "regen": "medium", "throttle": "gentle", "speed_cap_mph": 35,   "color": "#e67e22"}
+  },
+  "note": "Drive modes = parameter presets written to the VCU (bounded). The VCU STILL clamps to its hard safety limits — a mode cannot exceed them. Edit freely."
+}

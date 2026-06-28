@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>944 EV — Head Unit</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, Arial, sans-serif; background:#0e0e10; color:#eee; }
+  header { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background:#000; }
+  header b { font-size:20px; letter-spacing:1px; }
+  header .status { font-size:14px; color:#9fd3ff; }
+  header .mode { font-weight:700; }
+  #warn { display:flex; gap:8px; flex-wrap:wrap; padding:0 12px; }
+  #warn .chip { background:#c0392b; color:#fff; padding:6px 10px; border-radius:20px; font-size:12px; font-weight:700; }
+  .grid { display:grid; grid-template-columns:1.1fr 1fr; gap:10px; padding:10px; }
+  #map { height:48vh; border-radius:12px; }
+  .tel { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .card { background:#1b1b1e; border-radius:12px; padding:10px 12px; }
+  .card .k { font-size:10px; color:#8a8a90; text-transform:uppercase; letter-spacing:.5px; }
+  .card .v { font-size:30px; font-weight:800; line-height:1.1; }
+  .card .v small { font-size:13px; color:#999; font-weight:600; }
+  .row { padding:4px 12px 12px; }
+  .row h3 { margin:8px 4px 6px; font-size:12px; color:#8a8a90; text-transform:uppercase; letter-spacing:.5px; }
+  .btns { display:flex; gap:8px; flex-wrap:wrap; }
+  .btns button { flex:1; min-width:90px; padding:14px; border:0; border-radius:10px; color:#fff; font-weight:700; font-size:14px; cursor:pointer; opacity:.65; }
+  .btns button.active { opacity:1; outline:3px solid #fff3; }
+  .charge { color:#39d353; }
+</style>
+</head>
+<body>
+  <header>
+    <b>944 EV ⚡</b>
+    <span class="status" id="status">—</span>
+    <span class="mode">mode: <span id="mode">—</span></span>
+  </header>
+  <div id="warn"></div>
+  <div class="grid">
+    <div id="map"></div>
+    <div class="tel">
+      <div class="card"><div class="k">Speed</div><div class="v"><span id="speed">—</span><small> mph</small></div></div>
+      <div class="card"><div class="k">Power</div><div class="v"><span id="power">—</span><small> kW</small></div></div>
+      <div class="card"><div class="k">Charge</div><div class="v"><span id="soc">—</span><small> %</small></div></div>
+      <div class="card"><div class="k">Range</div><div class="v"><span id="range">—</span><small> mi</small></div></div>
+      <div class="card"><div class="k">Motor / Inv</div><div class="v" id="temps">—<small> °C</small></div></div>
+      <div class="card"><div class="k">Wh / mi</div><div class="v" id="whmi">—</div></div>
+      <div class="card"><div class="k">Pack</div><div class="v" id="pack" style="font-size:20px">—</div></div>
+      <div class="card"><div class="k">Trip status</div><div class="v" id="state2" style="font-size:18px">—</div></div>
+    </div>
+  </div>
+  <div class="row"><h3>Drive mode</h3><div class="btns" id="modes"></div></div>
+  <div class="row"><h3>Simulate car condition (mock)</h3><div class="btns" id="scenarios"></div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const map = L.map('map', {zoomControl:false}).setView([37.7749,-122.4194], 14);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
+const me = L.circleMarker([37.7749,-122.4194], {radius:9, color:'#1565c0', fillColor:'#4a9eff', fillOpacity:1, weight:3}).addTo(map);
+const $ = id => document.getElementById(id);
+
+async function buildModes() {
+  const d = await (await fetch('/api/modes')).json();
+  const box = $('modes'); box.innerHTML = '';
+  for (const [name, m] of Object.entries(d.modes)) {
+    const b = document.createElement('button');
+    b.textContent = name; b.style.background = m.color; b.dataset.mode = name;
+    b.onclick = async () => { await fetch('/api/mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:name})}); tick(); };
+    box.appendChild(b);
+  }
+}
+async function buildScenarios() {
+  const d = await (await fetch('/api/scenarios')).json();
+  const box = $('scenarios'); box.innerHTML = '';
+  for (const name of d.scenarios) {
+    const b = document.createElement('button');
+    b.textContent = name; b.style.background = '#2a2a30'; b.dataset.scn = name;
+    b.onclick = async () => { await fetch('/api/scenario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scenario:name})}); tick(); };
+    box.appendChild(b);
+  }
+}
+async function tick() {
+  let t; try { t = await (await fetch('/api/telemetry')).json(); } catch(e){ return; }
+  $('status').textContent = (t.charging ? '🔌 ' : '') + t.status;
+  $('status').className = 'status' + (t.charging ? ' charge' : '');
+  $('mode').textContent = t.mode;
+  $('speed').textContent = t.speed_mph;
+  $('power').textContent = t.power_kw;
+  $('soc').textContent = t.soc_pct;
+  $('range').textContent = t.range_mi;
+  $('temps').innerHTML = t.motor_c + ' / ' + t.inverter_c + '<small> °C</small>';
+  $('whmi').textContent = t.wh_mi;
+  $('pack').textContent = t.pack_v + ' V · ' + t.pack_a + ' A';
+  $('state2').textContent = t.status;
+  const w = $('warn'); w.innerHTML = '';
+  (t.warnings||[]).forEach(msg => { const c=document.createElement('span'); c.className='chip'; c.textContent='⚠ '+msg; w.appendChild(c); });
+  document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('active', b.dataset.mode===t.mode));
+  document.querySelectorAll('#scenarios button').forEach(b => b.classList.toggle('active', b.dataset.scn===t.scenario));
+  me.setLatLng([t.lat, t.lon]); map.panTo([t.lat, t.lon], {animate:false});
+}
+buildModes(); buildScenarios(); tick(); setInterval(tick, 500);
+</script>
+</body>
+</html>

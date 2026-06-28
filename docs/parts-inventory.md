@@ -61,6 +61,7 @@ instruments (repurposed) · **radiator + fans** (repurposed to cool the inverter
 |---|---|---|
 | ZombieVerter VCU | $380 | the only new electronics "brain" |
 | CAN→gauge adapter (ESP32 + transceiver) | $20–50 | reuses the 944 cluster (ADR-0012) |
+| Control computer (Pi + CAN HAT + 7" touch + GPS + UPS) | $150–300 | optional head unit: telemetry/maps/drive modes (ADR-0014; app in `app/`) |
 | Adapter plate + coupler (machined) | $520–860 | the only new fabrication |
 | HV safety extras (DC fuse/MSD if not reused, lugs, crimper, loom) | $150–400 | size to inverter (PF2) |
 | Motor-mount stock + fasteners | $60–150 | |

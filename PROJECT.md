@@ -128,5 +128,5 @@ v1 is done when all of these are true:
 **Strip list:** `docs/strip-list.md` ·
 **Design:** `docs/944-layout-design.md`, `docs/battery-fit.md`, `docs/battery-pack-and-balance.md`, `docs/low-cg-packaging.md`,
 `docs/drivetrain-diagrams.md`, `docs/control-wiring.md`, `docs/power-and-reuse-diagrams.md`, `docs/dashboard-reuse.md`, `docs/range-analysis.md` ·
-**Sim:** `sim/` · **Custom parts (CAD):** `cad/` · **Sequence:** `docs/build-order.md` ·
+**Sim:** `sim/` · **Custom parts (CAD):** `cad/` · **Head unit app:** `docs/control-computer.md` + `app/` · **Sequence:** `docs/build-order.md` ·
 **Why staged:** `docs/mvp-mule.md` · **Decisions:** `docs/adr/`
