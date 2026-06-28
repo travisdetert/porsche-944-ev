@@ -28,6 +28,10 @@ Pure stdlib. Three tabs:
 - **CAR** — a **3D 944** (Three.js) with the signature **animated pop-up headlights** (toggle).
   Brake lights glow on regen, the charge port glows when charging — driven by live telemetry.
   (Loads Three.js from CDN; if blocked, the tab no-ops and the rest of the app still works.)
+- **LAYOUT** — the 944 model **ghosted** with the **EV components placed inside** (motor, front +
+  main battery packs, transaxle, subs) — labeled, toggleable, with a ghost-opacity slider. Edit
+  **`app/frontend/ev_layout.json`** (positions in metres, +X = front) to move things and refresh.
+  This turns the 3D model into a real **placement planning tool**.
 
 ## What's mocked vs real
 - `backend/server.py` → **`MockCan`** generates scenario-driven telemetry. On the Pi, replace
