@@ -112,7 +112,9 @@
       <span style="color:#aaa;font-size:12px">Ghost car</span>
       <input type="range" id="ghost" min="0" max="60" value="22" style="accent-color:#4a9eff">
       <button class="clearbtn" id="spinL">⟳ spin</button>
-      <span style="color:#888;font-size:12px">tap a component to toggle · edit <code>app/frontend/ev_layout.json</code> to move things</span>
+      <button class="clearbtn" id="alignModel">⟲ rotate model 90°</button>
+      <span id="yawval" style="color:#4a9eff;font-size:12px"></span>
+      <span style="color:#888;font-size:12px">tap a component to toggle · align the nose to FRONT, then edit <code>ev_layout.json</code></span>
     </div>
     <div id="layout-wrap" style="position:relative;margin:0 12px">
       <div id="layout3d" style="height:54vh;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
@@ -371,37 +373,48 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   const dl = new THREE.DirectionalLight(0xffffff, 1.0); dl.position.set(5, 9, 6); scene.add(dl);
   scene.add(new THREE.GridHelper(12, 12, 0x333344, 0x222233));
   const world = new THREE.Group(); scene.add(world);
-  const labels = []; let ghostMats = [], ghostOpacity = 0.22, spin = true;
+  const labels = []; let ghostMats = [], ghostOpacity = 0.22, spin = true, loadedModel = null, yaw = 0;
+
+  function addLabel(text, mesh, color, small) {
+    const lab = document.createElement('div'); lab.textContent = text;
+    lab.style.cssText = 'position:absolute;padding:2px 7px;border-radius:6px;background:rgba(10,10,12,0.7);font-weight:700;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%);font-size:' + (small ? 10 : 11) + 'px;color:' + (color || '#fff') + ';';
+    wrap.appendChild(lab); labels.push({lab, mesh}); return lab;
+  }
+  function applyYaw() { const yv = document.getElementById('yawval'); if (yv) yv.textContent = 'yaw ' + yaw + '° → set model_yaw_deg'; if (loadedModel) loadedModel.rotation.y = yaw * Math.PI / 180; }
+  // centerline + FRONT/REAR markers (rotate with the world)
+  world.add(new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.012, 0.012), new THREE.MeshBasicMaterial({color:0x445566})));
+  const fa = new THREE.Object3D(); fa.position.set(2.35, 0.35, 0); world.add(fa); addLabel('FRONT ▶', fa, '#4a9eff', true);
+  const ra = new THREE.Object3D(); ra.position.set(-2.35, 0.35, 0); world.add(ra); addLabel('◀ REAR', ra, '#888', true);
 
   fetch('ev_layout.json').then(r => r.json()).then(cfg => {
     const carCfg = cfg.car || {};
     ghostOpacity = carCfg.ghost_opacity != null ? carCfg.ghost_opacity : 0.22;
+    yaw = carCfg.model_yaw_deg || 0;
     const gh = document.getElementById('ghost'); if (gh) gh.value = Math.round(ghostOpacity * 100);
     if (THREE.GLTFLoader) new THREE.GLTFLoader().load('models/944.glb', (g) => {
       const m = g.scene, bb = new THREE.Box3().setFromObject(m);
       const sz = bb.getSize(new THREE.Vector3()), ctr = bb.getCenter(new THREE.Vector3());
       const s = (carCfg.length_m || 4.32) / Math.max(sz.x, sz.z, 0.001); m.scale.setScalar(s);
       m.position.set(-ctr.x * s, -bb.min.y * s, -ctr.z * s);
-      m.rotation.y = (carCfg.model_yaw_deg || 0) * Math.PI / 180;
       m.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.transparent = true; o.material.opacity = ghostOpacity; o.material.depthWrite = false; ghostMats.push(o.material); } });
-      world.add(m);
+      world.add(m); loadedModel = m; applyYaw();
     });
     const list = document.getElementById('complist');
     (cfg.components || []).forEach(c => {
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(c.size[0], c.size[1], c.size[2]),
         new THREE.MeshStandardMaterial({color:c.color, transparent:true, opacity:0.85, metalness:0.2, roughness:0.6}));
       mesh.position.set(c.pos[0], c.pos[1], c.pos[2]); world.add(mesh);
-      const lab = document.createElement('div'); lab.textContent = c.name;
-      lab.style.cssText = 'position:absolute;padding:2px 7px;border-radius:6px;background:rgba(10,10,12,0.7);color:#fff;font-size:11px;font-weight:700;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)';
-      wrap.appendChild(lab); labels.push({lab, mesh});
+      const lab = addLabel(c.name, mesh);
       const b = document.createElement('button'); b.textContent = c.name; b.style.background = c.color; b.className = 'active';
       b.onclick = () => { mesh.visible = !mesh.visible; lab.style.display = mesh.visible ? '' : 'none'; b.classList.toggle('active', mesh.visible); };
       if (list) list.appendChild(b);
     });
+    applyYaw();
   });
 
   const gh = document.getElementById('ghost'); if (gh) gh.oninput = e => { ghostOpacity = e.target.value / 100; ghostMats.forEach(m => m.opacity = ghostOpacity); };
   const sp = document.getElementById('spinL'); if (sp) sp.onclick = () => spin = !spin;
+  const am = document.getElementById('alignModel'); if (am) am.onclick = () => { yaw = (yaw + 90) % 360; applyYaw(); };
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return; rnd.setSize(w, h); cam.aspect = w / h; cam.updateProjectionMatrix(); };
   window.layoutResize = resize; window.addEventListener('resize', resize); resize();
   const v = new THREE.Vector3();
