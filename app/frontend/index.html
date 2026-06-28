@@ -178,6 +178,7 @@
   <section class="view" id="view-game">
     <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <span style="color:#aaa;font-size:12px">🎮 R2 gas · L2 brake/reverse · left-stick steer · (or ↑ ↓ ← →) — press a controller button to connect</span>
+      <button class="clearbtn" id="fpBtn">👁 Cockpit view (C)</button>
       <span id="gpstatus" style="color:#39d353;font-size:12px"></span>
     </div>
     <div id="game-wrap" style="position:relative;margin:0 12px">
@@ -985,6 +986,27 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   GW(1.0,1.35); GW(-1.0,1.35); GW(1.0,-1.35); GW(-1.0,-1.35);
   scene.add(car);
 
+  // ---- first-person cockpit overlay (parented to the camera so it stays in view) ----
+  scene.add(cam);
+  const cockpit = new THREE.Group(); cam.add(cockpit); cockpit.visible = false;
+  const trimMat = new THREE.MeshStandardMaterial({color:0x0e1014, metalness:0.3, roughness:0.75});
+  const cowl = new THREE.Mesh(new THREE.BoxGeometry(2.6,0.5,0.7), trimMat); cowl.position.set(0,-0.52,-0.72); cowl.rotation.x = 0.18; cockpit.add(cowl);
+  const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.52,0.3), new THREE.MeshBasicMaterial({color:0x0a2b4d})); scr.position.set(0.18,-0.4,-0.6); scr.rotation.x = -0.55; cockpit.add(scr);  // the head-unit glow
+  const pillarL = new THREE.Mesh(new THREE.BoxGeometry(0.09,1.25,0.09), trimMat); pillarL.position.set(-0.98,0.16,-0.9); pillarL.rotation.z = 0.34; cockpit.add(pillarL);
+  const pillarR = pillarL.clone(); pillarR.position.x = 0.98; pillarR.rotation.z = -0.34; cockpit.add(pillarR);
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(2.05,0.12,0.12), trimMat); roof.position.set(0,0.64,-0.95); cockpit.add(roof);
+  const wheelM = new THREE.MeshStandardMaterial({color:0x16181c, metalness:0.45, roughness:0.5});
+  const tilt = new THREE.Group(); tilt.position.set(0,-0.34,-0.58); tilt.rotation.x = -0.44; cockpit.add(tilt);
+  const wheelGrp = new THREE.Group(); tilt.add(wheelGrp);
+  wheelGrp.add(new THREE.Mesh(new THREE.TorusGeometry(0.23,0.028,14,36), wheelM));
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.04,16), wheelM); hub.rotation.x = Math.PI/2; wheelGrp.add(hub);
+  [0, 2.094, 4.188].forEach(a => { const sp = new THREE.Mesh(new THREE.BoxGeometry(0.21,0.022,0.022), wheelM); sp.position.set(Math.cos(a)*0.11, Math.sin(a)*0.11, 0); sp.rotation.z = a; wheelGrp.add(sp); });
+  let steerVis = 0, fp = false;
+  const fpBtn = document.getElementById('fpBtn');
+  function setCockpit(on) { fp = on; cockpit.visible = on; car.visible = !on; if (fpBtn) fpBtn.classList.toggle('active', on); }
+  if (fpBtn) fpBtn.onclick = () => setCockpit(!fp);
+  window.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'c' && document.getElementById('view-game').classList.contains('active')) setCockpit(!fp); });
+
   const keys = {}, status = document.getElementById('gpstatus'), hud = document.getElementById('hud');
   window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (document.getElementById('view-game').classList.contains('active') && e.key.indexOf('Arrow') === 0) e.preventDefault(); });
   window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
@@ -1027,7 +1049,14 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
     px += fx * speed * dt; pz += fz * speed * dt;
     car.position.set(px, 0, pz); car.rotation.y = heading;
     wheels.forEach(w => w.rotateOnAxis(yAxis, speed * dt * 2.2));
-    cam.position.lerp(new THREE.Vector3(px - fx * 9, 4.2, pz - fz * 9), 0.12); cam.lookAt(px, 0.7, pz);
+    steerVis += (inp.st - steerVis) * 0.2; wheelGrp.rotation.z = -steerVis * 0.9;
+    if (fp) {                                              // first-person: driver's seat (LHD, looking ahead)
+      const lx = -Math.cos(heading), lz = Math.sin(heading);
+      cam.position.set(px + lx * 0.32 + fx * 0.1, 1.12, pz + lz * 0.32 + fz * 0.1);
+      cam.lookAt(px + fx * 15, 0.92, pz + fz * 15);
+    } else {                                               // chase cam
+      cam.position.lerp(new THREE.Vector3(px - fx * 9, 4.2, pz - fz * 9), 0.12); cam.lookAt(px, 0.7, pz);
+    }
     rnd.render(scene, cam);
     if (hud) hud.textContent = Math.abs(Math.round(speed * 2.237)) + ' mph' + (speed < -0.5 ? ' (R)' : '') + ' · grip ' + (window.gripFactor || 1).toFixed(2);
   })(performance.now());
