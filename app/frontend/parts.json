@@ -1,0 +1,66 @@
+{
+  "_README": "Custom/precision parts that still need to be proven out (designed in cad/, not yet built+verified on the car). Drives the PARTS screen. status: unproven=critical unknown, designed=CAD done awaiting measure/fab/fit, proven=built & verified.",
+  "legend": {
+    "unproven": "Critical unknown — not yet measured / built / tested",
+    "designed": "CAD done — awaits measure, fab & fit",
+    "proven": "Built & verified on the car"
+  },
+  "parts": [
+    {
+      "name": "Adapter plate + coupler",
+      "gate": "G2", "status": "unproven", "blocking": true,
+      "what": "Bolts the EM57 motor face to the 944 torque-tube bellhousing and locates both shafts concentric.",
+      "risk": "The single precision part of the build. The coupler/hub is usually SOURCED (EV Coupler Connection), not machined — the EM57 output is an integrated reduction-gear interface, not a plain shaft.",
+      "prove": "Measure EM57 face + bellhousing → fill the .scad → machine → dry-fit → shaft runout < 0.1 mm → driveline rotates true by hand.",
+      "cad": "cad/adapter-plate.scad", "preview": "parts/adapter-plate.svg"
+    },
+    {
+      "name": "Motor mounts",
+      "gate": "G3", "status": "designed", "blocking": true,
+      "what": "Steel brackets tying the EM57 to the 944 factory crossmember hardpoints — locate the motor and react its torque.",
+      "risk": "Must bolt to crossmember hardpoints (never sheetmetal), be triangulated / fatigue-safe, and isolate NVH with bushings.",
+      "prove": "Measure EM57 bosses + crossmember points → weld steel → bolt up → verify height/alignment for the adapter → load-drive, inspect for cracks / whine.",
+      "cad": "cad/motor-mount.scad", "preview": "parts/motor-mount.svg"
+    },
+    {
+      "name": "Battery enclosure — MAIN (8 modules)",
+      "gate": "G4", "status": "designed", "blocking": true,
+      "what": "Welded 3 mm aluminum box for 8 modules in the fuel-tank bay, flanged to floor hardpoints.",
+      "risk": "The 26\" (685 mm) Tesla module is the tight dimension — may need on-edge or 2-layer. Crash-load mounts must hit frame, not sheetmetal.",
+      "prove": "Put measured bay L×W×H into the .scad (auto fit-check) → fab → modules secured & sealed → bolt to hardpoints → megger isolation pass.",
+      "cad": "cad/battery-enclosure.scad", "preview": "parts/battery-enclosure.svg"
+    },
+    {
+      "name": "Battery enclosure — FRONT (6 modules)",
+      "gate": "G4", "status": "designed",
+      "what": "Same design, smaller — 6 modules in the engine bay for front weight and the 50/50 balance.",
+      "risk": "Shares the fit + crash-mount constraints, and competes for space up front with the motor, inverter and charger.",
+      "prove": "Same as MAIN: bay fit-check → fab → secure & seal → hardpoint mount → isolation pass.",
+      "cad": "cad/battery-enclosure.scad", "preview": "parts/battery-enclosure.svg"
+    },
+    {
+      "name": "Skid plate",
+      "gate": "G4", "status": "designed",
+      "what": "Sacrificial 3–5 mm steel plate under the low main box; takes road strikes and sets ground clearance.",
+      "risk": "Sets the practical breakover/clearance; must deflect (turned-up lip), not catch, and be replaceable.",
+      "prove": "Size to the main-box footprint + margin → mount to frame rails → clearance / breakover check → strike test, confirm the pack is untouched.",
+      "cad": "cad/skid-plate.scad", "preview": "parts/skid-plate.svg"
+    },
+    {
+      "name": "Dash panel + gauge faces",
+      "gate": "—", "status": "designed",
+      "what": "Custom panel/overlays repurposing the 944 gauges for EV values (MPH, motor RPM, SOC, HV).",
+      "risk": "Depends on the CAN → gauge adapter driving the stock needles correctly (ADR-0012).",
+      "prove": "Pick overlay vs new panel → print faces → drive gauges from the CAN adapter → confirm each reads the right EV value across its range.",
+      "cad": "cad/dash-panel.scad", "preview": "parts/dash-panel.svg"
+    },
+    {
+      "name": "CAN → gauge adapter",
+      "gate": "—", "status": "unproven",
+      "what": "Small board translating ZombieVerter / openinverter CAN frames into the analog signals the stock 944 cluster needs (ADR-0012).",
+      "risk": "Custom electronics — needle calibration and signal mapping are unproven, and there's no CAD model yet.",
+      "prove": "Bench-map each CAN signal → drive a single gauge → calibrate the needle sweep → verify all four gauges live on the bus.",
+      "cad": "docs/dashboard-reuse.md", "preview": ""
+    }
+  ]
+}
