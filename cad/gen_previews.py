@@ -17,6 +17,9 @@ DASH = dict(w=380, h=170,
             small=[("CHARGE %", "← fuel", 190, 50, 40), ("HV x100 V", "← oil press", 190, 104, 40),
                    ("BATT C", "← oil temp", 150, 148, 34), ("COOLANT", "native", 230, 148, 34)],
             lights=[("FAULT", "#c0392b"), ("BMS", "#e67e22"), ("12V", "#1565c0"), ("BRAKE", "#c0392b")])
+MMOUNT = dict(base_W=70, base_t=8, up_H=80, up_t=8, iso_bore_d=50,
+              motor_bolt_z0=28, motor_bolt_dz=40)
+SKID = dict(L=640, W=560, t=4, corner_r=30, bolt_d=9, inset=18, n_long=3, n_wide=2, lip_t=3)
 
 
 def svg(w, h, body):
@@ -119,8 +122,57 @@ def dashboard_svg(d):
     return svg(W, H, ''.join(e))
 
 
+def motor_mount_svg(m):
+    W, H, s, ox, oy = 460, 320, 2.4, 90, 250   # side elevation (Y up, origin bottom-left)
+    bw, bt, uh, ut = m['base_W'], m['base_t'], m['up_H'], m['up_t']
+    def X(y): return ox + y*s
+    def Y(z): return oy - z*s
+    e = [f'<rect width="{W}" height="{H}" fill="#fbfbf9"/>',
+         '<text x="20" y="30" font-size="18" font-weight="bold" fill="#222">Motor mount — side elevation (preview)</text>',
+         '<text x="20" y="49" font-size="11" fill="#888">Placeholder dims from motor-mount.scad — MEASURE motor bosses + crossmember. Steel weldment, add gussets.</text>',
+         f'<line x1="60" y1="{oy}" x2="{W-30}" y2="{oy}" stroke="#bbb" stroke-dasharray="4 4"/>',
+         # base (bolts to crossmember)
+         f'<rect x="{X(0)}" y="{Y(bt)}" width="{bw*s}" height="{bt*s}" fill="#9aa6ad" stroke="#5b6b78" stroke-width="2"/>',
+         # upright (bolts to motor)
+         f'<rect x="{X(bw-ut)}" y="{Y(uh)}" width="{ut*s}" height="{uh*s}" fill="#9aa6ad" stroke="#5b6b78" stroke-width="2"/>',
+         # gusset (dashed = weld this)
+         f'<polygon points="{X(bw-ut)},{Y(bt)} {X(bw-ut)},{Y(bt+45)} {X(bw-ut-45)},{Y(bt)}" fill="#e67e22" fill-opacity="0.35" stroke="#bf360c" stroke-dasharray="4 3"/>',
+         f'<text x="{X(bw-ut-44)}" y="{Y(bt+18)}" font-size="9" fill="#bf360c">gusset/weld</text>']
+    if m['iso_bore_d'] > 0:
+        e.append(f'<circle cx="{X(bw/2)}" cy="{Y(bt/2)}" r="{m["iso_bore_d"]/2*s}" fill="#fff" stroke="#5b6b78"/>')
+        e.append(f'<text x="{X(bw/2)}" y="{oy+22}" font-size="9" fill="#666" text-anchor="middle">isolator</text>')
+    for z in (m['motor_bolt_z0'], m['motor_bolt_z0']+m['motor_bolt_dz']):
+        e.append(f'<circle cx="{X(bw-ut/2)}" cy="{Y(z)}" r="5" fill="#1565c0"/>')
+    e.append(f'<text x="{X(bw-ut)+14}" y="{Y(uh)+14}" font-size="10" fill="#1565c0">→ motor boss</text>')
+    e.append(f'<text x="{X(8)}" y="{oy+22}" font-size="10" fill="#2e7d32">↓ crossmember bolts</text>')
+    return svg(W, H, ''.join(e))
+
+
+def skid_svg(s):
+    W, H = 720, 360
+    sc = 600.0 / s['L']
+    ox, oy = 60, 80
+    e = [f'<rect width="{W}" height="{H}" fill="#fbfbf9"/>',
+         '<text x="20" y="30" font-size="18" font-weight="bold" fill="#222">Skid plate — top view (preview)</text>',
+         '<text x="20" y="49" font-size="11" fill="#888">Size to the MAIN box footprint + margin (skid-plate.scad). Steel; turned-up lip.</text>',
+         f'<rect x="{ox}" y="{oy}" rx="{s["corner_r"]*sc}" width="{s["L"]*sc}" height="{s["W"]*sc}" fill="#dfe3e6" stroke="#5b6b78" stroke-width="2"/>',
+         f'<rect x="{ox+s["lip_t"]*sc*3}" y="{oy+s["lip_t"]*sc*3}" rx="{s["corner_r"]*sc}" width="{(s["L"]-s["lip_t"]*6)*sc}" height="{(s["W"]-s["lip_t"]*6)*sc}" fill="none" stroke="#888" stroke-dasharray="6 4"/>']
+    for i in range(s['n_long']):
+        x = ox + (s['inset'] + i*(s['L']-2*s['inset'])/(s['n_long']-1))*sc
+        for y in (oy + s['inset']*sc, oy + (s['W']-s['inset'])*sc):
+            e.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{s["bolt_d"]/2*sc:.0f}" fill="#fff" stroke="#5b6b78" stroke-width="1.5"/>')
+    for j in range(s['n_wide']):
+        y = oy + (s['inset'] + j*(s['W']-2*s['inset'])/(s['n_wide']-1))*sc
+        for x in (ox + s['inset']*sc, ox + (s['L']-s['inset'])*sc):
+            e.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{s["bolt_d"]/2*sc:.0f}" fill="#fff" stroke="#5b6b78" stroke-width="1.5"/>')
+    e.append(f'<text x="{ox}" y="{oy+s["W"]*sc+26:.0f}" font-size="12" fill="#444">{s["L"]} × {s["W"]} × {s["t"]} mm steel · dashed = turned-up lip · ○ = bolt to frame (sacrificial)</text>')
+    return svg(W, H, ''.join(e))
+
+
 if __name__ == "__main__":
     open("cad/adapter-plate.svg", "w").write(adapter_svg(ADAPTER))
     open("cad/battery-enclosure.svg", "w").write(enclosure_svg(ENC))
     open("cad/dash-panel.svg", "w").write(dashboard_svg(DASH))
-    print("wrote cad/adapter-plate.svg, cad/battery-enclosure.svg, cad/dash-panel.svg")
+    open("cad/motor-mount.svg", "w").write(motor_mount_svg(MMOUNT))
+    open("cad/skid-plate.svg", "w").write(skid_svg(SKID))
+    print("wrote 5 previews: adapter, enclosure, dash, motor-mount, skid-plate")
