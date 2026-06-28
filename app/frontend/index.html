@@ -162,16 +162,21 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   if (b.dataset.view === 'trips') { loadTrips(); drawTrips(); }
   if (b.dataset.view === 'car' && window.carResize) setTimeout(window.carResize, 60);
   if (b.dataset.view === 'game' && window.gameResize) setTimeout(window.gameResize, 60);
-  setTimeout(() => map.invalidateSize(), 50);
+  // DRIVE map was likely built while hidden (CAR is the default tab) — resize + refit on show
+  if (b.dataset.view === 'drive') setTimeout(() => { map.invalidateSize(); if (routeBounds) map.fitBounds(routeBounds, {padding:[30,30]}); }, 60);
+  else setTimeout(() => map.invalidateSize(), 50);
 });
 
 // map
 const map = L.map('map', {zoomControl:false}).setView([43.42,-88.05], 9);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
+let routeBounds = null;
 fetch('/api/route').then(r => r.json()).then(d => {
   const line = L.polyline(d.route, {color:'#4a9eff', weight:4, opacity:0.45}).addTo(map);
-  map.fitBounds(line.getBounds(), {padding:[30,30]});
-  window.routeMi = d.dist_mi || 0;          // feed the CAR "loop" sim column
+  routeBounds = line.getBounds();
+  map.invalidateSize();                       // container may be hidden at load; size it before fitting
+  map.fitBounds(routeBounds, {padding:[30,30]});
+  window.routeMi = d.dist_mi || 0;            // feed the CAR "loop" sim column
   if (window.refreshSim) window.refreshSim();
 });
 const me = L.circleMarker([43.1789,-88.1170], {radius:9, color:'#1565c0', fillColor:'#4a9eff', fillOpacity:1, weight:3}).addTo(map);
