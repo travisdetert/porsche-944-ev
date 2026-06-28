@@ -100,13 +100,13 @@
   <!-- CAR (3D model + EV layout — drag to look around) -->
   <section class="view active" id="view-car">
     <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <button class="clearbtn" id="hoodBtn">Open hood ▲</button>
-      <button class="clearbtn" id="popBtn">Pop-up lights ▲</button>
-      <button class="clearbtn" id="wheelBtn">Spin wheels</button>
+      <button class="clearbtn" id="hoodBtn" title="Animates on the schematic — the photo model is one fused mesh">Open hood ▲</button>
+      <button class="clearbtn" id="popBtn" title="Animates on the schematic — the photo model is one fused mesh">Pop-up lights ▲</button>
+      <button class="clearbtn" id="wheelBtn" title="Animates on the schematic">Spin wheels</button>
       <button class="clearbtn" id="realBtn">Realistic body</button>
       <span style="color:#aaa;font-size:12px">Ghost</span>
       <input type="range" id="ghost" min="0" max="100" value="70" style="accent-color:#4a9eff">
-      <span style="color:#888;font-size:12px">drag to orbit · ghost to see inside · tap a component to see its effect on balance</span>
+      <span style="color:#888;font-size:12px">drag to orbit · ghost to see inside · tap a component for its balance effect · hood/lights animate on the schematic</span>
     </div>
     <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <span style="color:#aaa;font-size:12px">Tire grip</span><input type="range" id="tgrip" min="70" max="130" value="100" style="accent-color:#39d353">
@@ -681,9 +681,10 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   if (tg) tg.oninput = updateTires; if (tp) tp.oninput = updateTires; updateTires();
 
   let hoodOpen = false, hoodT = 0, popOpen = false, popT = 0, wheelsSpin = false;
-  const hb = document.getElementById('hoodBtn'); if (hb) hb.onclick = () => { hoodOpen = !hoodOpen; hb.textContent = hoodOpen ? 'Close hood ▼' : 'Open hood ▲'; hb.classList.toggle('active', hoodOpen); };
-  const pb = document.getElementById('popBtn'); if (pb) pb.onclick = () => { popOpen = !popOpen; pb.textContent = popOpen ? 'Pop-up lights ▼' : 'Pop-up lights ▲'; pb.classList.toggle('active', popOpen); };
-  const wb = document.getElementById('wheelBtn'); if (wb) wb.onclick = () => { wheelsSpin = !wheelsSpin; wb.classList.toggle('active', wheelsSpin); };
+  // hood/pop/wheels are rigged on the schematic; if the photo body is showing, flip to the schematic so they animate
+  const hb = document.getElementById('hoodBtn'); if (hb) hb.onclick = () => { if (showReal) showRealistic(false); hoodOpen = !hoodOpen; hb.textContent = hoodOpen ? 'Close hood ▼' : 'Open hood ▲'; hb.classList.toggle('active', hoodOpen); };
+  const pb = document.getElementById('popBtn'); if (pb) pb.onclick = () => { if (showReal) showRealistic(false); popOpen = !popOpen; pb.textContent = popOpen ? 'Pop-up lights ▼' : 'Pop-up lights ▲'; pb.classList.toggle('active', popOpen); };
+  const wb = document.getElementById('wheelBtn'); if (wb) wb.onclick = () => { if (showReal) showRealistic(false); wheelsSpin = !wheelsSpin; wb.classList.toggle('active', wheelsSpin); };
   const gh = document.getElementById('ghost'); if (gh) gh.oninput = e => applyGhost(e.target.value/100);
 
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return; rnd.setSize(w,h); cam.aspect = w/h; cam.updateProjectionMatrix(); };
