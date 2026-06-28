@@ -772,7 +772,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   });
 
   // realistic glTF body (ghostable shell)
-  let realModel = null, realMats = [], showReal = false, layoutYaw = 0;
+  let realModel = null, realMats = [], showReal = false, layoutYaw = 0; const bodyMats = [];
   const applyGhost = o => { [paint, glass].concat(realMats).forEach(m => { m.transparent = o < 1; m.opacity = o; m.depthWrite = o >= 1; }); };
   const realBtn = document.getElementById('realBtn');
   function showRealistic(on) {
@@ -790,7 +790,13 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
         mdl.scale.setScalar(4.32 / Math.max(sz.x, 0.001)); mdl.updateMatrixWorld(true);
         bb = new THREE.Box3().setFromObject(mdl); const ct = bb.getCenter(new THREE.Vector3());
         mdl.position.set(-ct.x, -bb.min.y, -ct.z);
-        mdl.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); realMats.push(o.material); } });
+        mdl.traverse(o => {
+          if (!o.isMesh) return;
+          o.material = o.material.clone(); realMats.push(o.material);
+          const c = o.material.color;                       // flat reddish, untextured = the body paint → tintable
+          if (!o.material.map && c && c.r > 0.22 && c.r > c.g*1.6 && c.r > c.b*1.6) bodyMats.push(o.material);
+        });
+        if (window.__twinHex) bodyMats.forEach(m => m.color.set(window.__twinHex));
         car.add(mdl); realModel = mdl; const gh = document.getElementById('ghost'); applyGhost(gh ? gh.value/100 : 0.7);
       }, undefined, () => { schem.visible = true; showReal = false; if (realBtn) realBtn.classList.remove('active'); });
     }
@@ -820,7 +826,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
 
   // ---- live paint: recolor the twin (freeform picker + swatches); syncs the game car too ----
   const paintPick = document.getElementById('paintpick');
-  const setPaint = hex => { paint.color.set(hex); stripeMat.color.set(hex); if (paintPick) paintPick.value = hex; if (window.__gameBody) window.__gameBody.material.color.set(hex); window.__twinHex = hex; };
+  const setPaint = hex => { paint.color.set(hex); stripeMat.color.set(hex); bodyMats.forEach(m => m.color.set(hex)); if (paintPick) paintPick.value = hex; if (window.__gameBody) window.__gameBody.material.color.set(hex); window.__twinHex = hex; };
   if (paintPick) paintPick.oninput = e => setPaint(e.target.value);
   const swEl = document.getElementById('swatches');
   if (swEl) [['Viper Green','#86b817'],['Irish Green','#009a3d'],['Oak Green','#3c4a38'],['British Racing','#16412b'],['Signal Green','#2e9e5b'],['Black','#17191d'],['Guards Red','#d81414'],['GT Silver','#c7ccce'],['White','#ececec']].forEach(([name,hex]) => {
