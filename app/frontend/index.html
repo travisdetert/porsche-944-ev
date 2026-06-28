@@ -103,12 +103,19 @@
       <button class="clearbtn" id="hoodBtn">Open hood ▲</button>
       <button class="clearbtn" id="popBtn">Pop-up lights ▲</button>
       <button class="clearbtn" id="wheelBtn">Spin wheels</button>
+      <button class="clearbtn" id="realBtn">Realistic body</button>
       <span style="color:#aaa;font-size:12px">Ghost</span>
       <input type="range" id="ghost" min="0" max="100" value="70" style="accent-color:#4a9eff">
-      <span style="color:#888;font-size:12px">drag to orbit · scroll to zoom · open the hood / ghost to see the EV conversion · tap a component to toggle</span>
+      <span style="color:#888;font-size:12px">drag to orbit · ghost to see inside · tap a component to see its effect on balance</span>
+    </div>
+    <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span style="color:#aaa;font-size:12px">Tire grip</span><input type="range" id="tgrip" min="70" max="130" value="100" style="accent-color:#39d353">
+      <span style="color:#aaa;font-size:12px">Inflation</span><input type="range" id="tpsi" min="24" max="40" value="32" style="accent-color:#39d353">
+      <span id="tirenote" style="color:#888;font-size:12px"></span>
     </div>
     <div id="car-wrap" style="position:relative;margin:0 12px">
-      <div id="car3d" style="height:60vh;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
+      <div id="car3d" style="height:56vh;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
+      <div id="balance" style="position:absolute;bottom:10px;left:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.72);padding:8px 12px;border-radius:8px;line-height:1.5;pointer-events:none"></div>
     </div>
     <div class="row"><div class="btns" id="complist"></div></div>
   </section>
@@ -438,7 +445,7 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
 })();
 </script>
 
-<!-- Unified 3D design viewer: schematic 944 (riggable) + EV components, orbit + hood/pop-ups/wheels -->
+<!-- Unified 3D design viewer: schematic 944 (riggable) + realistic shell + EV components + balance/CG + tires -->
 <script>
 (function () {
   if (!window.THREE) return;
@@ -460,43 +467,94 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   const stripeMat = new THREE.MeshStandardMaterial({color:0x3a3a3d, roughness:0.5});
   const lensMat = new THREE.MeshStandardMaterial({color:0xffffff, emissive:0x000000});
 
-  const car = new THREE.Group();
-  car.add(B(4.3,0.42,1.8, paint, 0,0.46,0));           // chassis
-  car.add(B(1.7,0.5,1.55, glass, -0.6,1.0,0));          // cabin
-  car.add(B(1.4,0.3,1.7, paint, -1.4,0.82,0));          // rear deck
-  car.add(B(0.5,0.4,1.7, paint, 2.05,0.55,0));          // nose
-  car.add(B(2.0,0.03,0.26, stripeMat, -0.9,1.27,0));    // stripe (roof/rear)
+  const car = new THREE.Group(); scene.add(car);
+  const schem = new THREE.Group(); car.add(schem);                      // schematic body (toggle vs realistic)
+  schem.add(B(4.3,0.42,1.8, paint, 0,0.46,0));
+  schem.add(B(1.7,0.5,1.55, glass, -0.6,1.0,0));
+  schem.add(B(1.4,0.3,1.7, paint, -1.4,0.82,0));
+  schem.add(B(0.5,0.4,1.7, paint, 2.05,0.55,0));
+  schem.add(B(2.0,0.03,0.26, stripeMat, -0.9,1.27,0));
   const wheels = [];
-  const W = (x,z) => { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.44,0.44,0.32,26), tireMat); w.rotation.x = Math.PI/2; w.position.set(x,0.42,z); car.add(w); wheels.push(w); };
+  const W = (x,z) => { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.44,0.44,0.32,26), tireMat); w.rotation.x = Math.PI/2; w.position.set(x,0.42,z); schem.add(w); wheels.push(w); };
   W(1.35,0.9); W(1.35,-0.9); W(-1.4,0.9); W(-1.4,-0.9);
-  const hood = new THREE.Group(); hood.position.set(0.35,0.7,0);     // hinged at the cowl
-  hood.add(B(1.55,0.08,1.62, paint, 0.78,0,0));
-  hood.add(B(1.55,0.03,0.26, stripeMat, 0.78,0.06,0));
-  car.add(hood);
+  const hood = new THREE.Group(); hood.position.set(0.35,0.7,0);
+  hood.add(B(1.55,0.08,1.62, paint, 0.78,0,0)); hood.add(B(1.55,0.03,0.26, stripeMat, 0.78,0.06,0)); schem.add(hood);
   const pods = [];
-  const P = (z) => { const g = new THREE.Group(); g.position.set(1.78,0.78,z); g.add(B(0.4,0.1,0.34, paint, 0.2,0,0)); g.add(B(0.06,0.09,0.28, lensMat, 0.42,0,0)); car.add(g); pods.push(g); };
+  const P = (z) => { const g = new THREE.Group(); g.position.set(1.78,0.78,z); g.add(B(0.4,0.1,0.34, paint, 0.2,0,0)); g.add(B(0.06,0.09,0.28, lensMat, 0.42,0,0)); schem.add(g); pods.push(g); };
   P(0.46); P(-0.46);
-  scene.add(car);
 
-  const labels = [];
+  // centre-of-gravity marker
+  const cgDot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), new THREE.MeshStandardMaterial({color:0xffd400, emissive:0x664f00}));
+  const cgStem = new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,1,8), new THREE.MeshBasicMaterial({color:0xffd400}));
+  car.add(cgDot); car.add(cgStem);
+
+  let glider = {mass_kg:980, cg:[0.05,0.5,0]}, axles = {front_x:1.25, rear_x:-1.15};
+  const comps = [], labels = [];
   const addLabel = (t, mesh, color) => { const l = document.createElement('div'); l.textContent = t; l.style.cssText = 'position:absolute;padding:2px 7px;border-radius:6px;background:rgba(10,10,12,0.72);color:' + (color||'#fff') + ';font-size:11px;font-weight:700;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)'; wrap.appendChild(l); labels.push({l, mesh}); return l; };
+
+  function updateBalance() {
+    let m = glider.mass_kg, mx = m*glider.cg[0], my = m*glider.cg[1], mz = m*glider.cg[2];
+    comps.forEach(c => { if (!c.mesh.visible) return; m += c.mass; mx += c.mass*c.pos[0]; my += c.mass*c.pos[1]; mz += c.mass*c.pos[2]; });
+    const cx = mx/m, cy = my/m, cz = mz/m;
+    cgDot.position.set(cx, cy, cz); cgStem.position.set(cx, cy/2, cz); cgStem.scale.y = cy;
+    let ff = (cx - axles.rear_x) / (axles.front_x - axles.rear_x); ff = Math.max(0, Math.min(1, ff));
+    const fp = Math.round(ff*100);
+    const bal = ff > 0.52 ? 'Front-biased → understeer (push)' : ff < 0.48 ? 'Rear-biased → RWD traction + agile, watch oversteer' : 'Balanced ~50/50 → neutral & predictable';
+    const cgN = cy < 0.5 ? 'Low CG → flat cornering, less roll' : 'CG a bit high → more body roll';
+    const el = document.getElementById('balance');
+    if (el) el.innerHTML = '⚖ <b>' + Math.round(m) + ' kg</b> · F/R <b>' + fp + '/' + (100-fp) + '</b> · CG <b>' + cy.toFixed(2) + ' m</b><br>' + bal + '<br>' + cgN + ' · 🟡 = centre of gravity (toggle parts to see their effect)';
+  }
+
   fetch('ev_layout.json').then(r => r.json()).then(cfg => {
+    if (cfg.glider) glider = cfg.glider;
+    if (cfg.axles) axles = cfg.axles;
     const list = document.getElementById('complist');
     (cfg.components || []).forEach(c => {
       const mesh = B(c.size[0],c.size[1],c.size[2], new THREE.MeshStandardMaterial({color:c.color, transparent:true, opacity:0.92, metalness:0.2, roughness:0.6}), c.pos[0],c.pos[1],c.pos[2]);
-      car.add(mesh);
-      const l = addLabel(c.name, mesh);
+      car.add(mesh); comps.push({mesh, mass:c.mass_kg||0, pos:c.pos});
+      const l = addLabel(c.name + (c.mass_kg ? ' (' + c.mass_kg + 'kg)' : ''), mesh);
       const b = document.createElement('button'); b.textContent = c.name; b.style.background = c.color; b.className = 'active';
-      b.onclick = () => { mesh.visible = !mesh.visible; l.style.display = mesh.visible ? '' : 'none'; b.classList.toggle('active', mesh.visible); };
+      b.onclick = () => { mesh.visible = !mesh.visible; l.style.display = mesh.visible ? '' : 'none'; b.classList.toggle('active', mesh.visible); updateBalance(); };
       if (list) list.appendChild(b);
     });
+    updateBalance();
+    if (cfg.tires) { const tg = document.getElementById('tgrip'), tp = document.getElementById('tpsi'); if (tg) tg.value = Math.round((cfg.tires.compound||1)*100); if (tp) tp.value = cfg.tires.inflation_psi||32; }
+    updateTires();
   });
+
+  // realistic glTF body (ghostable shell)
+  let realModel = null, realMats = [], showReal = false;
+  const applyGhost = o => { [paint, glass].concat(realMats).forEach(m => { m.transparent = o < 1; m.opacity = o; m.depthWrite = o >= 1; }); };
+  const realBtn = document.getElementById('realBtn');
+  if (realBtn) realBtn.onclick = () => {
+    showReal = !showReal; realBtn.classList.toggle('active', showReal); schem.visible = !showReal;
+    if (showReal && !realModel && THREE.GLTFLoader) {
+      new THREE.GLTFLoader().load('models/944.glb', g => {
+        const mdl = g.scene, bb = new THREE.Box3().setFromObject(mdl), sz = bb.getSize(new THREE.Vector3()), ct = bb.getCenter(new THREE.Vector3());
+        const s = 4.32 / Math.max(sz.x, sz.z, 0.001); mdl.scale.setScalar(s); mdl.position.set(-ct.x*s, -bb.min.y*s, -ct.z*s);
+        mdl.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); realMats.push(o.material); } });
+        car.add(mdl); realModel = mdl; const gh = document.getElementById('ghost'); applyGhost(gh ? gh.value/100 : 0.7);
+      });
+    }
+    if (realModel) realModel.visible = showReal;
+  };
+
+  function updateTires() {
+    const tg = document.getElementById('tgrip'), tp = document.getElementById('tpsi');
+    const compound = (tg ? +tg.value : 100)/100, psi = tp ? +tp.value : 32, opt = 32;
+    const grip = Math.max(0.4, compound * (1 - 0.018*Math.abs(psi-opt)));
+    window.gripFactor = grip;
+    const note = (psi < opt-2 ? 'under-inflated → squirmy, vague' : psi > opt+2 ? 'over-inflated → small contact patch, harsh' : 'near-optimal pressure') + (compound > 1.1 ? ' · sticky compound' : compound < 0.9 ? ' · hard/eco compound' : '');
+    const el = document.getElementById('tirenote'); if (el) el.textContent = 'grip ' + grip.toFixed(2) + ' — ' + note + ' (changes how the GAME drives)';
+  }
+  const tg = document.getElementById('tgrip'), tp = document.getElementById('tpsi');
+  if (tg) tg.oninput = updateTires; if (tp) tp.oninput = updateTires; updateTires();
 
   let hoodOpen = false, hoodT = 0, popOpen = false, popT = 0, wheelsSpin = false;
   const hb = document.getElementById('hoodBtn'); if (hb) hb.onclick = () => { hoodOpen = !hoodOpen; hb.textContent = hoodOpen ? 'Close hood ▼' : 'Open hood ▲'; hb.classList.toggle('active', hoodOpen); };
   const pb = document.getElementById('popBtn'); if (pb) pb.onclick = () => { popOpen = !popOpen; pb.textContent = popOpen ? 'Pop-up lights ▼' : 'Pop-up lights ▲'; pb.classList.toggle('active', popOpen); };
   const wb = document.getElementById('wheelBtn'); if (wb) wb.onclick = () => { wheelsSpin = !wheelsSpin; wb.classList.toggle('active', wheelsSpin); };
-  const gh = document.getElementById('ghost'); if (gh) gh.oninput = e => { const o = e.target.value / 100; [paint, glass].forEach(m => { m.transparent = o < 1; m.opacity = o; m.depthWrite = o >= 1; }); };
+  const gh = document.getElementById('ghost'); if (gh) gh.oninput = e => applyGhost(e.target.value/100);
 
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return; rnd.setSize(w,h); cam.aspect = w/h; cam.updateProjectionMatrix(); };
   window.carResize = resize; window.addEventListener('resize', resize); resize();
@@ -580,14 +638,15 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
     speed -= inp.brk * (speed > 0 ? BRK : ACC) * dt;        // brake, then reverse
     speed *= (1 - 0.6 * dt);                                 // drag
     speed = Math.max(-MAXR, Math.min(MAXF, speed));
-    heading += -inp.st * TURN * dt * Math.max(0.2, Math.min(1, Math.abs(speed) / 12)) * (speed < 0 ? -1 : 1);
+    const grip = window.gripFactor || 1;   // from the CAR tab's tire sim
+    heading += -inp.st * TURN * (0.55 + 0.45 * grip) * dt * Math.max(0.2, Math.min(1, Math.abs(speed) / 12)) * (speed < 0 ? -1 : 1);
     const fx = Math.sin(heading), fz = Math.cos(heading);
     px += fx * speed * dt; pz += fz * speed * dt;
     car.position.set(px, 0, pz); car.rotation.y = heading;
     wheels.forEach(w => w.rotateOnAxis(yAxis, speed * dt * 2.2));
     cam.position.lerp(new THREE.Vector3(px - fx * 9, 4.2, pz - fz * 9), 0.12); cam.lookAt(px, 0.7, pz);
     rnd.render(scene, cam);
-    if (hud) hud.textContent = Math.abs(Math.round(speed * 2.237)) + ' mph' + (speed < -0.5 ? ' (R)' : '');
+    if (hud) hud.textContent = Math.abs(Math.round(speed * 2.237)) + ' mph' + (speed < -0.5 ? ' (R)' : '') + ' · grip ' + (window.gripFactor || 1).toFixed(2);
   })(performance.now());
 })();
 </script>
