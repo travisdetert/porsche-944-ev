@@ -11,6 +11,12 @@ ADAPTER = dict(plate_OD=200, plate_t=16, motor_bc=150, motor_bolts=6, motor_bolt
                motor_reg_d=110, bell_bc=170, bell_bolts=8, bell_bolt_d=11, bore_d=60)
 ENC = dict(name="MAIN box (8 mod)", modules_x=2, modules_y=2, layers=2,
            mod_L=685, mod_W=300, mod_H=85, clear=8, wall_t=3, flange_w=25, vents=2)
+# Dash layout (mm, origin top-left to match dash-panel.scad). Each gauge: (label, source, x, y, dia)
+DASH = dict(w=380, h=170,
+            big=[("MPH", "speedo · transaxle", 95, 92, 86), ("RPM x1000", "motor rpm", 285, 92, 86)],
+            small=[("CHARGE %", "← fuel", 190, 50, 40), ("HV x100 V", "← oil press", 190, 104, 40),
+                   ("BATT C", "← oil temp", 150, 148, 34), ("COOLANT", "native", 230, 148, 34)],
+            lights=[("FAULT", "#c0392b"), ("BMS", "#e67e22"), ("12V", "#1565c0"), ("BRAKE", "#c0392b")])
 
 
 def svg(w, h, body):
@@ -80,7 +86,41 @@ def enclosure_svg(p):
     return svg(W, H, ''.join(e))
 
 
+def dashboard_svg(d):
+    px, py, W, H = 20, 54, d['w'] + 40, d['h'] + 110
+    e = [f'<rect width="{W}" height="{H}" fill="#1b1b1b"/>',
+         '<text x="20" y="30" font-size="18" font-weight="bold" fill="#eee">Custom dash layout (preview) — repurposed EV gauges</text>',
+         '<text x="20" y="48" font-size="11" fill="#999">Faces/panel per ADR-0012 · cut panel: dash-panel.scad · gauge map: dashboard-reuse.md</text>',
+         f'<rect x="{px}" y="{py}" rx="10" width="{d["w"]}" height="{d["h"]}" fill="#222" stroke="#555" stroke-width="2"/>']
+    for i, (lab, col) in enumerate(d['lights']):
+        lx = px + 70 + i*74
+        e.append(f'<circle cx="{lx}" cy="{py+15}" r="6" fill="{col}"/><text x="{lx+10}" y="{py+19}" font-size="9" fill="#bbb">{lab}</text>')
+
+    def gauge(lab, src, x, y, dia, big):
+        cx, cy, r = px + x, py + y, dia/2
+        g = [f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="#111" stroke="#999" stroke-width="2"/>']
+        for t in range(11):
+            a = math.radians(225 - t*270/10)
+            g.append(f'<line x1="{cx+math.cos(a)*(r-3):.0f}" y1="{cy-math.sin(a)*(r-3):.0f}" '
+                     f'x2="{cx+math.cos(a)*(r-8):.0f}" y2="{cy-math.sin(a)*(r-8):.0f}" stroke="#888"/>')
+        if big:
+            a = math.radians(225 - 6.5*270/10)
+            g.append(f'<line x1="{cx}" y1="{cy}" x2="{cx+math.cos(a)*(r-12):.0f}" y2="{cy-math.sin(a)*(r-12):.0f}" stroke="#e53935" stroke-width="2.5"/>')
+            g.append(f'<circle cx="{cx}" cy="{cy}" r="3" fill="#e53935"/>')
+        g.append(f'<text x="{cx}" y="{cy+r*0.5:.0f}" font-size="{12 if big else 9}" fill="#eee" text-anchor="middle" font-weight="bold">{lab}</text>')
+        g.append(f'<text x="{cx}" y="{cy+r+12:.0f}" font-size="8" fill="#888" text-anchor="middle">{src}</text>')
+        return ''.join(g)
+
+    for lab, src, x, y, dia in d['big']:
+        e.append(gauge(lab, src, x, y, dia, True))
+    for lab, src, x, y, dia in d['small']:
+        e.append(gauge(lab, src, x, y, dia, False))
+    e.append(f'<text x="20" y="{H-14}" font-size="10" fill="#999">"←" = was-gas gauge, repurposed · print 1:1 as a face template · DXF panel from dash-panel.scad</text>')
+    return svg(W, H, ''.join(e))
+
+
 if __name__ == "__main__":
     open("cad/adapter-plate.svg", "w").write(adapter_svg(ADAPTER))
     open("cad/battery-enclosure.svg", "w").write(enclosure_svg(ENC))
-    print("wrote cad/adapter-plate.svg, cad/battery-enclosure.svg")
+    open("cad/dash-panel.svg", "w").write(dashboard_svg(DASH))
+    print("wrote cad/adapter-plate.svg, cad/battery-enclosure.svg, cad/dash-panel.svg")

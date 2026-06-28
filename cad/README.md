@@ -30,7 +30,8 @@ Models live in the repo as `.scad`; fit-checks use **cardboard / paper / acrylic
 ## Files
 - `adapter-plate.scad` + `adapter-spec.md` — EM57 → torque-tube adapter (the critical part).
 - `battery-enclosure.scad` + `battery-enclosure-spec.md` — the two low battery boxes (6 + 8).
-- `*.svg` — **quick previews** (no OpenSCAD needed): `adapter-plate.svg`, `battery-enclosure.svg`.
+- `dash-panel.scad` + `dash-spec.md` — custom dash panel for the repurposed EV gauges (ADR-0012).
+- `*.svg` — **quick previews** (no OpenSCAD needed): `adapter-plate.svg`, `battery-enclosure.svg`, `dash-panel.svg`.
 - `gen_previews.py` — regenerates the SVGs from the part parameters (`python3 cad/gen_previews.py`).
 - mounts / skid: specs added when we design them.
 
