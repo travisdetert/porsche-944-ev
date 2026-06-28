@@ -32,7 +32,7 @@ with open(MODES_FILE) as f:
 # Simulated car conditions you can flip between to see the UI react.
 SCENARIOS = ["CITY", "HIGHWAY", "CHARGING", "HOT DAY", "LOW BATTERY", "FAULT"]
 STATE = {"mode": "NORMAL", "scenario": "CITY", "soc": 78.0, "t0": time.time(),
-         "route_d": 0.0, "last_t": time.time()}
+         "route_d": 0.0, "last_t": time.time(), "regen_kwh": 0.0, "kwh_throughput": 0.0}
 
 # Tunable VCU parameters (UI enforces these bounds; the VCU STILL clamps to hard limits).
 PARAMS = {
@@ -159,11 +159,15 @@ class MockCan:
     def read(self):
         sc, t = STATE["scenario"], time.time() - STATE["t0"]
         warnings, charging = [], (sc == "CHARGING")
+        cap = MODES[STATE["mode"]]["power_cap_kw"]
+        now = time.time()
+        dt = max(0.0, min(2.0, now - STATE["last_t"]))
+        STATE["last_t"] = now
 
         if charging:
-            speed, status = 0, "Charging"
+            speed, status, vcu, gear = 0.0, "Charging", "Charge", "P"
             STATE["soc"] = min(100.0, STATE["soc"] + 0.03)
-            kw = -6.6                                   # AC charging (negative = into pack)
+            charge_kw, kw = 6.6, -6.6                   # AC L2 (negative = into pack)
         else:
             if sc == "HIGHWAY":
                 speed = 68 + 6 * math.sin(t / 20)
@@ -171,41 +175,113 @@ class MockCan:
                 speed = max(0.0, 22 + 22 * math.sin(t / 8) + 8 * math.sin(t / 2))
             else:
                 speed = max(0.0, 42 + 30 * math.sin(t / 12))
-            cap = MODES[STATE["mode"]]["power_cap_kw"]
-            kw = min(cap, speed * 0.45 + 16 * max(0.0, math.sin(t / 3)))
+            kw = max(-40.0, min(cap, speed * 0.40 + 24 * math.sin(t / 3.5)))   # downswing → regen
             if sc == "FAULT":
-                kw = min(kw, 20)
+                kw = min(kw, 18)
                 warnings.append("BMS FAULT — reduced power")
-            STATE["soc"] = max(2.0, STATE["soc"] - kw * 0.00008)
+            STATE["soc"] = max(2.0, min(100.0, STATE["soc"] - kw * 0.00008))
             status = "Driving" if speed > 1 else "Ready"
+            vcu = "Fault" if sc == "FAULT" else ("Run" if speed > 1 else "Ready")
+            gear = "D" if speed > 1 else "N"
+            charge_kw = 0.0
 
         if sc == "LOW BATTERY":
             STATE["soc"] = min(STATE["soc"], 8.0)
+        soc = STATE["soc"]
+
+        drive_kw = max(0.0, kw)
+        regen_kw = 0.0 if charging else max(0.0, -kw)
+        STATE["regen_kwh"] += regen_kw * dt / 3600.0
+        STATE["kwh_throughput"] += abs(kw) * dt / 3600.0
+        STATE["route_d"] += speed * 0.447 * dt          # mph→m/s, advance along the route
+        lat, lon = _pos_at(STATE["route_d"])
+
+        # --- HV pack + per-cell BMS model (96S; one weak cell at index 7) ---
+        pack_v = 300 + soc * 0.9
+        pack_a = kw * 1000.0 / pack_v
+        cell_avg_base = pack_v / 96.0 - 0.00018 * pack_a        # load sag
+        spread = 0.012 + (1 - soc / 100) * 0.05 + min(0.045, abs(pack_a) / 2500.0)
+        cells, weak = [], 7
+        for i in range(24):                              # 24 module groups
+            off = 0.45 * spread * math.sin(i * 2.3 + t * 0.25)
+            if i == weak:
+                off -= spread * 0.9
+            cells.append(round(cell_avg_base + off, 3))
+        cmin, cmax = min(cells), max(cells)
+        cavg, cdelta = sum(cells) / len(cells), cmax - cmin
+
+        # --- temps / thermal ---
+        amb = 22 + (15 if sc == "HOT DAY" else 0)
         motor_c = 40 + abs(kw) * 0.25 + (35 if sc == "HOT DAY" else 0)
-        inv_c = 38 + abs(kw) * 0.2 + (40 if sc == "HOT DAY" else 0)
-        if STATE["soc"] <= 10:
+        inv_c = 38 + abs(kw) * 0.20 + (40 if sc == "HOT DAY" else 0)
+        cell_t_avg = amb + abs(kw) * 0.10 + (4 if charging else 0)
+        cell_t_min, cell_t_max = cell_t_avg - 1.5, cell_t_avg + 3.5 + abs(pack_a) / 200.0
+        rad_fan = max(0.0, min(100.0, (max(motor_c, inv_c) - 45) * 4))
+        pump = 100 if (speed > 1 or charging) else 30
+
+        # --- limits / safety / aux ---
+        soh = 92.5
+        dcl_a = round(400 * min(1.0, soc / 12.0) * (1 - max(0.0, cell_t_max - 45) / 40.0))
+        ccl_a = 0 if soc >= 100 else round(125 * (1 - soc / 100.0) * (1 - max(0.0, cell_t_max - 40) / 40.0))
+        iso_kohm = 80 if sc == "FAULT" else round(900 - soc * 1.5 + 60 * math.sin(t / 30))
+        contactor = "Open" if sc == "FAULT" else "Closed"
+        dcdc_v = round(13.9 - (0.4 if (speed > 1 or charging) else 0.1) - 0.01 * abs(kw), 1)
+        aux_a = round(9 + (12 if speed > 1 else 0) + (6 if charging else 0))
+
+        # --- motor mechanics ---
+        motor_rpm = round(speed * 150)
+        omega = motor_rpm * 2 * math.pi / 60
+        torque_act = round(min(320.0, kw * 1000 / omega)) if omega > 5 else 0
+        torque_cmd = round(min(320.0, cap * 1000 / omega)) if omega > 5 else 0
+        pedal = max(0, min(100, round(drive_kw / cap * 100))) if cap else 0
+
+        # --- energy ---
+        wh_mi = round(kw * 1000 / speed) if speed > 3 else 0
+        range_mi = round(soc / 100 * 74 * 0.9 / 0.30)
+        ttf = round((100 - soc) / 100 * 74 / max(charge_kw, 0.1) * 60) if charging else None
+
+        # --- warnings ---
+        if soc <= 10:
             warnings.append("LOW BATTERY")
         if inv_c >= 78:
             warnings.append("INVERTER HOT — derating")
         if motor_c >= 95:
             warnings.append("MOTOR HOT")
+        if cdelta >= 0.12:
+            warnings.append("CELL IMBALANCE")
+        if cell_t_max >= 50:
+            warnings.append("PACK HOT")
+        if iso_kohm < 100:
+            warnings.append("ISOLATION FAULT")
 
-        now = time.time()
-        dt = max(0.0, min(2.0, now - STATE["last_t"]))
-        STATE["last_t"] = now
-        STATE["route_d"] += speed * 0.447 * dt          # mph→m/s, advance along the route
-        lat, lon = _pos_at(STATE["route_d"])
         return {
             "mode": STATE["mode"], "scenario": sc, "status": status, "charging": charging,
-            "warnings": warnings,
-            "speed_mph": round(speed),
-            "power_kw": round(kw, 1),
-            "soc_pct": round(STATE["soc"], 1),
-            "range_mi": round(STATE["soc"] / 100 * 74 * 0.9 / 0.30),
-            "motor_c": round(motor_c), "inverter_c": round(inv_c),
-            "pack_v": round(330 + STATE["soc"] * 0.4),
-            "pack_a": round(kw * 1000 / 330),
-            "wh_mi": round(250 + 80 * max(0.0, math.sin(t / 3))),
+            "warnings": warnings, "vcu_state": vcu, "gear": gear,
+            # powertrain
+            "speed_mph": round(speed), "power_kw": round(kw, 1),
+            "drive_kw": round(drive_kw, 1), "regen_kw": round(regen_kw, 1),
+            "motor_rpm": motor_rpm, "torque_cmd_nm": torque_cmd, "torque_act_nm": torque_act,
+            "pedal_pct": pedal, "motor_c": round(motor_c), "inverter_c": round(inv_c),
+            # battery / BMS
+            "soc_pct": round(soc, 1), "soh_pct": soh, "range_mi": range_mi,
+            "pack_v": round(pack_v, 1), "pack_a": round(pack_a),
+            "cell_v_min": round(cmin, 3), "cell_v_max": round(cmax, 3),
+            "cell_v_avg": round(cavg, 3), "cell_v_delta": round(cdelta, 3),
+            "cells": cells, "weak_cell": weak,
+            "cell_t_min": round(cell_t_min, 1), "cell_t_avg": round(cell_t_avg, 1),
+            "cell_t_max": round(cell_t_max, 1),
+            "dcl_a": dcl_a, "ccl_a": ccl_a, "iso_kohm": iso_kohm, "contactor": contactor,
+            "cycle_count": 142, "kwh_throughput": round(STATE["kwh_throughput"], 2),
+            # thermal
+            "ambient_c": round(amb), "coolant_motor_c": round(motor_c - 6),
+            "coolant_batt_c": round(cell_t_avg + 1), "rad_fan_pct": round(rad_fan), "pump_pct": pump,
+            # 12V / aux
+            "dcdc_v": dcdc_v, "aux_a": aux_a,
+            # energy
+            "wh_mi": wh_mi, "regen_kwh": round(STATE["regen_kwh"], 2),
+            # charging
+            "charge_kw": round(charge_kw, 1), "time_to_full_min": ttf,
+            # gps
             "lat": round(lat, 6), "lon": round(lon, 6),
         }
 
@@ -238,6 +314,11 @@ CREATE TABLE IF NOT EXISTS samples(
   id INTEGER PRIMARY KEY AUTOINCREMENT, trip_id INTEGER,
   t REAL, speed REAL, power REAL, soc REAL, motor REAL, inv REAL, lat REAL, lon REAL);
 """)
+# migrate older DBs: add the BMS / Wh-per-mile sample columns if missing
+_cols = {r[1] for r in DB.execute("PRAGMA table_info(samples)")}
+for _c in ("cell_min", "cell_max", "cell_delta", "cell_tmax", "wh_mi"):
+    if _c not in _cols:
+        DB.execute("ALTER TABLE samples ADD COLUMN %s REAL" % _c)
 DB.commit()
 LAST_LOG_T = time.time()
 CURRENT_TRIP = None
@@ -264,9 +345,13 @@ def log_sample(d):
     dist = d["speed_mph"] * dt / 3600.0                 # miles this step
     kwh = max(0.0, d["power_kw"]) * dt / 3600.0          # energy drawn (positive only)
     with DB_LOCK:
-        DB.execute("INSERT INTO samples(trip_id,t,speed,power,soc,motor,inv,lat,lon) VALUES(?,?,?,?,?,?,?,?,?)",
+        DB.execute("INSERT INTO samples(trip_id,t,speed,power,soc,motor,inv,lat,lon,"
+                   "cell_min,cell_max,cell_delta,cell_tmax,wh_mi) "
+                   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                    (CURRENT_TRIP, round(now - STATE["t0"], 1), d["speed_mph"], d["power_kw"],
-                    d["soc_pct"], d["motor_c"], d["inverter_c"], d["lat"], d["lon"]))
+                    d["soc_pct"], d["motor_c"], d["inverter_c"], d["lat"], d["lon"],
+                    d.get("cell_v_min"), d.get("cell_v_max"), d.get("cell_v_delta"),
+                    d.get("cell_t_max"), d.get("wh_mi")))
         DB.execute("UPDATE trips SET ended_at=?, distance_mi=distance_mi+?, kwh_used=kwh_used+?, "
                    "max_kw=MAX(max_kw,?), max_speed=MAX(max_speed,?), n=n+1 WHERE id=?",
                    (now, dist, kwh, d["power_kw"], d["speed_mph"], CURRENT_TRIP))
@@ -289,9 +374,10 @@ def list_trips():
 
 def trip_samples(tid):
     with DB_LOCK:
-        rows = DB.execute("SELECT t,speed,power,soc,motor,inv FROM samples WHERE trip_id=? ORDER BY id",
-                          (tid,)).fetchall()
-    return [{"t": r[0], "speed": r[1], "power": r[2], "soc": r[3], "motor": r[4], "inv": r[5]} for r in rows]
+        rows = DB.execute("SELECT t,speed,power,soc,motor,inv,cell_delta,cell_tmax,wh_mi "
+                          "FROM samples WHERE trip_id=? ORDER BY id", (tid,)).fetchall()
+    return [{"t": r[0], "speed": r[1], "power": r[2], "soc": r[3], "motor": r[4], "inv": r[5],
+             "cell_delta": r[6], "cell_tmax": r[7], "wh_mi": r[8]} for r in rows]
 
 
 new_trip()   # start a fresh trip each server launch
@@ -322,7 +408,9 @@ class Handler(BaseHTTPRequestHandler):
             log_sample(data)
             HISTORY.append({"t": data and round(time.time() - STATE["t0"], 1),
                             "speed": data["speed_mph"], "power": data["power_kw"],
-                            "soc": data["soc_pct"], "motor": data["motor_c"], "inv": data["inverter_c"]})
+                            "soc": data["soc_pct"], "motor": data["motor_c"], "inv": data["inverter_c"],
+                            "cell_delta": data["cell_v_delta"], "cell_tmax": data["cell_t_max"],
+                            "wh_mi": data["wh_mi"]})
             if len(HISTORY) > HIST_MAX:
                 del HISTORY[0]
             self._send(200, json.dumps(data))
@@ -342,9 +430,11 @@ class Handler(BaseHTTPRequestHandler):
             tid = int(parse_qs(urlparse(self.path).query).get("id", ["0"])[0])
             buf = io.StringIO()
             w = csv.writer(buf)
-            w.writerow(["t_s", "speed_mph", "power_kw", "soc_pct", "motor_c", "inverter_c", "lat", "lon"])
+            w.writerow(["t_s", "speed_mph", "power_kw", "soc_pct", "motor_c", "inverter_c",
+                        "cell_v_min", "cell_v_max", "cell_delta", "cell_t_max", "wh_mi", "lat", "lon"])
             with DB_LOCK:
-                rows = DB.execute("SELECT t,speed,power,soc,motor,inv,lat,lon FROM samples "
+                rows = DB.execute("SELECT t,speed,power,soc,motor,inv,cell_min,cell_max,cell_delta,"
+                                  "cell_tmax,wh_mi,lat,lon FROM samples "
                                   "WHERE trip_id=? ORDER BY id", (tid,)).fetchall()
             for r in rows:
                 w.writerow(r)
