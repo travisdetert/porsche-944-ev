@@ -62,6 +62,11 @@
 
   <!-- DRIVE -->
   <section class="view" id="view-drive">
+    <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 12px 8px">
+      <span style="color:#aaa;font-size:12px">🗺 Trip</span>
+      <select id="routesel" class="clearbtn"></select>
+      <span id="routecov" style="font-size:12px"></span>
+    </div>
     <div class="grid">
       <div id="map"></div>
       <div class="tel">
@@ -210,15 +215,35 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
 // map
 const map = L.map('map', {zoomControl:false}).setView([43.42,-88.05], 9);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
-let routeBounds = null;
-fetch('/api/route').then(r => r.json()).then(d => {
-  const line = L.polyline(d.route, {color:'#4a9eff', weight:4, opacity:0.45}).addTo(map);
-  routeBounds = line.getBounds();
-  map.invalidateSize();                       // container may be hidden at load; size it before fitting
-  map.fitBounds(routeBounds, {padding:[30,30]});
-  window.routeMi = d.dist_mi || 0;            // feed the CAR "loop" sim column
-  if (window.refreshSim) window.refreshSim();
-});
+let routeBounds = null, routeLine = null;
+function tripCoverage(dist, loop) {                       // EM57 + 74 kWh, highway, 10% reserve (sim/trip_coverage.py)
+  const usable = 196;
+  if (loop || dist * 2 <= usable) return ['✓ round-trip on one charge', '#39d353'];
+  if (dist <= usable) return ['✓ reachable + overnight L2 charge', '#e6c84a'];
+  return ['✗ needs an en-route charge (L2 = hours)', '#e0533a'];
+}
+function loadRoute() {
+  return fetch('/api/route').then(r => r.json()).then(d => {
+    if (routeLine) map.removeLayer(routeLine);
+    routeLine = L.polyline(d.route, {color:'#4a9eff', weight:4, opacity:0.5}).addTo(map);
+    routeBounds = routeLine.getBounds();
+    map.invalidateSize();                                 // container may be hidden at load; size before fitting
+    map.fitBounds(routeBounds, {padding:[30,30]});
+    window.routeMi = d.dist_mi || 0;                      // feed the CAR "loop" sim column
+    const cov = tripCoverage(d.dist_mi || 0, d.loop), el = $('routecov');
+    if (el) { el.textContent = (d.dist_mi || 0).toFixed(0) + ' mi · ' + cov[0]; el.style.color = cov[1]; }
+    if (window.refreshSim) window.refreshSim();
+  });
+}
+function buildRoutes() {
+  fetch('/api/routes').then(r => r.json()).then(d => {
+    const sel = $('routesel'); if (!sel) return; sel.innerHTML = '';
+    d.routes.forEach(rt => { const o = document.createElement('option'); o.value = rt.name; o.textContent = rt.name + ' · ' + rt.dist_mi + ' mi' + (rt.loop ? ' (loop)' : ''); sel.appendChild(o); });
+    sel.value = d.active;
+    sel.onchange = () => fetch('/api/route', {method:'POST', body:JSON.stringify({name: sel.value})}).then(() => loadRoute());
+  });
+}
+buildRoutes(); loadRoute();
 const me = L.circleMarker([43.1789,-88.1170], {radius:9, color:'#1565c0', fillColor:'#4a9eff', fillOpacity:1, weight:3}).addTo(map);
 
 async function buildModes() {
