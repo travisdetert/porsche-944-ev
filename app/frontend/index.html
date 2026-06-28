@@ -264,28 +264,37 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   const box = (w,h,d,mat,x,y,z) => { const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); m.position.set(x,y,z); return m; };
 
   const car = new THREE.Group();
-  car.add(box(4.2,0.5,1.8, paint, 0,0.5,0));
-  car.add(box(3.8,0.45,1.7, paint, -0.1,0.85,0));
-  car.add(box(1.9,0.55,1.55, glass, -0.45,1.18,0));
-  const nose = box(0.95,0.45,1.75, paint, 1.85,0.6,0); nose.rotation.z = -0.18; car.add(nose);
-  const wheel = (x,z) => { const w=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.32,22),tire); w.rotation.x=Math.PI/2; w.position.set(x,0.42,z); car.add(w); };
-  wheel(1.4,0.85); wheel(1.4,-0.85); wheel(-1.4,0.85); wheel(-1.4,-0.85);
+  // body: extruded 944 wedge/fastback side profile (the real silhouette)
+  const p = new THREE.Shape();
+  p.moveTo(2.45,0.50); p.lineTo(2.52,0.66); p.lineTo(1.25,0.82);
+  p.lineTo(0.55,1.30); p.lineTo(0.10,1.45); p.lineTo(-0.85,1.46);
+  p.lineTo(-1.95,1.02); p.lineTo(-2.18,0.80); p.lineTo(-2.18,0.40);
+  p.lineTo(2.30,0.40); p.closePath();
+  const bodyGeo = new THREE.ExtrudeGeometry(p, {depth:1.7, bevelEnabled:true, bevelThickness:0.06, bevelSize:0.06, bevelSegments:2});
+  bodyGeo.translate(0,0,-0.85);
+  car.add(new THREE.Mesh(bodyGeo, paint));
+  // greenhouse side glass
+  [0.9,-0.9].forEach(z => car.add(box(1.45,0.34,0.03, glass, -0.25,1.24,z)));
+  // wheels (tucked into the arches)
+  const wheel = (x,z) => { const w=new THREE.Mesh(new THREE.CylinderGeometry(0.43,0.43,0.30,24),tire); w.rotation.x=Math.PI/2; w.position.set(x,0.40,z); car.add(w); };
+  wheel(1.35,0.86); wheel(1.35,-0.86); wheel(-1.4,0.86); wheel(-1.4,-0.86);
 
+  // pop-up headlights — flush in the hood, rotate up
   const lensMat = new THREE.MeshStandardMaterial({color:0xffffff, emissive:0x000000});
   const pods = [];
   const popup = (z) => {
-    const pivot = new THREE.Group(); pivot.position.set(1.45,0.93,z);
-    pivot.add(box(0.5,0.12,0.36, paint, 0.25,0,0));
-    pivot.add(box(0.07,0.1,0.3, lensMat, 0.5,0,0));
+    const pivot = new THREE.Group(); pivot.position.set(1.28,0.84,z);
+    pivot.add(box(0.42,0.1,0.34, paint, 0.21,0,0));
+    pivot.add(box(0.06,0.09,0.28, lensMat, 0.44,0,0));
     car.add(pivot); pods.push(pivot);
   };
-  popup(0.45); popup(-0.45);
+  popup(0.42); popup(-0.42);
 
   const brakeMat = new THREE.MeshStandardMaterial({color:0x330000, emissive:0x330000});
-  car.add(box(0.08,0.18,0.4, brakeMat, -2.05,0.8,0.5));
-  car.add(box(0.08,0.18,0.4, brakeMat, -2.05,0.8,-0.5));
+  car.add(box(0.06,0.16,0.44, brakeMat, -2.17,0.66,0.5));
+  car.add(box(0.06,0.16,0.44, brakeMat, -2.17,0.66,-0.5));
   const portMat = new THREE.MeshStandardMaterial({color:0x113311, emissive:0x000000});
-  car.add(box(0.05,0.2,0.2, portMat, 1.0,0.7,0.92));
+  car.add(box(0.04,0.18,0.18, portMat, 0.9,0.62,0.9));
   scene.add(car);
 
   let popTarget = 0, popAngle = 0, lightsOn = false;
