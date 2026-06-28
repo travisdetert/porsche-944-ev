@@ -258,7 +258,7 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   const dir = new THREE.DirectionalLight(0xffffff, 1.1); dir.position.set(5, 9, 6); scene.add(dir);
   scene.add(new THREE.GridHelper(40, 40, 0x333344, 0x222233));
 
-  const paint = new THREE.MeshStandardMaterial({color:0xb01515, metalness:0.5, roughness:0.4});
+  const paint = new THREE.MeshStandardMaterial({color:0xd81414, metalness:0.55, roughness:0.32});
   const glass = new THREE.MeshStandardMaterial({color:0x111418, metalness:0.3, roughness:0.2});
   const tire  = new THREE.MeshStandardMaterial({color:0x111111, roughness:0.9});
   const box = (w,h,d,mat,x,y,z) => { const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); m.position.set(x,y,z); return m; };
@@ -273,6 +273,13 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   const bodyGeo = new THREE.ExtrudeGeometry(p, {depth:1.7, bevelEnabled:true, bevelThickness:0.06, bevelSize:0.06, bevelSegments:2});
   bodyGeo.translate(0,0,-0.85);
   car.add(new THREE.Mesh(bodyGeo, paint));
+  // center racing stripe (grey, sits slightly proud of the body) — like the real car
+  const stripeMat = new THREE.MeshStandardMaterial({color:0x3a3a3d, metalness:0.4, roughness:0.5});
+  const stripeGeo = new THREE.ExtrudeGeometry(p, {depth:0.24, bevelEnabled:false});
+  stripeGeo.translate(0,0,-0.12);
+  const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+  stripe.scale.set(1.012,1.012,1);
+  car.add(stripe);
   // greenhouse side glass
   [0.9,-0.9].forEach(z => car.add(box(1.45,0.34,0.03, glass, -0.25,1.24,z)));
   // wheels (tucked into the arches)
