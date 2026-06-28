@@ -1141,6 +1141,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
     rnd.render(scene, cam);
     if (hud) hud.textContent = Math.abs(Math.round(speed * 2.237)) + ' mph' + (speed < -0.5 ? ' (R)' : '') + ' · grip ' + (window.gripFactor || 1).toFixed(2) + (inp.hb ? ' · DRIFT' : '');
     if (lapinfo) lapinfo.innerHTML = 'LAP ' + ((now - lapStart) / 1000).toFixed(1) + 's<br>last ' + (lastLap ? lastLap.toFixed(1) : '—') + 's<br>best ' + (bestLap ? bestLap.toFixed(1) : '—') + 's';
+    if (status) { const g0 = navigator.getGamepads && navigator.getGamepads()[0]; status.textContent = g0 ? ('🎮 ' + g0.id.slice(0, 26)) : '🎮 no pad — connect USB/BT, then press a button'; status.style.color = g0 ? '#39d353' : '#e6a86a'; }
   })(performance.now());
 })();
 </script>
