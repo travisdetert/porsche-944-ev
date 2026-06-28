@@ -132,6 +132,7 @@
       <button class="clearbtn" id="wheelBtn" title="Animates on the schematic">Spin wheels</button>
       <button class="clearbtn" id="realBtn">Realistic body</button>
       <button class="clearbtn" id="sensBtn">🫧 Sensorium</button>
+      <button class="clearbtn" id="bayBtn">🔧 Engine bay</button>
       <span style="color:#aaa;font-size:12px">Ghost</span>
       <input type="range" id="ghost" min="0" max="100" value="70" style="accent-color:#4a9eff">
       <span style="color:#aaa;font-size:12px">Paint</span>
@@ -736,6 +737,15 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   const P = (z) => { const g = new THREE.Group(); g.position.set(1.78,0.78,z); g.add(B(0.4,0.1,0.34, paint, 0.2,0,0)); g.add(B(0.06,0.09,0.28, lensMat, 0.42,0,0)); schem.add(g); pods.push(g); };
   P(0.46); P(-0.46);
 
+  // engine-bay structure so the motor reads as sitting in a real bay (firewall, rails, towers, core support)
+  const bayMat = new THREE.MeshStandardMaterial({color:0x2a2d33, metalness:0.5, roughness:0.7});
+  schem.add(B(0.06, 0.62, 1.55, bayMat, 0.5, 0.7, 0));        // firewall (bay ↔ cabin)
+  schem.add(B(1.5, 0.10, 0.10, bayMat, 1.15, 0.46, 0.62));    // frame rail L
+  schem.add(B(1.5, 0.10, 0.10, bayMat, 1.15, 0.46, -0.62));   // frame rail R
+  schem.add(B(0.42, 0.34, 0.34, bayMat, 1.0, 0.92, 0.66));    // strut tower L
+  schem.add(B(0.42, 0.34, 0.34, bayMat, 1.0, 0.92, -0.66));   // strut tower R
+  schem.add(B(0.06, 0.42, 1.5, bayMat, 1.78, 0.6, 0));        // core support (front)
+
   // centre-of-gravity marker
   const cgDot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), new THREE.MeshStandardMaterial({color:0xffd400, emissive:0x664f00}));
   const cgStem = new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,1,8), new THREE.MeshBasicMaterial({color:0xffd400}));
@@ -748,7 +758,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   adapter.rotation.z = Math.PI/2; adapter.position.set(0.78,0.46,0); car.add(adapter);
 
   let glider = {mass_kg:980, cg:[0.05,0.5,0]}, axles = {front_x:1.25, rear_x:-1.15};
-  const comps = [], labels = []; let motorComp = null, motorLabel = null, LAYOUT = null, curRear = 0.52;
+  const comps = [], labels = [], motorOptData = []; let motorComp = null, motorLabel = null, LAYOUT = null, curRear = 0.52, motorOpts = null;
   const addLabel = (t, mesh, color) => { const l = document.createElement('div'); l.textContent = t; l.style.cssText = 'position:absolute;padding:2px 7px;border-radius:6px;background:rgba(10,10,12,0.72);color:' + (color||'#fff') + ';font-size:11px;font-weight:700;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)'; wrap.appendChild(l); labels.push({l, mesh}); return l; };
   addLabel('torque tube', tube, '#9be29b'); addLabel('adapter', adapter, '#ffb27a');
 
@@ -856,9 +866,22 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
         const used = Math.min(m.T_nm, lim), capped = m.T_nm > lim;
         const el = document.getElementById('motorinfo');
         if (el) el.innerHTML = m.P_kw + ' kW · ' + m.T_nm + ' Nm → transaxle uses <b>' + used + ' Nm</b>' + (capped ? ' <span style="color:#e67e22">(capped — extra torque wasted, ADR-0004)</span>' : ' (within limit)');
+        motorOptData.forEach(o => { const sel = o.m.name === name; o.box.material.opacity = sel ? 0.45 : 0.12; o.edges.material.color.set(sel ? 0xffd400 : 0x3a6ea5); });
         updateBalance();
       };
       ms.onchange = () => applyMotor(ms.value);
+      // proposed-motor ghosts: every motor option drawn at the mount (nested) so you compare bay fit
+      motorOpts = new THREE.Group(); motorOpts.visible = false; car.add(motorOpts);
+      cfg.motors.forEach((m, i) => {
+        const sz = m.size || [0.58, 0.48, 0.55];
+        const box = new THREE.Mesh(new THREE.BoxGeometry(sz[0], sz[1], sz[2]), new THREE.MeshStandardMaterial({color:0x1565c0, transparent:true, opacity:0.14, depthWrite:false}));
+        box.position.set(motorComp.pos[0], motorComp.pos[1], motorComp.pos[2]);
+        const edges = new THREE.LineSegments(new THREE.EdgesGeometry(box.geometry), new THREE.LineBasicMaterial({color:0x3a6ea5}));
+        box.add(edges); motorOpts.add(box);
+        const anchor = new THREE.Object3D(); anchor.visible = false; anchor.position.set(motorComp.pos[0], 1.42 + i * 0.2, motorComp.pos[2]); motorOpts.add(anchor);
+        addLabel(m.name + ' · ' + m.P_kw + 'kW · ' + m.mass_kg + 'kg', anchor, '#9ec9ee');
+        motorOptData.push({m, box, edges, anchor});
+      });
       const def = cfg.motors.find(x => x.name.indexOf('EM57') >= 0) || cfg.motors[0];
       if (def) { ms.value = def.name; applyMotor(def.name); }
     }
@@ -921,6 +944,24 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   const pb = document.getElementById('popBtn'); if (pb) pb.onclick = () => { if (showReal) showRealistic(false); popOpen = !popOpen; pb.textContent = popOpen ? 'Pop-up lights ▼' : 'Pop-up lights ▲'; pb.classList.toggle('active', popOpen); };
   const wb = document.getElementById('wheelBtn'); if (wb) wb.onclick = () => { if (showReal) showRealistic(false); wheelsSpin = !wheelsSpin; wb.classList.toggle('active', wheelsSpin); };
   const gh = document.getElementById('ghost'); if (gh) gh.oninput = e => applyGhost(e.target.value/100);
+
+  // ---- Engine-bay view: schematic + hood open + ghosted, framed on the bay, all proposed motors shown ----
+  let bayOn = false;
+  const bayBtn = document.getElementById('bayBtn');
+  function showBay(on) {
+    bayOn = on; if (bayBtn) bayBtn.classList.toggle('active', on);
+    if (on) { showRealistic(false); hoodOpen = true; if (hb) { hb.textContent = 'Close hood ▼'; hb.classList.add('active'); } applyGhost(0.12); }
+    else { applyGhost((document.getElementById('ghost') || {value:70}).value / 100); }
+    if (motorOpts) motorOpts.visible = on;
+    motorOptData.forEach(o => o.anchor.visible = on);
+    if (motorComp) motorComp.mesh.visible = !on;             // hide the solid box; ghosts show all options
+    if (controls) {
+      if (on) { cam.position.set(3.3, 1.8, 2.5); controls.target.set(1.05, 0.62, 0); }
+      else { cam.position.set(5.6, 3, 6.6); controls.target.set(0, 0.6, 0); }
+      controls.update();
+    }
+  }
+  if (bayBtn) bayBtn.onclick = () => showBay(!bayOn);
 
   // ---- live paint: recolor the twin (freeform picker + swatches); syncs the game car too ----
   const paintPick = document.getElementById('paintpick');
