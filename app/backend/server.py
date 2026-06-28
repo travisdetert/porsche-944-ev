@@ -140,7 +140,19 @@ class MockCan:
         }
 
 
-CAN = MockCan()
+# Telemetry source: real SocketCAN on the Pi (CAN_IFACE=can0), else the dev mock.
+_iface = os.environ.get("CAN_IFACE")
+if _iface:
+    try:
+        from can_source import SocketCanSource
+        CAN = SocketCanSource(_iface, os.path.join(HERE, "..", "can_map.json"))
+        print("Telemetry source: SocketCAN on", _iface)
+    except Exception as e:
+        print("SocketCAN unavailable (%r) — using MockCan" % e)
+        CAN = MockCan()
+else:
+    print("Telemetry source: MockCan  (set CAN_IFACE=can0 on the Pi for real CAN)")
+    CAN = MockCan()
 
 # --- trip persistence (SQLite, stdlib) ---
 DB_PATH = os.path.join(HERE, "..", "data", "trips.db")
@@ -236,6 +248,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(404, "frontend/index.html not found")
         elif self.path == "/api/telemetry":
             data = CAN.read()
+            data["mode"] = STATE["mode"]            # mode is app state, not from CAN
             log_sample(data)
             HISTORY.append({"t": data and round(time.time() - STATE["t0"], 1),
                             "speed": data["speed_mph"], "power": data["power_kw"],
@@ -285,6 +298,7 @@ class Handler(BaseHTTPRequestHandler):
             m = data.get("mode")
             if m in MODES:
                 STATE["mode"] = m              # bounded: only a known preset (VCU still clamps)
+                getattr(CAN, "set_mode", lambda *a: None)(m, MODES[m])
                 self._send(200, json.dumps({"active": m}))
             else:
                 self._send(400, json.dumps({"error": "unknown mode"}))
@@ -303,6 +317,7 @@ class Handler(BaseHTTPRequestHandler):
             if name in PARAMS:
                 p = PARAMS[name]
                 p["value"] = max(p["min"], min(p["max"], val))   # BOUNDED clamp (VCU clamps again)
+                getattr(CAN, "set_param", lambda *a: None)(name, p["value"])
                 self._send(200, json.dumps({"name": name, "value": p["value"]}))
             else:
                 self._send(400, json.dumps({"error": "unknown param"}))

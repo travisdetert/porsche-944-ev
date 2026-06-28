@@ -1,0 +1,3 @@
+# Dev mock needs NOTHING (pure stdlib) — just run: python3 app/backend/server.py
+# Real CAN on the Pi needs python-can (set CAN_IFACE=can0):
+python-can>=4.0

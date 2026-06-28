@@ -1,0 +1,12 @@
+{
+  "_README": "Maps openinverter CAN frames → head-unit telemetry fields. These IDs / bit positions / scales are CONFIGURED IN YOUR ZombieVerter (its CAN mapping), so they are NOT universal — the values below are PLACEHOLDERS. Set each to match your VCU's CAN map (id = decimal CAN arbitration id; start = bit offset; len = bits; value = raw*scale + offset).",
+  "signals": [
+    {"field": "speed_mph",  "id": 256, "start": 0,  "len": 16, "scale": 0.01, "offset": 0,     "endian": "little", "signed": false},
+    {"field": "power_kw",   "id": 256, "start": 16, "len": 16, "scale": 0.1,  "offset": 0,     "endian": "little", "signed": true},
+    {"field": "soc_pct",    "id": 257, "start": 0,  "len": 8,  "scale": 0.5,  "offset": 0,     "endian": "little", "signed": false},
+    {"field": "motor_c",    "id": 258, "start": 0,  "len": 8,  "scale": 1,    "offset": -40,   "endian": "little", "signed": false},
+    {"field": "inverter_c", "id": 258, "start": 8,  "len": 8,  "scale": 1,    "offset": -40,   "endian": "little", "signed": false},
+    {"field": "pack_v",     "id": 259, "start": 0,  "len": 16, "scale": 0.1,  "offset": 0,     "endian": "little", "signed": false},
+    {"field": "pack_a",     "id": 259, "start": 16, "len": 16, "scale": 0.1,  "offset": 0,     "endian": "little", "signed": true}
+  ]
+}
