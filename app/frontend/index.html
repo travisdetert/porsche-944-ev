@@ -119,6 +119,7 @@
       <button class="clearbtn" id="popBtn" title="Animates on the schematic — the photo model is one fused mesh">Pop-up lights ▲</button>
       <button class="clearbtn" id="wheelBtn" title="Animates on the schematic">Spin wheels</button>
       <button class="clearbtn" id="realBtn">Realistic body</button>
+      <button class="clearbtn" id="sensBtn">🫧 Sensorium</button>
       <span style="color:#aaa;font-size:12px">Ghost</span>
       <input type="range" id="ghost" min="0" max="100" value="70" style="accent-color:#4a9eff">
       <span style="color:#888;font-size:12px">drag to orbit · ghost to see inside · tap a component for its balance effect · hood/lights animate on the schematic</span>
@@ -136,6 +137,7 @@
     <div id="car-wrap" style="position:relative;margin:0 12px">
       <div id="car3d" style="height:56vh;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
       <div id="balance" style="position:absolute;bottom:10px;left:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.72);padding:8px 12px;border-radius:8px;line-height:1.5;pointer-events:none"></div>
+      <div id="senslegend" style="display:none;position:absolute;top:10px;right:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.78);padding:8px 12px;border-radius:8px;line-height:1.6;pointer-events:none;max-width:60%"></div>
     </div>
     <div class="row"><div class="btns" id="complist"></div></div>
     <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:2px 12px">
@@ -813,6 +815,47 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   const wb = document.getElementById('wheelBtn'); if (wb) wb.onclick = () => { if (showReal) showRealistic(false); wheelsSpin = !wheelsSpin; wb.classList.toggle('active', wheelsSpin); };
   const gh = document.getElementById('ghost'); if (gh) gh.oninput = e => applyGhost(e.target.value/100);
 
+  // ---- Sensorium: the car redrawn as glowing sense-nodes, each sized by sensing weight and pulsing with its live channel ----
+  const sens = new THREE.Group(); sens.visible = false; car.add(sens);
+  const tcol = (c, lo, hi) => new THREE.Color(0x2ec27e).lerp(new THREE.Color(0xff3b30), Math.max(0, Math.min(1, (c-lo)/(hi-lo))));
+  const senseDefs = [
+    {pos:[-0.75,0.45,0], r:0.50, label:'🔋 BMS feel · main pack (96 cells)', color:t=>tcol(t.cell_t_max,25,55), pulse:t=>Math.min(1,Math.abs(t.pack_a)/250), info:t=>'Δ'+(t.cell_v_delta*1000).toFixed(0)+'mV · '+t.cell_t_max+'°C'},
+    {pos:[0.5,0.45,0],   r:0.36, label:'🔋 BMS feel · front pack',           color:t=>tcol(t.cell_t_max,25,55), pulse:t=>Math.min(1,Math.abs(t.pack_a)/250), info:t=>'pack '+t.pack_v+'V'},
+    {pos:[1.05,0.62,0],  r:0.20, label:'🌡 motor temp (pain)',               color:t=>tcol(t.motor_c,40,100),  pulse:t=>Math.min(1,t.motor_rpm/10000), info:t=>t.motor_c+'°C · '+t.motor_rpm+'rpm'},
+    {pos:[1.05,0.92,0],  r:0.16, label:'🌡 inverter temp (pain)',            color:t=>tcol(t.inverter_c,38,90), pulse:t=>Math.min(1,Math.abs(t.power_kw)/100), info:t=>t.inverter_c+'°C'},
+    {pos:[0,0.55,0],     r:0.22, label:'🌀 balance (IMU / vestibular)',      color:()=>new THREE.Color(0x4a9eff), pulse:t=>Math.min(1,t.speed_mph/60), info:t=>t.gear+' · '+t.speed_mph+' mph'},
+    {pos:[0,1.70,0],     r:0.18, label:'👁 GPS (sight)',                     color:()=>new THREE.Color(0xffd400), pulse:()=>0.4+0.25*Math.sin(performance.now()/450), info:t=>t.lat.toFixed(3)+', '+t.lon.toFixed(3)},
+  ];
+  [[1.35,0.9],[1.35,-0.9],[-1.4,0.9],[-1.4,-0.9]].forEach((p,i) => senseDefs.push(
+    {pos:[p[0],0.42,p[1]], r:0.20, label:i===0?'🛞 tires (touch / road)':'', color:()=>new THREE.Color(0x9b59ff), pulse:t=>Math.min(1,t.speed_mph/45), info:i===0?(()=>'grip '+(window.gripFactor||1).toFixed(2)):null}));
+  const senseNodes = senseDefs.map(d => {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(d.r,20,20), new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.5}));
+    m.position.set(d.pos[0],d.pos[1],d.pos[2]);
+    m.add(new THREE.Mesh(new THREE.SphereGeometry(d.r*1.5,16,16), new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.07})));
+    sens.add(m); return {d, m};
+  });
+  function updateSenses() {
+    if (!sens.visible) return;
+    const t = window.__lastT; if (!t) return;
+    const now = performance.now(); let rows = '';
+    senseNodes.forEach(({d, m}) => {
+      const p = d.pulse(t); m.material.color.copy(d.color(t));
+      m.scale.setScalar(1 + 0.4*p + 0.12*Math.sin(now/250 + d.pos[0]*3));
+      m.material.opacity = 0.4 + 0.45*p;
+      if (d.label) rows += '<div style="display:flex;justify-content:space-between;gap:12px;padding:1px 0"><span>'+d.label+'</span><span style="color:#9aa">'+(d.info?d.info(t):'')+'</span></div>';
+    });
+    const el = document.getElementById('senslegend'); if (el) el.innerHTML = rows;
+  }
+  const sensBtn = document.getElementById('sensBtn');
+  function showSensorium(on) {
+    sens.visible = on; if (sensBtn) sensBtn.classList.toggle('active', on);
+    comps.forEach(c => c.mesh.visible = !on);          // hide the boxes; the senses are the focus
+    cgDot.visible = !on; cgStem.visible = !on; tube.visible = !on; adapter.visible = !on;
+    applyGhost(on ? 0.16 : (document.getElementById('ghost')||{value:70}).value/100);
+    const el = document.getElementById('senslegend'); if (el) el.style.display = on ? 'block' : 'none';
+  }
+  if (sensBtn) sensBtn.onclick = () => showSensorium(!sens.visible);
+
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return; rnd.setSize(w,h); cam.aspect = w/h; cam.updateProjectionMatrix(); };
   window.carResize = resize; window.addEventListener('resize', resize); resize();
   const yAxis = new THREE.Vector3(0,1,0), v = new THREE.Vector3();
@@ -822,6 +865,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
     popT += ((popOpen ? 0.9 : 0) - popT) * 0.15; pods.forEach(p => p.rotation.z = popT);
     lensMat.emissive.setHex(popOpen ? 0xffffee : 0x000000);
     if (wheelsSpin) wheels.forEach(w => w.rotateOnAxis(yAxis, 0.3));
+    updateSenses();
     if (controls) controls.update();
     rnd.render(scene, cam);
     const r = host.getBoundingClientRect(), hr = wrap.getBoundingClientRect();
