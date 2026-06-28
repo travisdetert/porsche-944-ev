@@ -713,7 +713,17 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   schem.add(B(0.5,0.4,1.7, paint, 2.05,0.55,0));
   schem.add(B(2.0,0.03,0.26, stripeMat, -0.9,1.27,0));
   const wheels = [];
-  const W = (x,z) => { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.44,0.44,0.32,26), tireMat); w.rotation.x = Math.PI/2; w.position.set(x,0.42,z); chassis.add(w); wheels.push(w); };
+  const rimMat = new THREE.MeshStandardMaterial({color:0x33373f, metalness:0.85, roughness:0.35});
+  function makeWheel(R, width) {                       // tire + spoked rim + hub, so it reads as a real wheel
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.CylinderGeometry(R, R, width, 28), tireMat));
+    g.add(new THREE.Mesh(new THREE.CylinderGeometry(R*0.62, R*0.62, width*1.04, 22), rimMat));
+    const face = width/2*0.96;
+    for (let i=0;i<5;i++){ const a=i/5*Math.PI*2; const sp=new THREE.Mesh(new THREE.BoxGeometry(R*0.52,0.045,0.07), rimMat); sp.position.set(Math.cos(a)*R*0.3, face, Math.sin(a)*R*0.3); sp.rotation.y=-a; g.add(sp); const s2=sp.clone(); s2.position.y=-face; g.add(s2); }
+    g.add(new THREE.Mesh(new THREE.CylinderGeometry(R*0.16,R*0.16,width*1.1,12), rimMat));
+    return g;
+  }
+  const W = (x,z) => { const w = makeWheel(0.44,0.32); w.rotation.x = Math.PI/2; w.position.set(x,0.42,z); chassis.add(w); wheels.push(w); };
   W(1.35,0.9); W(1.35,-0.9); W(-1.4,0.9); W(-1.4,-0.9);
   // axle bars + centerline as a persistent chassis reference for placing components
   const refMat = new THREE.MeshBasicMaterial({color:0x5a6170});
@@ -996,8 +1006,19 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), new THREE.MeshStandardMaterial({color:0x15151b}));
   ground.rotation.x = -Math.PI/2; scene.add(ground);
   scene.add(new THREE.GridHelper(800, 160, 0x2a2a3a, 0x1d1d28));
+  // ---- oval track: asphalt ring + curbs + start line, ringed by scenery (GTA-ish) ----
+  const SX = 1.6, RIN = 26, ROUT = 40, RMID = (RIN + ROUT) / 2;
+  const asphalt = new THREE.Mesh(new THREE.RingGeometry(RIN, ROUT, 80), new THREE.MeshStandardMaterial({color:0x202227, roughness:0.96}));
+  asphalt.rotation.x = -Math.PI/2; asphalt.scale.set(SX,1,1); asphalt.position.y = 0.02; scene.add(asphalt);
+  const curb = (r, col) => { const c = new THREE.Mesh(new THREE.TorusGeometry(r, 0.25, 8, 96), new THREE.MeshStandardMaterial({color:col})); c.rotation.x = Math.PI/2; c.scale.set(SX,1,1); c.position.y = 0.12; scene.add(c); };
+  curb(RIN, 0xb22222); curb(ROUT, 0xcccccc);
+  const startLine = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.02, ROUT - RIN), new THREE.MeshStandardMaterial({color:0xeeeeee})); startLine.position.set(0, 0.05, -RMID); scene.add(startLine);
+  const bCols = [0x3a3f4a, 0x44485a, 0x5a4a44, 0x404a44];
+  for (let i = 0; i < 16; i++) { const a = i/16*Math.PI*2, R = 70 + (i%4)*14, h = 6 + (i*7%22); const b = new THREE.Mesh(new THREE.BoxGeometry(8,h,8), new THREE.MeshStandardMaterial({color:bCols[i%4], roughness:0.9})); b.position.set(Math.cos(a)*R*SX, h/2, Math.sin(a)*R); scene.add(b); }
+  const treeT = new THREE.MeshStandardMaterial({color:0x2f7d32}), treeB = new THREE.MeshStandardMaterial({color:0x5a3a22});
+  for (let i = 0; i < 24; i++) { const a = (i+0.5)/24*Math.PI*2, R = 52 + (i%3)*4; const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.3,1.4,8), treeB); tr.position.set(Math.cos(a)*R*SX,0.7,Math.sin(a)*R); scene.add(tr); const lv = new THREE.Mesh(new THREE.ConeGeometry(1.1,2.4,10), treeT); lv.position.set(Math.cos(a)*R*SX,2.2,Math.sin(a)*R); scene.add(lv); }
   const coneMat = new THREE.MeshStandardMaterial({color:0xff8a00});
-  for (let i = 0; i < 28; i++) { const c = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1.1, 12), coneMat); const a = i/28*Math.PI*2; c.position.set(Math.cos(a)*34, 0.55, Math.sin(a)*34); scene.add(c); }
+  for (let i = 0; i < 40; i++) { const a = i/40*Math.PI*2; const c = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.9, 10), coneMat); c.position.set(Math.cos(a)*(RIN+1)*SX, 0.45, Math.sin(a)*(RIN+1)); scene.add(c); }
 
   const Bx = (w,h,d,col,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshStandardMaterial({color:col,metalness:0.4,roughness:0.45})); m.position.set(x,y,z); return m; };
   const car = new THREE.Group();
@@ -1006,9 +1027,19 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   car.add(Bx(1.6,0.45,1.7, 0x0c0f12, 0,0.95,-0.5));    // cabin (rear)
   car.add(Bx(0.25,0.04,4.0, 0x3a3a3d, 0,0.78,0));      // stripe
   const tireMat = new THREE.MeshStandardMaterial({color:0x111111, roughness:0.9});
-  const wheels = [];
-  const GW = (x,z) => { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,0.3,20), tireMat); w.rotation.z = Math.PI/2; w.position.set(x,0.45,z); car.add(w); wheels.push(w); };
-  GW(1.0,1.35); GW(-1.0,1.35); GW(1.0,-1.35); GW(-1.0,-1.35);
+  const rimMat = new THREE.MeshStandardMaterial({color:0x33373f, metalness:0.85, roughness:0.35});
+  function makeWheel(R, width) {
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.CylinderGeometry(R, R, width, 28), tireMat));
+    g.add(new THREE.Mesh(new THREE.CylinderGeometry(R*0.62, R*0.62, width*1.04, 22), rimMat));
+    const face = width/2*0.96;
+    for (let i=0;i<5;i++){ const a=i/5*Math.PI*2; const sp=new THREE.Mesh(new THREE.BoxGeometry(R*0.52,0.045,0.07), rimMat); sp.position.set(Math.cos(a)*R*0.3, face, Math.sin(a)*R*0.3); sp.rotation.y=-a; g.add(sp); const s2=sp.clone(); s2.position.y=-face; g.add(s2); }
+    g.add(new THREE.Mesh(new THREE.CylinderGeometry(R*0.16,R*0.16,width*1.1,12), rimMat));
+    return g;
+  }
+  const wheels = [], steerWheels = [];
+  const GW = (x,z,steer) => { const mount = new THREE.Group(); mount.position.set(x,0.45,z); car.add(mount); const w = makeWheel(0.45,0.3); w.rotation.z = Math.PI/2; mount.add(w); wheels.push(w); if (steer) steerWheels.push(mount); };
+  GW(1.0,1.35,true); GW(-1.0,1.35,true); GW(1.0,-1.35,false); GW(-1.0,-1.35,false);
   scene.add(car);
 
   // ---- first-person cockpit overlay (parented to the camera so it stays in view) ----
@@ -1038,7 +1069,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   window.addEventListener('gamepadconnected', () => { if (status) status.textContent = '🎮 controller connected'; });
   window.addEventListener('gamepaddisconnected', () => { if (status) status.textContent = ''; });
 
-  let heading = 0, speed = 0, px = 0, pz = 0, last = performance.now();
+  let heading = Math.PI/2, speed = 0, px = 0, pz = -RMID, last = performance.now();   // start on the track's start line
   const MAXF = 32, MAXR = 9, ACC = 16, BRK = 26, TURN = 1.8, yAxis = new THREE.Vector3(0,1,0);
 
   function input() {
@@ -1075,12 +1106,15 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
     car.position.set(px, 0, pz); car.rotation.y = heading;
     wheels.forEach(w => w.rotateOnAxis(yAxis, speed * dt * 2.2));
     steerVis += (inp.st - steerVis) * 0.2; wheelGrp.rotation.z = -steerVis * 0.9;
+    steerWheels.forEach(m => m.rotation.y = -steerVis * 0.5);     // front wheels turn
     if (fp) {                                              // first-person: driver's seat (LHD, looking ahead)
       const lx = -Math.cos(heading), lz = Math.sin(heading);
       cam.position.set(px + lx * 0.32 + fx * 0.1, 1.12, pz + lz * 0.32 + fz * 0.1);
       cam.lookAt(px + fx * 15, 0.92, pz + fz * 15);
-    } else {                                               // chase cam
-      cam.position.lerp(new THREE.Vector3(px - fx * 9, 4.2, pz - fz * 9), 0.12); cam.lookAt(px, 0.7, pz);
+      if (Math.abs(cam.fov - 72) > 0.5) { cam.fov = 72; cam.updateProjectionMatrix(); }
+    } else {                                               // GTA-style chase cam: speed widens FOV + looks ahead
+      const tFov = 60 + Math.min(22, Math.abs(speed) * 0.8); cam.fov += (tFov - cam.fov) * 0.1; cam.updateProjectionMatrix();
+      cam.position.lerp(new THREE.Vector3(px - fx * 8.5, 3.6, pz - fz * 8.5), 0.1); cam.lookAt(px + fx * 4, 1.0, pz + fz * 4);
     }
     rnd.render(scene, cam);
     if (hud) hud.textContent = Math.abs(Math.round(speed * 2.237)) + ' mph' + (speed < -0.5 ? ' (R)' : '') + ' · grip ' + (window.gripFactor || 1).toFixed(2);
