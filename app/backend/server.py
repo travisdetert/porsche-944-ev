@@ -335,7 +335,7 @@ class Handler(BaseHTTPRequestHandler):
         elif self.path == "/api/history":
             self._send(200, json.dumps({"samples": HISTORY}))
         elif self.path == "/api/route":
-            self._send(200, json.dumps({"route": ROUTE}))
+            self._send(200, json.dumps({"route": ROUTE, "dist_mi": round(_TOTAL / 1609.34, 1)}))
         elif self.path == "/api/trips":
             self._send(200, json.dumps({"trips": list_trips()}))
         elif self.path.startswith("/api/trip.csv?"):

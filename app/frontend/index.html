@@ -171,6 +171,8 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addT
 fetch('/api/route').then(r => r.json()).then(d => {
   const line = L.polyline(d.route, {color:'#4a9eff', weight:4, opacity:0.45}).addTo(map);
   map.fitBounds(line.getBounds(), {padding:[30,30]});
+  window.routeMi = d.dist_mi || 0;          // feed the CAR "loop" sim column
+  if (window.refreshSim) window.refreshSim();
 });
 const me = L.circleMarker([43.1789,-88.1170], {radius:9, color:'#1565c0', fillColor:'#4a9eff', fillOpacity:1, weight:3}).addTo(map);
 
@@ -553,11 +555,20 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
     const tbl = document.getElementById('simtable'); if (!tbl) return;
     const sb = document.getElementById('simbatt'), kwh = sb ? +sb.value : 74;
     const grip = window.gripFactor || 1, mu = 0.95 * grip, rear = curRear || 0.52, tx = (LAYOUT.transaxle_torque_limit_nm) || 350;
+    const routeMi = window.routeMi || 0;
     const f = (x, d) => x == null ? '—' : x.toFixed(d);
+    const loopCell = v => {
+      if (!routeMi) return '—';
+      if (v.range == null) return '<span style="color:#ff6b6b">✗</span>';
+      const spare = v.range - routeMi, soc = Math.max(0, (1 - routeMi / v.range) * 100);
+      return v.range >= routeMi
+        ? '<span style="color:#39d353">✓ +' + spare.toFixed(0) + ' mi · ' + soc.toFixed(0) + '%</span>'
+        : '<span style="color:#ff6b6b">✗ −' + (-spare).toFixed(0) + ' mi</span>';
+    };
     const rows = LAYOUT.motors.map(mo => ({ mo, v: simVehicle(mo, kwh, mu, rear) }));
     const quick = rows.reduce((a, b) => (b.v.z != null && (!a || b.v.z < a.v.z)) ? b : a, null);
     const far = rows.reduce((a, b) => (!a || b.v.range > a.v.range) ? b : a, null);
-    let html = '<tr style="color:#9aa;text-align:right"><th style="text-align:left">Motor</th><th>kW</th><th>Nm→tx</th><th>0-60</th><th>top</th><th>range</th><th>pack $</th><th>$/mi</th></tr>';
+    let html = '<tr style="color:#9aa;text-align:right"><th style="text-align:left">Motor</th><th>kW</th><th>Nm→tx</th><th>0-60</th><th>top</th><th>range</th><th>loop' + (routeMi ? ' ' + routeMi.toFixed(0) + 'mi' : '') + '</th><th>pack $</th><th>$/mi</th></tr>';
     rows.forEach(({ mo, v }) => {
       const used = Math.min(mo.T_nm, tx), capped = mo.T_nm > tx;
       const hot = quick && mo === quick.mo ? 'color:#39d353;font-weight:700' : '';
@@ -568,6 +579,7 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
         + '<td style="' + hot + '">' + f(v.z, 1) + 's</td>'
         + '<td>' + f(v.top, 0) + '</td>'
         + '<td>' + f(v.range, 0) + ' mi</td>'
+        + '<td>' + loopCell(v) + '</td>'
         + '<td>$' + Math.round(v.pack).toLocaleString() + '</td>'
         + '<td>$' + f(v.perMi, 0) + '</td></tr>';
     });
@@ -576,7 +588,8 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
     const dual = rows.find(r => r.mo.name.indexOf('Dual') >= 0);
     const ins = document.getElementById('siminsight');
     if (ins && em && dual && em.v.z != null && dual.v.z != null) {
-      ins.innerHTML = 'at ' + kwh + ' kWh · grip ' + grip.toFixed(2) + ' · Dual EM57 only ~' + (em.v.z - dual.v.z).toFixed(1) + 's quicker, same range → put the money in <b>battery</b> (ADR-0011). <span style="color:#e67e22">*</span> transaxle-capped · <span style="color:#39d353">green</span> quickest · <span style="color:#4a9eff">●</span> longest range';
+      const loopTxt = routeMi && em.v.range ? ' · EM57+' + kwh + 'kWh ' + (em.v.range >= routeMi ? 'finishes the ' + routeMi.toFixed(0) + ' mi loop w/ ~' + Math.max(0, (1 - routeMi / em.v.range) * 100).toFixed(0) + '% to spare' : 'falls ~' + (routeMi - em.v.range).toFixed(0) + ' mi short of the loop') : '';
+      ins.innerHTML = 'at ' + kwh + ' kWh · grip ' + grip.toFixed(2) + ' · Dual EM57 only ~' + (em.v.z - dual.v.z).toFixed(1) + 's quicker, same range → put the money in <b>battery</b> (ADR-0011)' + loopTxt + '. <span style="color:#e67e22">*</span> transaxle-capped · <span style="color:#39d353">green</span> quickest · <span style="color:#4a9eff">●</span> longest range';
     }
   }
 
@@ -617,6 +630,7 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
     }
     if (cfg.tires) { const tg = document.getElementById('tgrip'), tp = document.getElementById('tpsi'); if (tg) tg.value = Math.round((cfg.tires.compound||1)*100); if (tp) tp.value = cfg.tires.inflation_psi||32; }
     const sb = document.getElementById('simbatt'); if (sb) sb.onchange = runSim;
+    window.refreshSim = runSim;
     updateTires();
     runSim();
   });
