@@ -1,11 +1,18 @@
 {
-  "_README": "EV component placement + masses for the CAR design viewer. Positions are METRES in the car frame: +X = front, +Y = up, +Z = right; origin at car centre on the ground. mass_kg drives the live CG / front-rear balance (yellow dot = centre of gravity). glider = the stripped car (kept parts, no EV bits) with its mass + CG. axles set the wheelbase used for the front/rear split. tires feed the GAME grip. Tweak and refresh.",
+  "_README": "EV layout + masses for the CAR design viewer. Positions in METRES, +X = front. mass_kg drives the live CG / front-rear balance. glider = stripped car (kept parts). motors[] feed the Motor selector — choosing one updates the motor box (size/mass), the balance, and shows how much torque the transaxle actually takes (capped at transaxle_torque_limit_nm, ADR-0004). The driveline (motor → adapter → torque tube → transaxle) is drawn so you can see the interaction.",
   "car": { "length_m": 4.32, "model_yaw_deg": 0, "ghost_opacity": 0.7 },
   "glider": { "mass_kg": 980, "cg": [0.05, 0.5, 0.0] },
   "axles": { "front_x": 1.25, "rear_x": -1.15 },
   "tires": { "compound": 1.0, "inflation_psi": 32, "optimal_psi": 32 },
+  "transaxle_torque_limit_nm": 350,
+  "motors": [
+    { "name": "HyPer9",      "P_kw": 88,  "T_nm": 160, "rpm": 8000,  "mass_kg": 68,  "size": [0.5, 0.42, 0.5] },
+    { "name": "Leaf EM57",   "P_kw": 110, "T_nm": 320, "rpm": 10500, "mass_kg": 80,  "size": [0.58, 0.48, 0.55] },
+    { "name": "HiTorque AC", "P_kw": 130, "T_nm": 350, "rpm": 9000,  "mass_kg": 90,  "size": [0.6, 0.5, 0.55] },
+    { "name": "Dual EM57",   "P_kw": 220, "T_nm": 640, "rpm": 10500, "mass_kg": 150, "size": [0.7, 0.5, 0.9] }
+  ],
   "components": [
-    { "name": "EM57 motor",      "color": "#1565c0", "mass_kg": 80,  "size": [0.58, 0.48, 0.55], "pos": [1.05, 0.48, 0.0] },
+    { "name": "EM57 motor",      "role": "motor", "color": "#1565c0", "mass_kg": 80,  "size": [0.58, 0.48, 0.55], "pos": [1.05, 0.48, 0.0] },
     { "name": "Inverter + VCU",  "color": "#0d47a1", "mass_kg": 15,  "size": [0.5, 0.18, 0.5],   "pos": [1.05, 0.82, 0.0] },
     { "name": "Charger / DC-DC", "color": "#5c6bc0", "mass_kg": 12,  "size": [0.35, 0.28, 0.35], "pos": [1.45, 0.5, 0.5] },
     { "name": "Front pack (6)",  "color": "#1976d2", "mass_kg": 180, "size": [0.8, 0.26, 1.2],   "pos": [0.5, 0.36, 0.0] },

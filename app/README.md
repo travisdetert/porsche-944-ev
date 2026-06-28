@@ -25,13 +25,18 @@ Pure stdlib. Three tabs:
   gitignored) and **survive restarts** — pick a past trip from the dropdown to review it (distance,
   Wh/mi, duration), or **+ New trip** to segment, or **⤓ CSV** to download a trip's full samples.
   This is the logger that, on the real car, validates actual Wh/mi vs. the range model.
-- **CAR** — a **3D 944** (Three.js) with the signature **animated pop-up headlights** (toggle).
-  Brake lights glow on regen, the charge port glows when charging — driven by live telemetry.
-  (Loads Three.js from CDN; if blocked, the tab no-ops and the rest of the app still works.)
-- **LAYOUT** — the 944 model **ghosted** with the **EV components placed inside** (motor, front +
-  main battery packs, transaxle, subs) — labeled, toggleable, with a ghost-opacity slider. Edit
-  **`app/frontend/ev_layout.json`** (positions in metres, +X = front) to move things and refresh.
-  This turns the 3D model into a real **placement planning tool**.
+- **CAR** — the **design + handling viewer** (Three.js). The **real glTF 944** loads as a
+  **ghostable shell** (toggle "Realistic body" off for the schematic with **animated pop-up
+  headlights**) with the **EV components placed inside** (motor, front + main packs, transaxle,
+  subs) — labeled, toggleable, ghost-opacity slider. It also computes:
+  - **Balance/CG** — a yellow CG marker + live **front/rear weight split** from each part's
+    `mass_kg`; toggle a component to *see* its effect, with a plain-language handling note.
+  - **Drivetrain** — the kept driveline drawn (motor → **adapter** → **torque tube** → transaxle).
+  - **Motor selector** — apply any motor (HyPer9 / Leaf EM57 / HiTorque / Dual EM57); the box,
+    mass, and balance update, and it shows the **torque the transaxle actually takes** (capped at
+    350 Nm, ADR-0004).
+  - **Tires** — grip + inflation sliders compute a grip factor fed to the **GAME** (drive the
+    difference). Edit **`app/frontend/ev_layout.json`** (metres, +X = front; `mass_kg` drives CG).
 
 ## What's mocked vs real
 - `backend/server.py` → **`MockCan`** generates scenario-driven telemetry. On the Pi, replace

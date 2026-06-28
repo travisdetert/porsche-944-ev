@@ -113,6 +113,11 @@
       <span style="color:#aaa;font-size:12px">Inflation</span><input type="range" id="tpsi" min="24" max="40" value="32" style="accent-color:#39d353">
       <span id="tirenote" style="color:#888;font-size:12px"></span>
     </div>
+    <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span style="color:#aaa;font-size:12px">Motor</span>
+      <select id="motorsel" class="clearbtn"></select>
+      <span id="motorinfo" style="color:#888;font-size:12px"></span>
+    </div>
     <div id="car-wrap" style="position:relative;margin:0 12px">
       <div id="car3d" style="height:56vh;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
       <div id="balance" style="position:absolute;bottom:10px;left:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.72);padding:8px 12px;border-radius:8px;line-height:1.5;pointer-events:none"></div>
@@ -488,9 +493,16 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   const cgStem = new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,1,8), new THREE.MeshBasicMaterial({color:0xffd400}));
   car.add(cgDot); car.add(cgStem);
 
+  // driveline: motor → adapter → torque tube → transaxle (the kept Porsche driveline)
+  const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,2.25,16), new THREE.MeshStandardMaterial({color:0x2e7d32, metalness:0.3, roughness:0.6}));
+  tube.rotation.z = Math.PI/2; tube.position.set(-0.18,0.4,0); car.add(tube);
+  const adapter = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.12,20), new THREE.MeshStandardMaterial({color:0xe67e22, metalness:0.4, roughness:0.5}));
+  adapter.rotation.z = Math.PI/2; adapter.position.set(0.78,0.46,0); car.add(adapter);
+
   let glider = {mass_kg:980, cg:[0.05,0.5,0]}, axles = {front_x:1.25, rear_x:-1.15};
-  const comps = [], labels = [];
+  const comps = [], labels = []; let motorComp = null, motorLabel = null;
   const addLabel = (t, mesh, color) => { const l = document.createElement('div'); l.textContent = t; l.style.cssText = 'position:absolute;padding:2px 7px;border-radius:6px;background:rgba(10,10,12,0.72);color:' + (color||'#fff') + ';font-size:11px;font-weight:700;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)'; wrap.appendChild(l); labels.push({l, mesh}); return l; };
+  addLabel('torque tube', tube, '#9be29b'); addLabel('adapter', adapter, '#ffb27a');
 
   function updateBalance() {
     let m = glider.mass_kg, mx = m*glider.cg[0], my = m*glider.cg[1], mz = m*glider.cg[2];
@@ -513,11 +525,31 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
       const mesh = B(c.size[0],c.size[1],c.size[2], new THREE.MeshStandardMaterial({color:c.color, transparent:true, opacity:0.92, metalness:0.2, roughness:0.6}), c.pos[0],c.pos[1],c.pos[2]);
       car.add(mesh); comps.push({mesh, mass:c.mass_kg||0, pos:c.pos});
       const l = addLabel(c.name + (c.mass_kg ? ' (' + c.mass_kg + 'kg)' : ''), mesh);
+      if (c.role === 'motor') { motorComp = comps[comps.length - 1]; motorLabel = l; }
       const b = document.createElement('button'); b.textContent = c.name; b.style.background = c.color; b.className = 'active';
       b.onclick = () => { mesh.visible = !mesh.visible; l.style.display = mesh.visible ? '' : 'none'; b.classList.toggle('active', mesh.visible); updateBalance(); };
       if (list) list.appendChild(b);
     });
     updateBalance();
+    // Motor selector: apply any motor to the kept transaxle; show the torque the transaxle actually takes
+    const ms = document.getElementById('motorsel');
+    if (ms && cfg.motors) {
+      const lim = cfg.transaxle_torque_limit_nm || 350;
+      cfg.motors.forEach(m => { const o = document.createElement('option'); o.value = m.name; o.textContent = m.name; ms.appendChild(o); });
+      const applyMotor = name => {
+        const m = cfg.motors.find(x => x.name === name); if (!m || !motorComp) return;
+        motorComp.mass = m.mass_kg;
+        if (m.size) { motorComp.mesh.geometry.dispose(); motorComp.mesh.geometry = new THREE.BoxGeometry(m.size[0], m.size[1], m.size[2]); }
+        if (motorLabel) motorLabel.textContent = name + ' (' + m.mass_kg + 'kg)';
+        const used = Math.min(m.T_nm, lim), capped = m.T_nm > lim;
+        const el = document.getElementById('motorinfo');
+        if (el) el.innerHTML = m.P_kw + ' kW · ' + m.T_nm + ' Nm → transaxle uses <b>' + used + ' Nm</b>' + (capped ? ' <span style="color:#e67e22">(capped — extra torque wasted, ADR-0004)</span>' : ' (within limit)');
+        updateBalance();
+      };
+      ms.onchange = () => applyMotor(ms.value);
+      const def = cfg.motors.find(x => x.name.indexOf('EM57') >= 0) || cfg.motors[0];
+      if (def) { ms.value = def.name; applyMotor(def.name); }
+    }
     if (cfg.tires) { const tg = document.getElementById('tgrip'), tp = document.getElementById('tpsi'); if (tg) tg.value = Math.round((cfg.tires.compound||1)*100); if (tp) tp.value = cfg.tires.inflation_psi||32; }
     updateTires();
   });
@@ -526,18 +558,20 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   let realModel = null, realMats = [], showReal = false;
   const applyGhost = o => { [paint, glass].concat(realMats).forEach(m => { m.transparent = o < 1; m.opacity = o; m.depthWrite = o >= 1; }); };
   const realBtn = document.getElementById('realBtn');
-  if (realBtn) realBtn.onclick = () => {
-    showReal = !showReal; realBtn.classList.toggle('active', showReal); schem.visible = !showReal;
-    if (showReal && !realModel && THREE.GLTFLoader) {
+  function showRealistic(on) {
+    showReal = on; if (realBtn) realBtn.classList.toggle('active', on); schem.visible = !on;
+    if (on && !realModel && THREE.GLTFLoader) {
       new THREE.GLTFLoader().load('models/944.glb', g => {
         const mdl = g.scene, bb = new THREE.Box3().setFromObject(mdl), sz = bb.getSize(new THREE.Vector3()), ct = bb.getCenter(new THREE.Vector3());
         const s = 4.32 / Math.max(sz.x, sz.z, 0.001); mdl.scale.setScalar(s); mdl.position.set(-ct.x*s, -bb.min.y*s, -ct.z*s);
         mdl.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); realMats.push(o.material); } });
         car.add(mdl); realModel = mdl; const gh = document.getElementById('ghost'); applyGhost(gh ? gh.value/100 : 0.7);
-      });
+      }, undefined, () => { schem.visible = true; showReal = false; if (realBtn) realBtn.classList.remove('active'); });
     }
-    if (realModel) realModel.visible = showReal;
-  };
+    if (realModel) realModel.visible = on;
+  }
+  if (realBtn) realBtn.onclick = () => showRealistic(!showReal);
+  showRealistic(true);   // default: real 944 model overlay on (ghostable); toggle off for the animated schematic
 
   function updateTires() {
     const tg = document.getElementById('tgrip'), tp = document.getElementById('tpsi');
