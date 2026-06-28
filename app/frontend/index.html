@@ -86,6 +86,7 @@
       <h3 style="margin:0 4px 0 0;color:#aaa">Trips</h3>
       <select class="clearbtn" id="tripsel"></select>
       <button class="clearbtn" id="newtrip">+ New trip</button>
+      <button class="clearbtn" id="export">⤓ CSV</button>
       <span id="tripinfo" style="color:#888;font-size:12px"></span>
     </div>
     <div class="chart"><div class="lbl">Speed (mph)</div><canvas id="c-speed"></canvas></div>
@@ -200,6 +201,11 @@ $('tripsel').onchange = async () => {
   drawTrips();
 };
 $('newtrip').onclick = async () => { await fetch('/api/trip/new', {method:'POST'}); hist = []; await loadTrips(); $('tripsel').value = 'live'; liveMode = true; drawTrips(); };
+$('export').onclick = async () => {
+  let id = $('tripsel').value;
+  if (id === 'live') { const d = await (await fetch('/api/trips')).json(); id = d.trips[0] && d.trips[0].id; }
+  if (id) window.open('/api/trip.csv?id=' + id, '_blank');
+};
 
 async function tick() {
   let t; try { t = await (await fetch('/api/telemetry')).json(); } catch(e){ return; }

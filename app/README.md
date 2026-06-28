@@ -23,8 +23,8 @@ Pure stdlib. Three tabs:
 - **TRIPS** — **canvas graphs** (no chart library) of speed, power (negative = regen/charge),
   charge %, and motor/inverter temps. Trips are **saved to SQLite** (`app/data/trips.db`,
   gitignored) and **survive restarts** — pick a past trip from the dropdown to review it (distance,
-  Wh/mi, duration), or **+ New trip** to segment. This is the logger that, on the real car,
-  validates actual Wh/mi vs. the range model.
+  Wh/mi, duration), or **+ New trip** to segment, or **⤓ CSV** to download a trip's full samples.
+  This is the logger that, on the real car, validates actual Wh/mi vs. the range model.
 
 ## What's mocked vs real
 - `backend/server.py` → **`MockCan`** generates scenario-driven telemetry. On the Pi, replace
@@ -53,6 +53,7 @@ app/
 | `GET /api/history` | in-memory live samples for the trip graphs |
 | `GET /api/trips` · `GET /api/trip?id=N` | saved trip summaries / one trip's samples (SQLite) |
 | `POST /api/trip/new` | end the current trip, start a new one |
+| `GET /api/trip.csv?id=N` | download a trip's samples as CSV |
 | `GET /api/route` | the mock GPS route waypoints |
 
 ## Deploy to the Pi (later)

@@ -10,6 +10,8 @@ openinverter frames (see the `read()` contract below).
 SAFETY: this app is NON-safety (ADR-0014). It only reads telemetry and writes BOUNDED
 drive-mode presets. The VCU + BMS enforce all hard limits/interlocks independently.
 """
+import csv
+import io
 import json
 import math
 import os
@@ -253,6 +255,23 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, json.dumps({"route": ROUTE}))
         elif self.path == "/api/trips":
             self._send(200, json.dumps({"trips": list_trips()}))
+        elif self.path.startswith("/api/trip.csv?"):
+            tid = int(parse_qs(urlparse(self.path).query).get("id", ["0"])[0])
+            buf = io.StringIO()
+            w = csv.writer(buf)
+            w.writerow(["t_s", "speed_mph", "power_kw", "soc_pct", "motor_c", "inverter_c", "lat", "lon"])
+            with DB_LOCK:
+                rows = DB.execute("SELECT t,speed,power,soc,motor,inv,lat,lon FROM samples "
+                                  "WHERE trip_id=? ORDER BY id", (tid,)).fetchall()
+            for r in rows:
+                w.writerow(r)
+            body = buf.getvalue().encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/csv")
+            self.send_header("Content-Disposition", 'attachment; filename="trip-%d.csv"' % tid)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
         elif self.path.startswith("/api/trip?"):
             tid = int(parse_qs(urlparse(self.path).query).get("id", ["0"])[0])
             self._send(200, json.dumps({"id": tid, "samples": trip_samples(tid)}))
