@@ -65,6 +65,8 @@ instruments (repurposed) · **radiator + fans** (repurposed to cool the inverter
 | HV safety extras (DC fuse/MSD if not reused, lugs, crimper, loom) | $150–400 | size to inverter (PF2) |
 | Motor-mount stock + fasteners | $60–150 | |
 | Electric vacuum pump (brakes) | $80–200 | replaces engine vacuum |
+| Electric hydraulic PS pump (EHPS, salvage) | $80–300 | retains power steering (ADR-0013); ~20–50 A 12 V |
+| D/N/R selector switch | $10–40 | electronic reverse (`control-wiring.md`) |
 | PTC defroster | $80–300 | required for defrost/registration |
 | 12 V battery + aux audio battery | $160–350 | LV + audio |
 | Stereo: head unit, amp, subs, speakers | $500–1,400 | ADR-0009 (taste) |

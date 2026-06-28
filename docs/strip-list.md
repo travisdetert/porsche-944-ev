@@ -48,7 +48,7 @@ HVAC ducting/blower.
 | **Brake boost** | intake-manifold vacuum | **electric vacuum pump** (or iBooster) | $80–250 |
 | **Cabin heat / defrost** | engine coolant heat | **electric coolant heater (PTC)** — needed for defrost / registration | $80–300 |
 | **12 V charging** | alternator | **DC-DC converter** (reuse Leaf PDM) | [donor] |
-| **Power steering** (if equipped) | belt-driven hydraulic pump | electric PS pump, or accept manual-effort steering | $0–250 |
+| **Power steering** (hydraulic) | belt-driven hydraulic pump | **electric hydraulic pump (EHPS)** feeds the stock rack (ADR-0013) | $80–300 |
 | ~~A/C~~ | belt-driven compressor | **DELETE** — go-kart spec, no A/C | $0 |
 | **Tach / gauges** | engine signals | driven from the **VCU/CAN** | $0–100 |
 

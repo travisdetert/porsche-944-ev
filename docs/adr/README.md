@@ -18,6 +18,7 @@ a reversal gets a new ADR that supersedes the old one. The value is the *why* an
 | [0010](0010-rear-well-to-subs.md) | Rear spare-well goes to the subwoofer (not a battery box) | Accepted |
 | [0011](0011-light-and-5050.md) | Strip to reinvest — saved money & weight feed the drivetrain (≈ stock weight, 50/50) | Accepted |
 | [0012](0012-reuse-dashboard-via-can-adapter.md) | Reuse the 944 dash via a CAN-to-gauge adapter | Accepted |
+| [0013](0013-electric-power-steering.md) | Retain power steering via an electric hydraulic pump | Accepted |
 
 ## Decisions still open (future ADRs)
 - DC fast charging (CCS) if road-tripping becomes a goal — supersedes part of ADR-0006.

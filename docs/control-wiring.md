@@ -41,7 +41,8 @@ VCU (or a thermo relay) runs the **coolant pump + radiator fan** off inverter/mo
 ## 12 V system
 - **DC-DC (Leaf PDM)** keeps the 12 V battery charged and powers **all stock loads** — lights,
   wipers, horn, gauges, **stereo + amp**, vacuum pump, heater, **contactor coils**.
-- **Size the DC-DC** for simultaneous peaks (bass + pump + heater). Fuse/relay box on the 12 V side.
+- **Size the DC-DC** for simultaneous peaks (bass + vacuum pump + **EHPS steering pump (~20–50 A)** +
+  heater). This is the biggest 12 V load on the car — confirm the PDM has headroom. Fuse/relay box on the 12 V side.
 - **Fail-safe:** if 12 V sags, the contactors **open** (no coil power = HV disconnects).
 
 ## Heater / defrost
@@ -93,7 +94,7 @@ flowchart LR
 | **Regen → brake-light trigger** | ✅ covered | wire VCU output to lamps |
 | **Drive-enable interlocks + charge inhibit** | ✅ covered | wire the interlock chain |
 | **"READY" indicator** (silent car) | ✅ covered | add light/chime |
-| **Power steering** — if your 944 has **hydraulic** PS, the engine-driven pump is gone | ⚠️ **DECIDE** | electric PS pump (e.g. MR2/Astra column) *or* accept manual-effort steering |
+| **Power steering** (944 is hydraulic) | ✅ decided | **electric hydraulic pump (EHPS)** drives the stock rack — ADR-0013; **+20–50 A 12 V load → size the DC-DC** |
 | **Creep** (auto-like crawl from stop) | ⚠️ decide | VCU-configurable — on or off? |
 | **Hill-hold** | ⚠️ decide | VCU feature or just the handbrake |
 | **Speedometer source** (cable vs VSS vs CAN) | ⚠️ verify on car | confirm 944 speedo drive works |
