@@ -82,9 +82,11 @@
 
   <!-- TRIPS -->
   <section class="view charts" id="view-trips">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <h3 style="margin:0;color:#aaa">Trip log (last ~2 min)</h3>
-      <button class="clearbtn" id="clear">Clear</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+      <h3 style="margin:0 4px 0 0;color:#aaa">Trips</h3>
+      <select class="clearbtn" id="tripsel"></select>
+      <button class="clearbtn" id="newtrip">+ New trip</button>
+      <span id="tripinfo" style="color:#888;font-size:12px"></span>
     </div>
     <div class="chart"><div class="lbl">Speed (mph)</div><canvas id="c-speed"></canvas></div>
     <div class="chart"><div class="lbl">Power (kW) — negative = regen/charge</div><canvas id="c-power"></canvas></div>
@@ -95,14 +97,14 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-let hist = [];
+let hist = [], liveMode = true, viewData = [];
 
 // nav
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   b.classList.add('active'); $('view-' + b.dataset.view).classList.add('active');
-  if (b.dataset.view === 'trips') drawTrips();
+  if (b.dataset.view === 'trips') { loadTrips(); drawTrips(); }
   setTimeout(() => map.invalidateSize(), 50);
 });
 
@@ -169,13 +171,35 @@ function drawChart(id, seriesList, yMin, yMax) {
   }
 }
 function drawTrips() {
-  if (hist.length < 2) return;
-  drawChart('c-speed', [{vals:hist.map(s=>s.speed), color:'#4a9eff'}], 0, 120);
-  drawChart('c-power', [{vals:hist.map(s=>s.power), color:'#39d353'}], -20, 120);
-  drawChart('c-soc',   [{vals:hist.map(s=>s.soc),   color:'#e6c84a'}], 0, 100);
-  drawChart('c-temp',  [{vals:hist.map(s=>s.motor), color:'#e67e22'}, {vals:hist.map(s=>s.inv), color:'#4a9eff'}], 20, 130);
+  const src = liveMode ? hist : viewData;
+  if (src.length < 2) { ['c-speed','c-power','c-soc','c-temp'].forEach(id=>{const c=$(id);c.width=c.clientWidth;c.getContext('2d').clearRect(0,0,c.width,90);}); return; }
+  drawChart('c-speed', [{vals:src.map(s=>s.speed), color:'#4a9eff'}], 0, 120);
+  drawChart('c-power', [{vals:src.map(s=>s.power), color:'#39d353'}], -20, 120);
+  drawChart('c-soc',   [{vals:src.map(s=>s.soc),   color:'#e6c84a'}], 0, 100);
+  drawChart('c-temp',  [{vals:src.map(s=>s.motor), color:'#e67e22'}, {vals:src.map(s=>s.inv), color:'#4a9eff'}], 20, 130);
 }
-$('clear').onclick = () => { hist = []; drawTrips(); };
+async function loadTrips() {
+  const cur = $('tripsel').value || 'live';
+  const d = await (await fetch('/api/trips')).json();
+  const sel = $('tripsel');
+  sel.innerHTML = '<option value="live">● Live (current)</option>';
+  d.trips.forEach(t => {
+    const tm = new Date(t.started_at*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    const o = document.createElement('option'); o.value = t.id;
+    o.textContent = `#${t.id} ${tm} · ${t.distance_mi}mi · ${t.wh_mi ?? '—'} Wh/mi · ${t.minutes}m`;
+    sel.appendChild(o);
+  });
+  sel.value = cur;
+}
+$('tripsel').onchange = async () => {
+  const v = $('tripsel').value;
+  if (v === 'live') { liveMode = true; $('tripinfo').textContent = ''; drawTrips(); return; }
+  liveMode = false;
+  const d = await (await fetch('/api/trip?id=' + v)).json();
+  viewData = d.samples; $('tripinfo').textContent = viewData.length + ' samples (saved)';
+  drawTrips();
+};
+$('newtrip').onclick = async () => { await fetch('/api/trip/new', {method:'POST'}); hist = []; await loadTrips(); $('tripsel').value = 'live'; liveMode = true; drawTrips(); };
 
 async function tick() {
   let t; try { t = await (await fetch('/api/telemetry')).json(); } catch(e){ return; }
@@ -195,7 +219,7 @@ async function tick() {
   me.setLatLng([t.lat, t.lon]);
   hist.push({speed:t.speed_mph, power:t.power_kw, soc:t.soc_pct, motor:t.motor_c, inv:t.inverter_c});
   if (hist.length > 240) hist.shift();
-  if ($('view-trips').classList.contains('active')) drawTrips();
+  if (liveMode && $('view-trips').classList.contains('active')) drawTrips();
 }
 buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
 </script>

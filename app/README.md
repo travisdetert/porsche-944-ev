@@ -20,8 +20,11 @@ Pure stdlib. Three tabs:
   (charging icon, derate + hot warnings, low-battery chip, fault power cut).
 - **TUNE** — live **sliders** for the VCU params (max torque/current, regen, throttle deadband +
   curve, ramp, creep, speed limit). **Bounded** — out-of-range values clamp; the VCU clamps again.
-- **TRIPS** — **canvas graphs** (no chart library) of the logged telemetry: speed, power
-  (negative = regen/charge), charge %, and motor/inverter temps over the last ~2 min.
+- **TRIPS** — **canvas graphs** (no chart library) of speed, power (negative = regen/charge),
+  charge %, and motor/inverter temps. Trips are **saved to SQLite** (`app/data/trips.db`,
+  gitignored) and **survive restarts** — pick a past trip from the dropdown to review it (distance,
+  Wh/mi, duration), or **+ New trip** to segment. This is the logger that, on the real car,
+  validates actual Wh/mi vs. the range model.
 
 ## What's mocked vs real
 - `backend/server.py` → **`MockCan`** generates scenario-driven telemetry. On the Pi, replace
@@ -47,7 +50,10 @@ app/
 | `GET /api/modes` · `POST /api/mode {mode}` | drive modes / set mode |
 | `GET /api/scenarios` · `POST /api/scenario {scenario}` | mock conditions / set condition |
 | `GET /api/params` · `POST /api/params {name,value}` | tunable params (bounded; clamps to min/max) |
-| `GET /api/history` | logged telemetry samples for the trip graphs |
+| `GET /api/history` | in-memory live samples for the trip graphs |
+| `GET /api/trips` · `GET /api/trip?id=N` | saved trip summaries / one trip's samples (SQLite) |
+| `POST /api/trip/new` | end the current trip, start a new one |
+| `GET /api/route` | the mock GPS route waypoints |
 
 ## Deploy to the Pi (later)
 SocketCAN (`can0`) + swap in the real CAN reader · kiosk Chromium full-screen · Pi as WiFi **AP**

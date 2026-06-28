@@ -13,8 +13,11 @@ drive-mode presets. The VCU + BMS enforce all hard limits/interlocks independent
 import json
 import math
 import os
+import sqlite3
+import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlparse, parse_qs
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FRONTEND = os.path.join(HERE, "..", "frontend")
@@ -137,6 +140,78 @@ class MockCan:
 
 CAN = MockCan()
 
+# --- trip persistence (SQLite, stdlib) ---
+DB_PATH = os.path.join(HERE, "..", "data", "trips.db")
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+DB = sqlite3.connect(DB_PATH, check_same_thread=False)
+DB_LOCK = threading.Lock()
+DB.executescript("""
+CREATE TABLE IF NOT EXISTS trips(
+  id INTEGER PRIMARY KEY AUTOINCREMENT, started_at REAL, ended_at REAL,
+  distance_mi REAL DEFAULT 0, kwh_used REAL DEFAULT 0,
+  max_kw REAL DEFAULT 0, max_speed REAL DEFAULT 0, n INTEGER DEFAULT 0);
+CREATE TABLE IF NOT EXISTS samples(
+  id INTEGER PRIMARY KEY AUTOINCREMENT, trip_id INTEGER,
+  t REAL, speed REAL, power REAL, soc REAL, motor REAL, inv REAL, lat REAL, lon REAL);
+""")
+DB.commit()
+LAST_LOG_T = time.time()
+CURRENT_TRIP = None
+
+
+def start_trip():
+    with DB_LOCK:
+        cur = DB.execute("INSERT INTO trips(started_at, ended_at) VALUES(?,?)", (time.time(), time.time()))
+        DB.commit()
+        return cur.lastrowid
+
+
+def new_trip():
+    global CURRENT_TRIP
+    CURRENT_TRIP = start_trip()
+    return CURRENT_TRIP
+
+
+def log_sample(d):
+    global LAST_LOG_T
+    now = time.time()
+    dt = max(0.0, min(2.0, now - LAST_LOG_T))
+    LAST_LOG_T = now
+    dist = d["speed_mph"] * dt / 3600.0                 # miles this step
+    kwh = max(0.0, d["power_kw"]) * dt / 3600.0          # energy drawn (positive only)
+    with DB_LOCK:
+        DB.execute("INSERT INTO samples(trip_id,t,speed,power,soc,motor,inv,lat,lon) VALUES(?,?,?,?,?,?,?,?,?)",
+                   (CURRENT_TRIP, round(now - STATE["t0"], 1), d["speed_mph"], d["power_kw"],
+                    d["soc_pct"], d["motor_c"], d["inverter_c"], d["lat"], d["lon"]))
+        DB.execute("UPDATE trips SET ended_at=?, distance_mi=distance_mi+?, kwh_used=kwh_used+?, "
+                   "max_kw=MAX(max_kw,?), max_speed=MAX(max_speed,?), n=n+1 WHERE id=?",
+                   (now, dist, kwh, d["power_kw"], d["speed_mph"], CURRENT_TRIP))
+        DB.commit()
+
+
+def list_trips():
+    with DB_LOCK:
+        rows = DB.execute("SELECT id,started_at,ended_at,distance_mi,kwh_used,max_kw,max_speed,n "
+                          "FROM trips ORDER BY id DESC LIMIT 50").fetchall()
+    out = []
+    for r in rows:
+        dist = r[3]
+        out.append({"id": r[0], "started_at": round(r[1]), "minutes": round((r[2]-r[1])/60, 1),
+                    "distance_mi": round(dist, 2), "kwh_used": round(r[4], 2),
+                    "wh_mi": round(r[4]*1000/dist) if dist > 0.05 else None,
+                    "max_kw": round(r[5], 1), "max_speed": round(r[6]), "samples": r[7]})
+    return out
+
+
+def trip_samples(tid):
+    with DB_LOCK:
+        rows = DB.execute("SELECT t,speed,power,soc,motor,inv FROM samples WHERE trip_id=? ORDER BY id",
+                          (tid,)).fetchall()
+    return [{"t": r[0], "speed": r[1], "power": r[2], "soc": r[3], "motor": r[4], "inv": r[5]} for r in rows]
+
+
+new_trip()   # start a fresh trip each server launch
+
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
@@ -159,6 +234,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(404, "frontend/index.html not found")
         elif self.path == "/api/telemetry":
             data = CAN.read()
+            log_sample(data)
             HISTORY.append({"t": data and round(time.time() - STATE["t0"], 1),
                             "speed": data["speed_mph"], "power": data["power_kw"],
                             "soc": data["soc_pct"], "motor": data["motor_c"], "inv": data["inverter_c"]})
@@ -175,6 +251,11 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, json.dumps({"samples": HISTORY}))
         elif self.path == "/api/route":
             self._send(200, json.dumps({"route": ROUTE}))
+        elif self.path == "/api/trips":
+            self._send(200, json.dumps({"trips": list_trips()}))
+        elif self.path.startswith("/api/trip?"):
+            tid = int(parse_qs(urlparse(self.path).query).get("id", ["0"])[0])
+            self._send(200, json.dumps({"id": tid, "samples": trip_samples(tid)}))
         else:
             self._send(404, "not found")
 
@@ -206,6 +287,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, json.dumps({"name": name, "value": p["value"]}))
             else:
                 self._send(400, json.dumps({"error": "unknown param"}))
+        elif self.path == "/api/trip/new":
+            self._send(200, json.dumps({"id": new_trip()}))
         else:
             self._send(404, "not found")
 

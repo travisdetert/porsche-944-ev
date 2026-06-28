@@ -15,3 +15,6 @@
 *.key
 *.pyc
 __pycache__/
+
+# App runtime data (SQLite trip DB)
+app/data/
