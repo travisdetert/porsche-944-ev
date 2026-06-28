@@ -25,6 +25,9 @@ Pure stdlib. Three tabs:
   gitignored) and **survive restarts** — pick a past trip from the dropdown to review it (distance,
   Wh/mi, duration), or **+ New trip** to segment, or **⤓ CSV** to download a trip's full samples.
   This is the logger that, on the real car, validates actual Wh/mi vs. the range model.
+- **CAR** — a **3D 944** (Three.js) with the signature **animated pop-up headlights** (toggle).
+  Brake lights glow on regen, the charge port glows when charging — driven by live telemetry.
+  (Loads Three.js from CDN; if blocked, the tab no-ops and the rest of the app still works.)
 
 ## What's mocked vs real
 - `backend/server.py` → **`MockCan`** generates scenario-driven telemetry. On the Pi, replace

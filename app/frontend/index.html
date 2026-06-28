@@ -52,6 +52,7 @@
     <button data-view="drive" class="active">DRIVE</button>
     <button data-view="tune">TUNE</button>
     <button data-view="trips">TRIPS</button>
+    <button data-view="car">CAR</button>
   </nav>
   <div id="warn"></div>
 
@@ -95,6 +96,15 @@
     <div class="chart"><div class="lbl">Temps °C — motor (orange) / inverter (blue)</div><canvas id="c-temp"></canvas></div>
   </section>
 
+  <!-- CAR (3D) -->
+  <section class="view" id="view-car">
+    <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="clearbtn" id="poplights">Pop-up lights ▲</button>
+      <span style="color:#888;font-size:12px">the 944's signature pop-ups · brake lights glow on regen · port glows when charging</span>
+    </div>
+    <div id="car3d" style="height:58vh;border-radius:12px;overflow:hidden;background:#0a0a0c;margin:0 12px"></div>
+  </section>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const $ = id => document.getElementById(id);
@@ -106,6 +116,7 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   b.classList.add('active'); $('view-' + b.dataset.view).classList.add('active');
   if (b.dataset.view === 'trips') { loadTrips(); drawTrips(); }
+  if (b.dataset.view === 'car' && window.carResize) setTimeout(window.carResize, 60);
   setTimeout(() => map.invalidateSize(), 50);
 });
 
@@ -223,11 +234,78 @@ async function tick() {
   document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('active', b.dataset.mode===t.mode));
   document.querySelectorAll('#scenarios button').forEach(b => b.classList.toggle('active', b.dataset.scn===t.scenario));
   me.setLatLng([t.lat, t.lon]);
+  if (window.updateCar) window.updateCar(t);
   hist.push({speed:t.speed_mph, power:t.power_kw, soc:t.soc_pct, motor:t.motor_c, inv:t.inverter_c});
   if (hist.length > 240) hist.shift();
   if (liveMode && $('view-trips').classList.contains('active')) drawTrips();
 }
 buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
+</script>
+
+<!-- 3D car view (Three.js). If offline / CDN blocked, this no-ops and the rest still works. -->
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script>
+(function () {
+  if (!window.THREE) return;
+  const host = document.getElementById('car3d');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
+  camera.position.set(5.5, 3.2, 6.5); camera.lookAt(0, 0.7, 0);
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(window.devicePixelRatio || 1);
+  host.appendChild(renderer.domElement);
+  scene.add(new THREE.AmbientLight(0x667, 1.1));
+  const dir = new THREE.DirectionalLight(0xffffff, 1.1); dir.position.set(5, 9, 6); scene.add(dir);
+  scene.add(new THREE.GridHelper(40, 40, 0x333344, 0x222233));
+
+  const paint = new THREE.MeshStandardMaterial({color:0xb01515, metalness:0.5, roughness:0.4});
+  const glass = new THREE.MeshStandardMaterial({color:0x111418, metalness:0.3, roughness:0.2});
+  const tire  = new THREE.MeshStandardMaterial({color:0x111111, roughness:0.9});
+  const box = (w,h,d,mat,x,y,z) => { const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); m.position.set(x,y,z); return m; };
+
+  const car = new THREE.Group();
+  car.add(box(4.2,0.5,1.8, paint, 0,0.5,0));
+  car.add(box(3.8,0.45,1.7, paint, -0.1,0.85,0));
+  car.add(box(1.9,0.55,1.55, glass, -0.45,1.18,0));
+  const nose = box(0.95,0.45,1.75, paint, 1.85,0.6,0); nose.rotation.z = -0.18; car.add(nose);
+  const wheel = (x,z) => { const w=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.32,22),tire); w.rotation.x=Math.PI/2; w.position.set(x,0.42,z); car.add(w); };
+  wheel(1.4,0.85); wheel(1.4,-0.85); wheel(-1.4,0.85); wheel(-1.4,-0.85);
+
+  const lensMat = new THREE.MeshStandardMaterial({color:0xffffff, emissive:0x000000});
+  const pods = [];
+  const popup = (z) => {
+    const pivot = new THREE.Group(); pivot.position.set(1.45,0.93,z);
+    pivot.add(box(0.5,0.12,0.36, paint, 0.25,0,0));
+    pivot.add(box(0.07,0.1,0.3, lensMat, 0.5,0,0));
+    car.add(pivot); pods.push(pivot);
+  };
+  popup(0.45); popup(-0.45);
+
+  const brakeMat = new THREE.MeshStandardMaterial({color:0x330000, emissive:0x330000});
+  car.add(box(0.08,0.18,0.4, brakeMat, -2.05,0.8,0.5));
+  car.add(box(0.08,0.18,0.4, brakeMat, -2.05,0.8,-0.5));
+  const portMat = new THREE.MeshStandardMaterial({color:0x113311, emissive:0x000000});
+  car.add(box(0.05,0.2,0.2, portMat, 1.0,0.7,0.92));
+  scene.add(car);
+
+  let popTarget = 0, popAngle = 0, lightsOn = false;
+  const btn = document.getElementById('poplights');
+  btn.onclick = () => { lightsOn = !lightsOn; popTarget = lightsOn ? 0.9 : 0; btn.textContent = lightsOn ? 'Pop-up lights ▼' : 'Pop-up lights ▲'; };
+  window.updateCar = (t) => {
+    brakeMat.emissive.setHex(t.power_kw < -1 ? 0xff1111 : 0x330000);
+    portMat.emissive.setHex(t.charging ? 0x33ff33 : 0x000000);
+  };
+  const resize = () => { const w=host.clientWidth, h=host.clientHeight; if(!w||!h) return; renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix(); };
+  window.carResize = resize; window.addEventListener('resize', resize); resize();
+  (function animate(){
+    requestAnimationFrame(animate);
+    car.rotation.y += 0.004;
+    popAngle += (popTarget - popAngle) * 0.12;
+    lensMat.emissive.setHex(lightsOn ? 0xffffee : 0x000000);
+    pods.forEach(p => p.rotation.z = popAngle);
+    renderer.render(scene, camera);
+  })();
+})();
 </script>
 </body>
 </html>
