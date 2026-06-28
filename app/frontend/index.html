@@ -49,16 +49,16 @@
     <span class="mode">mode: <span id="mode">—</span></span>
   </header>
   <nav>
-    <button data-view="drive" class="active">DRIVE</button>
+    <button data-view="drive">DRIVE</button>
     <button data-view="tune">TUNE</button>
     <button data-view="trips">TRIPS</button>
-    <button data-view="car">CAR</button>
+    <button data-view="car" class="active">CAR</button>
     <button data-view="game">GAME</button>
   </nav>
   <div id="warn"></div>
 
   <!-- DRIVE -->
-  <section class="view active" id="view-drive">
+  <section class="view" id="view-drive">
     <div class="grid">
       <div id="map"></div>
       <div class="tel">
@@ -98,7 +98,7 @@
   </section>
 
   <!-- CAR (3D model + EV layout — drag to look around) -->
-  <section class="view" id="view-car">
+  <section class="view active" id="view-car">
     <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <button class="clearbtn" id="hoodBtn">Open hood ▲</button>
       <button class="clearbtn" id="popBtn">Pop-up lights ▲</button>
@@ -123,6 +123,18 @@
       <div id="balance" style="position:absolute;bottom:10px;left:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.72);padding:8px 12px;border-radius:8px;line-height:1.5;pointer-events:none"></div>
     </div>
     <div class="row"><div class="btns" id="complist"></div></div>
+    <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:2px 12px">
+      <b style="font-size:13px">▶ Simulate all options</b>
+      <span style="color:#aaa;font-size:12px">Battery</span>
+      <select id="simbatt" class="clearbtn">
+        <option value="40">40 kWh</option>
+        <option value="50">50 kWh</option>
+        <option value="74" selected>74 kWh</option>
+        <option value="90">90 kWh</option>
+      </select>
+      <span id="siminsight" style="color:#888;font-size:12px"></span>
+    </div>
+    <div style="margin:0 12px 10px"><table id="simtable" style="width:100%;border-collapse:collapse;font-size:13px;color:#ddd"></table></div>
   </section>
 
   <!-- GAME (drive it) -->
@@ -154,13 +166,13 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
 });
 
 // map
-const map = L.map('map', {zoomControl:false}).setView([37.7749,-122.4194], 14);
+const map = L.map('map', {zoomControl:false}).setView([43.42,-88.05], 9);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
 fetch('/api/route').then(r => r.json()).then(d => {
   const line = L.polyline(d.route, {color:'#4a9eff', weight:4, opacity:0.45}).addTo(map);
   map.fitBounds(line.getBounds(), {padding:[30,30]});
 });
-const me = L.circleMarker([37.7749,-122.4194], {radius:9, color:'#1565c0', fillColor:'#4a9eff', fillOpacity:1, weight:3}).addTo(map);
+const me = L.circleMarker([43.1789,-88.1170], {radius:9, color:'#1565c0', fillColor:'#4a9eff', fillOpacity:1, weight:3}).addTo(map);
 
 async function buildModes() {
   const d = await (await fetch('/api/modes')).json();
@@ -500,7 +512,7 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
   adapter.rotation.z = Math.PI/2; adapter.position.set(0.78,0.46,0); car.add(adapter);
 
   let glider = {mass_kg:980, cg:[0.05,0.5,0]}, axles = {front_x:1.25, rear_x:-1.15};
-  const comps = [], labels = []; let motorComp = null, motorLabel = null;
+  const comps = [], labels = []; let motorComp = null, motorLabel = null, LAYOUT = null, curRear = 0.52;
   const addLabel = (t, mesh, color) => { const l = document.createElement('div'); l.textContent = t; l.style.cssText = 'position:absolute;padding:2px 7px;border-radius:6px;background:rgba(10,10,12,0.72);color:' + (color||'#fff') + ';font-size:11px;font-weight:700;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)'; wrap.appendChild(l); labels.push({l, mesh}); return l; };
   addLabel('torque tube', tube, '#9be29b'); addLabel('adapter', adapter, '#ffb27a');
 
@@ -510,16 +522,69 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
     const cx = mx/m, cy = my/m, cz = mz/m;
     cgDot.position.set(cx, cy, cz); cgStem.position.set(cx, cy/2, cz); cgStem.scale.y = cy;
     let ff = (cx - axles.rear_x) / (axles.front_x - axles.rear_x); ff = Math.max(0, Math.min(1, ff));
+    curRear = 1 - ff;                          // rear weight fraction feeds the launch-traction sim
     const fp = Math.round(ff*100);
     const bal = ff > 0.52 ? 'Front-biased → understeer (push)' : ff < 0.48 ? 'Rear-biased → RWD traction + agile, watch oversteer' : 'Balanced ~50/50 → neutral & predictable';
     const cgN = cy < 0.5 ? 'Low CG → flat cornering, less roll' : 'CG a bit high → more body roll';
     const el = document.getElementById('balance');
     if (el) el.innerHTML = '⚖ <b>' + Math.round(m) + ' kg</b> · F/R <b>' + fp + '/' + (100-fp) + '</b> · CG <b>' + cy.toFixed(2) + ' m</b><br>' + bal + '<br>' + cgN + ' · 🟡 = centre of gravity (toggle parts to see their effect)';
+    runSim();
+  }
+
+  // ---- performance sim (ported from sim/ev_944_sim.py): tractive force vs aero+rolling, with RWD-traction & transaxle-torque caps ----
+  function simVehicle(mo, kwh, mu, rear) {
+    const G = 9.81, RHO = 1.2, MPH = 2.2369, PACK = 5.5;
+    const tx = (LAYOUT && LAYOUT.transaxle_torque_limit_nm) || 350;
+    const m = (glider.mass_kg || 980) + mo.mass_kg + kwh * PACK + 47;   // glider + motor + pack + accessories
+    const CdA = 0.62, Crr = 0.011, r = 0.30, R = 7.2, eff = 0.88, usable = 0.90;
+    const P = mo.P_kw * 1000, T_nm = mo.T_nm, rpm = mo.rpm;
+    const wheelForce = v => { const w = (v / r) * R; if (w * 60 / (2 * Math.PI) > rpm) return 0; const ob = P / T_nm; let T = w <= ob ? T_nm : P / w; return Math.min(T, tx) * R * eff / r; };
+    const roadLoad = v => 0.5 * RHO * CdA * v * v + Crr * m * G;
+    let z = null, v = 0, t = 0; const tr = mu * m * G * rear;
+    while (v < 26.82 && t < 60) { const a = (Math.min(wheelForce(v), tr) - roadLoad(v)) / m; if (a <= 0) { z = null; break; } v += a * 0.005; t += 0.005; }
+    if (v >= 26.82) z = t;
+    let top = 0, u = 0.1; while (u < 160) { if (u / r * R * 60 / (2 * Math.PI) > rpm) break; if (wheelForce(u) > roadLoad(u)) top = u; else break; u += 0.2; } top *= MPH;
+    const vr = 65 / MPH, wh = (roadLoad(vr) * vr / eff + 300) / 65 * 1.18, range = kwh * usable * 1000 / wh;
+    const pack = kwh * 130;
+    return { m, z, top, range, pack, perMi: pack / range };
+  }
+  function runSim() {
+    if (!LAYOUT || !LAYOUT.motors) return;
+    const tbl = document.getElementById('simtable'); if (!tbl) return;
+    const sb = document.getElementById('simbatt'), kwh = sb ? +sb.value : 74;
+    const grip = window.gripFactor || 1, mu = 0.95 * grip, rear = curRear || 0.52, tx = (LAYOUT.transaxle_torque_limit_nm) || 350;
+    const f = (x, d) => x == null ? '—' : x.toFixed(d);
+    const rows = LAYOUT.motors.map(mo => ({ mo, v: simVehicle(mo, kwh, mu, rear) }));
+    const quick = rows.reduce((a, b) => (b.v.z != null && (!a || b.v.z < a.v.z)) ? b : a, null);
+    const far = rows.reduce((a, b) => (!a || b.v.range > a.v.range) ? b : a, null);
+    let html = '<tr style="color:#9aa;text-align:right"><th style="text-align:left">Motor</th><th>kW</th><th>Nm→tx</th><th>0-60</th><th>top</th><th>range</th><th>pack $</th><th>$/mi</th></tr>';
+    rows.forEach(({ mo, v }) => {
+      const used = Math.min(mo.T_nm, tx), capped = mo.T_nm > tx;
+      const hot = quick && mo === quick.mo ? 'color:#39d353;font-weight:700' : '';
+      html += '<tr style="text-align:right;border-top:1px solid #222">'
+        + '<td style="text-align:left">' + mo.name + (far && mo === far.mo ? ' <span style="color:#4a9eff">●</span>' : '') + '</td>'
+        + '<td>' + mo.P_kw + '</td>'
+        + '<td>' + used + (capped ? '<span style="color:#e67e22">*</span>' : '') + '</td>'
+        + '<td style="' + hot + '">' + f(v.z, 1) + 's</td>'
+        + '<td>' + f(v.top, 0) + '</td>'
+        + '<td>' + f(v.range, 0) + ' mi</td>'
+        + '<td>$' + Math.round(v.pack).toLocaleString() + '</td>'
+        + '<td>$' + f(v.perMi, 0) + '</td></tr>';
+    });
+    tbl.innerHTML = html;
+    const em = rows.find(r => r.mo.name.indexOf('EM57') >= 0 && r.mo.name.indexOf('Dual') < 0);
+    const dual = rows.find(r => r.mo.name.indexOf('Dual') >= 0);
+    const ins = document.getElementById('siminsight');
+    if (ins && em && dual && em.v.z != null && dual.v.z != null) {
+      ins.innerHTML = 'at ' + kwh + ' kWh · grip ' + grip.toFixed(2) + ' · Dual EM57 only ~' + (em.v.z - dual.v.z).toFixed(1) + 's quicker, same range → put the money in <b>battery</b> (ADR-0011). <span style="color:#e67e22">*</span> transaxle-capped · <span style="color:#39d353">green</span> quickest · <span style="color:#4a9eff">●</span> longest range';
+    }
   }
 
   fetch('ev_layout.json').then(r => r.json()).then(cfg => {
     if (cfg.glider) glider = cfg.glider;
     if (cfg.axles) axles = cfg.axles;
+    if (cfg.car) layoutYaw = cfg.car.model_yaw_deg || 0;
+    LAYOUT = cfg;
     const list = document.getElementById('complist');
     (cfg.components || []).forEach(c => {
       const mesh = B(c.size[0],c.size[1],c.size[2], new THREE.MeshStandardMaterial({color:c.color, transparent:true, opacity:0.92, metalness:0.2, roughness:0.6}), c.pos[0],c.pos[1],c.pos[2]);
@@ -551,19 +616,30 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
       if (def) { ms.value = def.name; applyMotor(def.name); }
     }
     if (cfg.tires) { const tg = document.getElementById('tgrip'), tp = document.getElementById('tpsi'); if (tg) tg.value = Math.round((cfg.tires.compound||1)*100); if (tp) tp.value = cfg.tires.inflation_psi||32; }
+    const sb = document.getElementById('simbatt'); if (sb) sb.onchange = runSim;
     updateTires();
+    runSim();
   });
 
   // realistic glTF body (ghostable shell)
-  let realModel = null, realMats = [], showReal = false;
+  let realModel = null, realMats = [], showReal = false, layoutYaw = 0;
   const applyGhost = o => { [paint, glass].concat(realMats).forEach(m => { m.transparent = o < 1; m.opacity = o; m.depthWrite = o >= 1; }); };
   const realBtn = document.getElementById('realBtn');
   function showRealistic(on) {
     showReal = on; if (realBtn) realBtn.classList.toggle('active', on); schem.visible = !on;
     if (on && !realModel && THREE.GLTFLoader) {
       new THREE.GLTFLoader().load('models/944.glb', g => {
-        const mdl = g.scene, bb = new THREE.Box3().setFromObject(mdl), sz = bb.getSize(new THREE.Vector3()), ct = bb.getCenter(new THREE.Vector3());
-        const s = 4.32 / Math.max(sz.x, sz.z, 0.001); mdl.scale.setScalar(s); mdl.position.set(-ct.x*s, -bb.min.y*s, -ct.z*s);
+        const mdl = g.scene;
+        // orient so the car's LONG axis runs along X (+X = front), matching the component layout
+        mdl.updateMatrixWorld(true);
+        let bb = new THREE.Box3().setFromObject(mdl), sz = bb.getSize(new THREE.Vector3());
+        let yaw = layoutYaw * Math.PI / 180;
+        if (sz.z > sz.x) yaw += Math.PI / 2;          // long axis is Z → rotate it onto X
+        mdl.rotation.y = yaw; mdl.updateMatrixWorld(true);
+        bb = new THREE.Box3().setFromObject(mdl); sz = bb.getSize(new THREE.Vector3());
+        mdl.scale.setScalar(4.32 / Math.max(sz.x, 0.001)); mdl.updateMatrixWorld(true);
+        bb = new THREE.Box3().setFromObject(mdl); const ct = bb.getCenter(new THREE.Vector3());
+        mdl.position.set(-ct.x, -bb.min.y, -ct.z);
         mdl.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); realMats.push(o.material); } });
         car.add(mdl); realModel = mdl; const gh = document.getElementById('ghost'); applyGhost(gh ? gh.value/100 : 0.7);
       }, undefined, () => { schem.visible = true; showReal = false; if (realBtn) realBtn.classList.remove('active'); });
@@ -580,6 +656,7 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
     window.gripFactor = grip;
     const note = (psi < opt-2 ? 'under-inflated → squirmy, vague' : psi > opt+2 ? 'over-inflated → small contact patch, harsh' : 'near-optimal pressure') + (compound > 1.1 ? ' · sticky compound' : compound < 0.9 ? ' · hard/eco compound' : '');
     const el = document.getElementById('tirenote'); if (el) el.textContent = 'grip ' + grip.toFixed(2) + ' — ' + note + ' (changes how the GAME drives)';
+    runSim();
   }
   const tg = document.getElementById('tgrip'), tp = document.getElementById('tpsi');
   if (tg) tg.oninput = updateTires; if (tp) tp.oninput = updateTires; updateTires();

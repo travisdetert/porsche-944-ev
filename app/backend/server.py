@@ -49,11 +49,25 @@ PARAMS = {
 HISTORY = []          # rolling telemetry log for the trip graphs
 HIST_MAX = 240        # ~2 min at 0.5 s sampling
 
-# Mock GPS route — a loop the marker drives along, paced by the simulated speed.
+# Mock GPS route — a SE-Wisconsin loop the marker drives along, paced by the simulated speed.
+# Menomonee Falls -> Pike Lake -> Holy Hill -> Sheboygan Dunes -> back to Menomonee Falls (~130 mi).
 ROUTE = [
-    [37.7785, -122.4256], [37.7806, -122.4180], [37.7799, -122.4100],
-    [37.7742, -122.4072], [37.7698, -122.4128], [37.7693, -122.4212],
-    [37.7726, -122.4271], [37.7785, -122.4256],
+    [43.1789, -88.1170],   # Menomonee Falls (start/finish)
+    [43.2280, -88.1120],   # Germantown
+    [43.2700, -88.2250],   # Richfield
+    [43.3019, -88.3045],   # Pike Lake (Kettle Moraine — Pike Lake Unit)
+    [43.2750, -88.3050],   # south toward the basilica
+    [43.2506, -88.3047],   # Holy Hill (Basilica of the National Shrine of Mary)
+    [43.3300, -88.2900],   # Slinger
+    [43.5200, -88.2300],   # Kewaskum
+    [43.6600, -88.0100],   # Cascade
+    [43.7000, -87.7800],   # west of Sheboygan
+    [43.6650, -87.7180],   # Sheboygan Dunes (Kohler-Andrae State Park)
+    [43.5500, -87.7900],   # south along Lake Michigan
+    [43.3900, -87.8700],   # Port Washington
+    [43.3000, -87.9900],   # Cedarburg / Grafton
+    [43.2100, -88.0500],   # approach
+    [43.1789, -88.1170],   # back to Menomonee Falls
 ]
 
 
