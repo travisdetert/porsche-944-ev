@@ -53,7 +53,7 @@
     <button data-view="tune">TUNE</button>
     <button data-view="trips">TRIPS</button>
     <button data-view="car">CAR</button>
-    <button data-view="layout">LAYOUT</button>
+    <button data-view="game">GAME</button>
   </nav>
   <div id="warn"></div>
 
@@ -97,29 +97,32 @@
     <div class="chart"><div class="lbl">Temps °C — motor (orange) / inverter (blue)</div><canvas id="c-temp"></canvas></div>
   </section>
 
-  <!-- CAR (3D) -->
+  <!-- CAR (3D model + EV layout — drag to look around) -->
   <section class="view" id="view-car">
     <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <button class="clearbtn" id="poplights">Pop-up lights ▲</button>
-      <span style="color:#888;font-size:12px">the 944's signature pop-ups · brake lights glow on regen · port glows when charging</span>
+      <button class="clearbtn" id="hoodBtn">Open hood ▲</button>
+      <button class="clearbtn" id="popBtn">Pop-up lights ▲</button>
+      <button class="clearbtn" id="wheelBtn">Spin wheels</button>
+      <span style="color:#aaa;font-size:12px">Ghost</span>
+      <input type="range" id="ghost" min="0" max="100" value="70" style="accent-color:#4a9eff">
+      <span style="color:#888;font-size:12px">drag to orbit · scroll to zoom · open the hood / ghost to see the EV conversion · tap a component to toggle</span>
     </div>
-    <div id="car3d" style="height:58vh;border-radius:12px;overflow:hidden;background:#0a0a0c;margin:0 12px"></div>
-  </section>
-
-  <!-- LAYOUT (3D EV component placement) -->
-  <section class="view" id="view-layout">
-    <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <span style="color:#aaa;font-size:12px">Ghost car</span>
-      <input type="range" id="ghost" min="0" max="60" value="22" style="accent-color:#4a9eff">
-      <button class="clearbtn" id="spinL">⟳ spin</button>
-      <button class="clearbtn" id="alignModel">⟲ rotate model 90°</button>
-      <span id="yawval" style="color:#4a9eff;font-size:12px"></span>
-      <span style="color:#888;font-size:12px">tap a component to toggle · align the nose to FRONT, then edit <code>ev_layout.json</code></span>
-    </div>
-    <div id="layout-wrap" style="position:relative;margin:0 12px">
-      <div id="layout3d" style="height:54vh;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
+    <div id="car-wrap" style="position:relative;margin:0 12px">
+      <div id="car3d" style="height:60vh;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
     </div>
     <div class="row"><div class="btns" id="complist"></div></div>
+  </section>
+
+  <!-- GAME (drive it) -->
+  <section class="view" id="view-game">
+    <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span style="color:#aaa;font-size:12px">🎮 R2 gas · L2 brake/reverse · left-stick steer · (or ↑ ↓ ← →) — press a controller button to connect</span>
+      <span id="gpstatus" style="color:#39d353;font-size:12px"></span>
+    </div>
+    <div id="game-wrap" style="position:relative;margin:0 12px">
+      <div id="game3d" style="height:62vh;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
+      <div id="hud" style="position:absolute;top:12px;left:16px;font-size:28px;font-weight:800;color:#fff;text-shadow:0 1px 4px #000">0 mph</div>
+    </div>
   </section>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -134,7 +137,7 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   b.classList.add('active'); $('view-' + b.dataset.view).classList.add('active');
   if (b.dataset.view === 'trips') { loadTrips(); drawTrips(); }
   if (b.dataset.view === 'car' && window.carResize) setTimeout(window.carResize, 60);
-  if (b.dataset.view === 'layout' && window.layoutResize) setTimeout(window.layoutResize, 60);
+  if (b.dataset.view === 'game' && window.gameResize) setTimeout(window.gameResize, 60);
   setTimeout(() => map.invalidateSize(), 50);
 });
 
@@ -263,9 +266,10 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
 <!-- 3D car view (Three.js). If offline / CDN blocked, this no-ops and the rest still works. -->
 <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 (function () {
-  if (!window.THREE) return;
+  return;  // disabled — replaced by the unified design viewer at the bottom of the page
   const host = document.getElementById('car3d');
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
@@ -431,6 +435,160 @@ buildModes(); buildScenarios(); buildParams(); tick(); setInterval(tick, 500);
       lab.style.top  = ((-v.y * 0.5 + 0.5) * r.height + (r.top - hr.top)) + 'px';
     });
   })();
+})();
+</script>
+
+<!-- Unified 3D design viewer: schematic 944 (riggable) + EV components, orbit + hood/pop-ups/wheels -->
+<script>
+(function () {
+  if (!window.THREE) return;
+  const host = document.getElementById('car3d'), wrap = document.getElementById('car-wrap');
+  if (!host) return;
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(45, 2, 0.1, 200); cam.position.set(5.6, 3, 6.6); cam.lookAt(0, 0.6, 0);
+  const rnd = new THREE.WebGLRenderer({antialias:true}); rnd.setPixelRatio(window.devicePixelRatio || 1); host.appendChild(rnd.domElement);
+  const controls = THREE.OrbitControls ? new THREE.OrbitControls(cam, rnd.domElement) : null;
+  if (controls) { controls.enableDamping = true; controls.target.set(0, 0.6, 0); }
+  scene.add(new THREE.AmbientLight(0x8899aa, 1.1));
+  const dl = new THREE.DirectionalLight(0xffffff, 1.1); dl.position.set(5, 9, 6); scene.add(dl);
+  scene.add(new THREE.GridHelper(14, 14, 0x333344, 0x222233));
+
+  const B = (w,h,d,mat,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat); m.position.set(x,y,z); return m; };
+  const paint = new THREE.MeshStandardMaterial({color:0xd81414, metalness:0.55, roughness:0.32, transparent:true, opacity:0.7, depthWrite:false});
+  const glass = new THREE.MeshStandardMaterial({color:0x0c0f12, metalness:0.3, roughness:0.15, transparent:true, opacity:0.7, depthWrite:false});
+  const tireMat = new THREE.MeshStandardMaterial({color:0x111111, roughness:0.9});
+  const stripeMat = new THREE.MeshStandardMaterial({color:0x3a3a3d, roughness:0.5});
+  const lensMat = new THREE.MeshStandardMaterial({color:0xffffff, emissive:0x000000});
+
+  const car = new THREE.Group();
+  car.add(B(4.3,0.42,1.8, paint, 0,0.46,0));           // chassis
+  car.add(B(1.7,0.5,1.55, glass, -0.6,1.0,0));          // cabin
+  car.add(B(1.4,0.3,1.7, paint, -1.4,0.82,0));          // rear deck
+  car.add(B(0.5,0.4,1.7, paint, 2.05,0.55,0));          // nose
+  car.add(B(2.0,0.03,0.26, stripeMat, -0.9,1.27,0));    // stripe (roof/rear)
+  const wheels = [];
+  const W = (x,z) => { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.44,0.44,0.32,26), tireMat); w.rotation.x = Math.PI/2; w.position.set(x,0.42,z); car.add(w); wheels.push(w); };
+  W(1.35,0.9); W(1.35,-0.9); W(-1.4,0.9); W(-1.4,-0.9);
+  const hood = new THREE.Group(); hood.position.set(0.35,0.7,0);     // hinged at the cowl
+  hood.add(B(1.55,0.08,1.62, paint, 0.78,0,0));
+  hood.add(B(1.55,0.03,0.26, stripeMat, 0.78,0.06,0));
+  car.add(hood);
+  const pods = [];
+  const P = (z) => { const g = new THREE.Group(); g.position.set(1.78,0.78,z); g.add(B(0.4,0.1,0.34, paint, 0.2,0,0)); g.add(B(0.06,0.09,0.28, lensMat, 0.42,0,0)); car.add(g); pods.push(g); };
+  P(0.46); P(-0.46);
+  scene.add(car);
+
+  const labels = [];
+  const addLabel = (t, mesh, color) => { const l = document.createElement('div'); l.textContent = t; l.style.cssText = 'position:absolute;padding:2px 7px;border-radius:6px;background:rgba(10,10,12,0.72);color:' + (color||'#fff') + ';font-size:11px;font-weight:700;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)'; wrap.appendChild(l); labels.push({l, mesh}); return l; };
+  fetch('ev_layout.json').then(r => r.json()).then(cfg => {
+    const list = document.getElementById('complist');
+    (cfg.components || []).forEach(c => {
+      const mesh = B(c.size[0],c.size[1],c.size[2], new THREE.MeshStandardMaterial({color:c.color, transparent:true, opacity:0.92, metalness:0.2, roughness:0.6}), c.pos[0],c.pos[1],c.pos[2]);
+      car.add(mesh);
+      const l = addLabel(c.name, mesh);
+      const b = document.createElement('button'); b.textContent = c.name; b.style.background = c.color; b.className = 'active';
+      b.onclick = () => { mesh.visible = !mesh.visible; l.style.display = mesh.visible ? '' : 'none'; b.classList.toggle('active', mesh.visible); };
+      if (list) list.appendChild(b);
+    });
+  });
+
+  let hoodOpen = false, hoodT = 0, popOpen = false, popT = 0, wheelsSpin = false;
+  const hb = document.getElementById('hoodBtn'); if (hb) hb.onclick = () => { hoodOpen = !hoodOpen; hb.textContent = hoodOpen ? 'Close hood ▼' : 'Open hood ▲'; hb.classList.toggle('active', hoodOpen); };
+  const pb = document.getElementById('popBtn'); if (pb) pb.onclick = () => { popOpen = !popOpen; pb.textContent = popOpen ? 'Pop-up lights ▼' : 'Pop-up lights ▲'; pb.classList.toggle('active', popOpen); };
+  const wb = document.getElementById('wheelBtn'); if (wb) wb.onclick = () => { wheelsSpin = !wheelsSpin; wb.classList.toggle('active', wheelsSpin); };
+  const gh = document.getElementById('ghost'); if (gh) gh.oninput = e => { const o = e.target.value / 100; [paint, glass].forEach(m => { m.transparent = o < 1; m.opacity = o; m.depthWrite = o >= 1; }); };
+
+  const resize = () => { const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return; rnd.setSize(w,h); cam.aspect = w/h; cam.updateProjectionMatrix(); };
+  window.carResize = resize; window.addEventListener('resize', resize); resize();
+  const yAxis = new THREE.Vector3(0,1,0), v = new THREE.Vector3();
+  (function loop(){
+    requestAnimationFrame(loop);
+    hoodT += ((hoodOpen ? 1.0 : 0) - hoodT) * 0.12; hood.rotation.z = hoodT;
+    popT += ((popOpen ? 0.9 : 0) - popT) * 0.15; pods.forEach(p => p.rotation.z = popT);
+    lensMat.emissive.setHex(popOpen ? 0xffffee : 0x000000);
+    if (wheelsSpin) wheels.forEach(w => w.rotateOnAxis(yAxis, 0.3));
+    if (controls) controls.update();
+    rnd.render(scene, cam);
+    const r = host.getBoundingClientRect(), hr = wrap.getBoundingClientRect();
+    labels.forEach(({l, mesh}) => { if (!mesh.visible) { l.style.display = 'none'; return; } mesh.getWorldPosition(v); v.project(cam); l.style.display = v.z < 1 ? '' : 'none'; l.style.left = ((v.x*0.5+0.5)*r.width + (r.left-hr.left)) + 'px'; l.style.top = ((-v.y*0.5+0.5)*r.height + (r.top-hr.top)) + 'px'; });
+  })();
+})();
+</script>
+
+<!-- GAME: basic arcade driving sim (Gamepad API + keyboard) -->
+<script>
+(function () {
+  if (!window.THREE) return;
+  const host = document.getElementById('game3d');
+  if (!host) return;
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0b0b10);
+  const cam = new THREE.PerspectiveCamera(60, 2, 0.1, 1000); cam.position.set(0, 4, -9);
+  const rnd = new THREE.WebGLRenderer({antialias:true}); rnd.setPixelRatio(window.devicePixelRatio || 1); host.appendChild(rnd.domElement);
+  scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x202028, 1.15));
+  const dl = new THREE.DirectionalLight(0xffffff, 0.9); dl.position.set(8, 14, 6); scene.add(dl);
+
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), new THREE.MeshStandardMaterial({color:0x15151b}));
+  ground.rotation.x = -Math.PI/2; scene.add(ground);
+  scene.add(new THREE.GridHelper(800, 160, 0x2a2a3a, 0x1d1d28));
+  const coneMat = new THREE.MeshStandardMaterial({color:0xff8a00});
+  for (let i = 0; i < 28; i++) { const c = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1.1, 12), coneMat); const a = i/28*Math.PI*2; c.position.set(Math.cos(a)*34, 0.55, Math.sin(a)*34); scene.add(c); }
+
+  const Bx = (w,h,d,col,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshStandardMaterial({color:col,metalness:0.4,roughness:0.45})); m.position.set(x,y,z); return m; };
+  const car = new THREE.Group();
+  car.add(Bx(1.8,0.5,4.2, 0xd81414, 0,0.5,0));         // body, length along Z
+  car.add(Bx(1.6,0.45,1.7, 0x0c0f12, 0,0.95,-0.5));    // cabin (rear)
+  car.add(Bx(0.25,0.04,4.0, 0x3a3a3d, 0,0.78,0));      // stripe
+  const tireMat = new THREE.MeshStandardMaterial({color:0x111111, roughness:0.9});
+  const wheels = [];
+  const GW = (x,z) => { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,0.3,20), tireMat); w.rotation.z = Math.PI/2; w.position.set(x,0.45,z); car.add(w); wheels.push(w); };
+  GW(1.0,1.35); GW(-1.0,1.35); GW(1.0,-1.35); GW(-1.0,-1.35);
+  scene.add(car);
+
+  const keys = {}, status = document.getElementById('gpstatus'), hud = document.getElementById('hud');
+  window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (document.getElementById('view-game').classList.contains('active') && e.key.indexOf('Arrow') === 0) e.preventDefault(); });
+  window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+  window.addEventListener('gamepadconnected', () => { if (status) status.textContent = '🎮 controller connected'; });
+  window.addEventListener('gamepaddisconnected', () => { if (status) status.textContent = ''; });
+
+  let heading = 0, speed = 0, px = 0, pz = 0, last = performance.now();
+  const MAXF = 32, MAXR = 9, ACC = 16, BRK = 26, TURN = 1.8, yAxis = new THREE.Vector3(0,1,0);
+
+  function input() {
+    let thr = 0, brk = 0, st = 0;
+    const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    const gp = pads && pads[0];
+    if (gp) {
+      thr = gp.buttons[7] ? gp.buttons[7].value : 0;                      // R2
+      brk = gp.buttons[6] ? gp.buttons[6].value : 0;                      // L2
+      if (gp.buttons[0] && gp.buttons[0].pressed) thr = Math.max(thr, 1); // X = gas
+      const ax = gp.axes[0] || 0; if (Math.abs(ax) > 0.08) st = ax;       // left stick
+    }
+    if (keys['arrowup'] || keys['w']) thr = 1;
+    if (keys['arrowdown'] || keys['s']) brk = 1;
+    if (keys['arrowleft'] || keys['a']) st = -1;
+    if (keys['arrowright'] || keys['d']) st = 1;
+    return {thr, brk, st};
+  }
+  function resize() { const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return; rnd.setSize(w,h); cam.aspect = w/h; cam.updateProjectionMatrix(); }
+  window.gameResize = resize; window.addEventListener('resize', resize); resize();
+
+  (function loop(now){
+    requestAnimationFrame(loop);
+    const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now;
+    const inp = input();
+    speed += inp.thr * ACC * dt;
+    speed -= inp.brk * (speed > 0 ? BRK : ACC) * dt;        // brake, then reverse
+    speed *= (1 - 0.6 * dt);                                 // drag
+    speed = Math.max(-MAXR, Math.min(MAXF, speed));
+    heading += -inp.st * TURN * dt * Math.max(0.2, Math.min(1, Math.abs(speed) / 12)) * (speed < 0 ? -1 : 1);
+    const fx = Math.sin(heading), fz = Math.cos(heading);
+    px += fx * speed * dt; pz += fz * speed * dt;
+    car.position.set(px, 0, pz); car.rotation.y = heading;
+    wheels.forEach(w => w.rotateOnAxis(yAxis, speed * dt * 2.2));
+    cam.position.lerp(new THREE.Vector3(px - fx * 9, 4.2, pz - fz * 9), 0.12); cam.lookAt(px, 0.7, pz);
+    rnd.render(scene, cam);
+    if (hud) hud.textContent = Math.abs(Math.round(speed * 2.237)) + ' mph' + (speed < -0.5 ? ' (R)' : '');
+  })(performance.now());
 })();
 </script>
 </body>
