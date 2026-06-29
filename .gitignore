@@ -24,3 +24,8 @@ app/frontend/models/*.glb
 app/frontend/models/*.gltf
 app/frontend/models/*.zip
 /models/
+
+# Screen recordings / large media (keep local, not in git)
+videos/
+*.mov
+*.mp4
