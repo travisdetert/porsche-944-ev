@@ -40,6 +40,12 @@
   .chart .lbl { font-size:12px; color:#aaa; margin-bottom:4px; font-weight:700; }
   .chart canvas { width:100%; height:90px; display:block; }
   .clearbtn { padding:10px 14px; border:0; border-radius:10px; background:#333; color:#eee; font-weight:700; cursor:pointer; }
+  /* compact CAR toolbar — lots of controls, keep them tight */
+  #view-car .clearbtn { padding:5px 9px; font-size:12px; border-radius:8px; }
+  #view-car .row { padding:3px 12px; }
+  #view-car .toolbar { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  #view-car .toolbar .sep { width:1px; align-self:stretch; background:#2a2a2e; margin:2px 4px; }
+  #view-car .btns button { padding:9px; font-size:13px; min-width:80px; }
 </style>
 </head>
 <body>
@@ -126,49 +132,47 @@
 
   <!-- CAR (3D model + EV layout — drag to look around) -->
   <section class="view active" id="view-car">
-    <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <button class="clearbtn" id="hoodBtn" title="Animates on the schematic — the photo model is one fused mesh">Open hood ▲</button>
-      <button class="clearbtn" id="popBtn" title="Animates on the schematic — the photo model is one fused mesh">Pop-up lights ▲</button>
-      <button class="clearbtn" id="wheelBtn" title="Animates on the schematic">Spin wheels</button>
-      <button class="clearbtn" id="realBtn">Realistic body</button>
-      <button class="clearbtn" id="sensBtn">🫧 Sensorium</button>
-      <button class="clearbtn" id="bayBtn">🔧 Engine bay</button>
-      <button class="clearbtn" id="hvBtn">⚡ HV + cooling</button>
+    <div class="row toolbar">
+      <button class="clearbtn" id="realBtn">Realistic</button>
+      <button class="clearbtn" id="bayBtn">🔧 Bay</button>
+      <button class="clearbtn" id="sensBtn">🫧 Senses</button>
+      <button class="clearbtn" id="hvBtn">⚡ HV+cool</button>
+      <span class="sep"></span>
+      <button class="clearbtn" id="hoodBtn" title="Animates on the schematic (the photo model is one fused mesh)">Hood ▲</button>
+      <button class="clearbtn" id="popBtn" title="Animates on the schematic">Lights ▲</button>
+      <button class="clearbtn" id="wheelBtn" title="Animates on the schematic">Wheels</button>
+      <span class="sep"></span>
       <span style="color:#aaa;font-size:12px">Ghost</span>
-      <input type="range" id="ghost" min="0" max="100" value="70" style="accent-color:#4a9eff">
+      <input type="range" id="ghost" min="0" max="100" value="70" style="accent-color:#4a9eff;width:88px">
       <span style="color:#aaa;font-size:12px">Paint</span>
-      <input type="color" id="paintpick" value="#17191d" title="Pick any shade" style="width:34px;height:24px;border:0;background:none;cursor:pointer;padding:0">
+      <input type="color" id="paintpick" value="#17191d" title="Pick any shade" style="width:30px;height:22px;border:0;background:none;cursor:pointer;padding:0">
       <span id="swatches" style="display:inline-flex;gap:5px;align-items:center"></span>
-      <span style="color:#888;font-size:12px">drag to orbit · ghost to see inside · tap a component for its balance effect · hood/lights animate on the schematic</span>
     </div>
-    <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <span style="color:#aaa;font-size:12px">Tire grip</span><input type="range" id="tgrip" min="70" max="130" value="100" style="accent-color:#39d353">
-      <span style="color:#aaa;font-size:12px">Inflation</span><input type="range" id="tpsi" min="24" max="40" value="32" style="accent-color:#39d353">
-      <span id="tirenote" style="color:#888;font-size:12px"></span>
+    <div class="row toolbar">
+      <span style="color:#aaa;font-size:12px">Tire</span><input type="range" id="tgrip" min="70" max="130" value="100" style="accent-color:#39d353;width:78px">
+      <span style="color:#aaa;font-size:12px">PSI</span><input type="range" id="tpsi" min="24" max="40" value="32" style="accent-color:#39d353;width:78px">
+      <span class="sep"></span>
+      <span style="color:#aaa;font-size:12px">Motor</span><select id="motorsel" class="clearbtn"></select>
+      <span class="sep"></span>
+      <span style="color:#aaa;font-size:12px">Battery</span>
+      <select id="simbatt" class="clearbtn">
+        <option value="40">40 kWh</option><option value="50">50 kWh</option>
+        <option value="74" selected>74 kWh</option><option value="90">90 kWh</option>
+      </select>
+      <button class="clearbtn" id="simToggle">▸ Sim table</button>
+      <span style="color:#666;font-size:11px">drag to orbit · ghost to x-ray</span>
     </div>
-    <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <span style="color:#aaa;font-size:12px">Motor</span>
-      <select id="motorsel" class="clearbtn"></select>
-      <span id="motorinfo" style="color:#888;font-size:12px"></span>
-    </div>
+    <div class="row" style="padding-top:0"><span id="tirenote" style="color:#888;font-size:12px"></span><span id="motorinfo" style="color:#888;font-size:12px;margin-left:12px"></span></div>
     <div id="car-wrap" style="position:relative;margin:0 12px">
       <div id="car3d" style="height:56vh;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
       <div id="balance" style="position:absolute;bottom:10px;left:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.72);padding:8px 12px;border-radius:8px;line-height:1.5;pointer-events:none"></div>
       <div id="senslegend" style="display:none;position:absolute;top:10px;right:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.78);padding:8px 12px;border-radius:8px;line-height:1.6;pointer-events:none;max-width:60%"></div>
     </div>
     <div class="row"><div class="btns" id="complist"></div></div>
-    <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:2px 12px">
-      <b style="font-size:13px">▶ Simulate all options</b>
-      <span style="color:#aaa;font-size:12px">Battery</span>
-      <select id="simbatt" class="clearbtn">
-        <option value="40">40 kWh</option>
-        <option value="50">50 kWh</option>
-        <option value="74" selected>74 kWh</option>
-        <option value="90">90 kWh</option>
-      </select>
-      <span id="siminsight" style="color:#888;font-size:12px"></span>
+    <div id="simwrap" style="display:none">
+      <div class="row" style="padding-bottom:0"><span id="siminsight" style="color:#888;font-size:12px"></span></div>
+      <div style="margin:4px 12px 12px"><table id="simtable" style="width:100%;border-collapse:collapse;font-size:13px;color:#ddd"></table></div>
     </div>
-    <div style="margin:0 12px 10px"><table id="simtable" style="width:100%;border-collapse:collapse;font-size:13px;color:#ddd"></table></div>
   </section>
 
   <!-- PARTS: custom parts still to be proven out -->
@@ -505,6 +509,7 @@ async function tick() {
   if (liveMode && $('view-trips').classList.contains('active')) drawTrips();
 }
 buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(tick, 500);
+(function(){ const b=document.getElementById('simToggle'), w=document.getElementById('simwrap'); if(b&&w) b.onclick=()=>{ const open=w.style.display==='none'; w.style.display=open?'block':'none'; b.textContent=(open?'▾':'▸')+' Sim table'; b.classList.toggle('active',open); if(open&&window.refreshSim) window.refreshSim(); }; })();
 </script>
 
 <!-- 3D car view (Three.js). If offline / CDN blocked, this no-ops and the rest still works. -->
@@ -1056,7 +1061,14 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
     if (controls) controls.update();
     rnd.render(scene, cam);
     const r = host.getBoundingClientRect(), hr = wrap.getBoundingClientRect();
-    labels.forEach(({l, mesh}) => { if (!mesh.visible) { l.style.display = 'none'; return; } mesh.getWorldPosition(v); v.project(cam); l.style.display = v.z < 1 ? '' : 'none'; l.style.left = ((v.x*0.5+0.5)*r.width + (r.left-hr.left)) + 'px'; l.style.top = ((-v.y*0.5+0.5)*r.height + (r.top-hr.top)) + 'px'; });
+    labels.forEach(({l, mesh}) => {
+      if (!mesh.visible) { l.style.display = 'none'; return; }
+      mesh.getWorldPosition(v); v.project(cam);
+      const sx = v.x * 0.5 + 0.5, sy = -v.y * 0.5 + 0.5;
+      l.style.display = (v.z < 1 && sx >= 0 && sx <= 1 && sy >= 0 && sy <= 1) ? '' : 'none';   // clip to the canvas
+      l.style.left = (sx * r.width + (r.left - hr.left)) + 'px';
+      l.style.top = (sy * r.height + (r.top - hr.top)) + 'px';
+    });
   })();
 })();
 </script>
