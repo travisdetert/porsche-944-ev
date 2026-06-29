@@ -212,6 +212,7 @@
     <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <span style="color:#aaa;font-size:12px">🎮 R2 gas · L2 brake/reverse · left-stick steer · (or ↑ ↓ ← →) — press a controller button to connect</span>
       <button class="clearbtn" id="fpBtn">👁 Cockpit view (C)</button>
+      <button class="clearbtn" id="dynBtn">📊 Dynamics (G)</button>
       <span id="gpstatus" style="color:#39d353;font-size:12px"></span>
     </div>
     <div id="game-wrap" style="position:relative;margin:0 12px">
@@ -1262,6 +1263,42 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
     g.add(Bx(1.7,0.5,3.8, tCols[i], 0,0.45,0)); g.add(Bx(1.5,0.4,1.6, 0x0c0f12, 0,0.85,-0.3));
     scene.add(g); traffic.push({g, ang: i/4*Math.PI*2, spd: 0.10 + 0.025*i});
   }
+
+  // ---- Dynamics overlay: per-wheel load arrows, CG shift, net-g vector (parented to the car) ----
+  const dyn = new THREE.Group(); dyn.visible = false; car.add(dyn);
+  const GREEN = new THREE.Color(0x39d353), RED = new THREE.Color(0xe0533a);
+  const wpos = [[1.0, 1.35], [-1.0, 1.35], [1.0, -1.35], [-1.0, -1.35]];   // x(right+), z(front+)
+  const loadArrows = wpos.map(p => { const a = new THREE.ArrowHelper(new THREE.Vector3(0,1,0), new THREE.Vector3(p[0],0.5,p[1]), 1, 0x39d353, 0.28, 0.2); dyn.add(a); return a; });
+  const cgMark = new THREE.Mesh(new THREE.SphereGeometry(0.18,16,16), new THREE.MeshBasicMaterial({color:0xffd400})); cgMark.position.set(0,0.7,0); dyn.add(cgMark);
+  const gArrow = new THREE.ArrowHelper(new THREE.Vector3(0,0,1), new THREE.Vector3(0,0.7,0), 0.01, 0xffb300, 0.4, 0.28); dyn.add(gArrow);
+  let dynOn = false, longT = 0, latT = 0, prevSpeed = 0, prevHeading = Math.PI/2;
+  const dynBtn = document.getElementById('dynBtn');
+  function setDyn(on) { dynOn = on; dyn.visible = on; if (dynBtn) dynBtn.classList.toggle('active', on); }
+  if (dynBtn) dynBtn.onclick = () => setDyn(!dynOn);
+  window.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'g' && document.getElementById('view-game').classList.contains('active')) setDyn(!dynOn); });
+  function updateDynamics(dt, inp) {
+    if (!dyn.visible) return;
+    const ax = (speed - prevSpeed) / Math.max(dt, 0.001);            // longitudinal accel
+    const yaw = (heading - prevHeading) / Math.max(dt, 0.001);       // yaw rate
+    const ay = speed * yaw;                                          // lateral accel
+    prevSpeed = speed; prevHeading = heading;
+    longT += (Math.max(-0.18, Math.min(0.18, ax * 0.05)) - longT) * 0.2;   // smoothed weight transfer
+    latT  += (Math.max(-0.20, Math.min(0.20, ay * 0.04)) - latT) * 0.2;
+    const grip = window.gripFactor || 1;
+    loadArrows.forEach((a, i) => {
+      const x = wpos[i][0], z = wpos[i][1];
+      let load = 0.25 + (z > 0 ? -longT : longT) + (x > 0 ? latT : -latT);   // accel→rear, corner→outer
+      load = Math.max(0.03, load);
+      a.setLength(load * 4.5, 0.28, 0.2);
+      const slipping = (inp.hb && z < 0) || (Math.abs(ay) * 0.5 + (inp.hb ? 0.4 : 0)) > grip * load * 4;
+      a.setColor(new THREE.Color().lerpColors(GREEN, RED, slipping ? 1 : Math.min(1, Math.abs(ay) / (grip * 4 + 0.001))));
+    });
+    cgMark.position.set(latT * 2.2, 0.7, -longT * 3.2);             // CG shifts toward the loaded end
+    const mag = Math.hypot(longT, latT);
+    if (mag > 0.005) { gArrow.setDirection(new THREE.Vector3(latT, 0, -longT).normalize()); gArrow.setLength(mag * 14, 0.4, 0.28); }
+    else gArrow.setLength(0.01, 0.01, 0.01);
+    gArrow.position.copy(cgMark.position);
+  }
   scene.add(car);
 
   // ---- first-person cockpit overlay (parented to the camera so it stays in view) ----
@@ -1341,6 +1378,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
     traffic.forEach(c => { c.ang += c.spd * dt; c.g.position.set(Math.cos(c.ang)*RMID*SX, 0, Math.sin(c.ang)*RMID); c.g.rotation.y = Math.atan2(-Math.sin(c.ang)*SX, Math.cos(c.ang)); });
     wheels.forEach(w => w.rotateOnAxis(yAxis, speed * dt * 2.2));
     steerVis += (inp.st - steerVis) * 0.2; wheelGrp.rotation.z = -steerVis * 0.9;
+    updateDynamics(dt, inp);
     steerWheels.forEach(m => m.rotation.y = -steerVis * 0.5);     // front wheels turn
     if (fp) {                                              // first-person: driver's seat (LHD, looking ahead)
       const lx = -Math.cos(heading), lz = Math.sin(heading);
