@@ -874,9 +874,24 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
     if (cfg.car) layoutYaw = cfg.car.model_yaw_deg || 0;
     LAYOUT = cfg;
     const list = document.getElementById('complist');
+    const detailMat = new THREE.MeshStandardMaterial({color:0x0d1013, metalness:0.45, roughness:0.55});
+    const addDetail = (mesh, c) => {                       // light part-detail so it's not just a box
+      const s = c.size, nm = c.name.toLowerCase();
+      if (nm.includes('pack')) { const n = 4; for (let i=0;i<n;i++){ const r=new THREE.Mesh(new THREE.BoxGeometry(s[0]*0.92,0.03,s[2]*0.14), detailMat); r.position.set(0, s[1]/2+0.016, (i-(n-1)/2)*s[2]/n); mesh.add(r);} }            // module ridges
+      else if (nm.includes('inverter')||nm.includes('charger')||nm.includes('vcu')) { const n=5; for (let i=0;i<n;i++){ const f=new THREE.Mesh(new THREE.BoxGeometry(s[0]*0.86,0.06,0.018), detailMat); f.position.set(0, s[1]/2+0.03, (i-(n-1)/2)*s[2]/n); mesh.add(f);} }        // cooling fins
+      else if (nm.includes('transaxle')) { const d=new THREE.Mesh(new THREE.CylinderGeometry(s[1]*0.5,s[1]*0.5,s[2]*0.62,18), detailMat); d.rotation.x=Math.PI/2; d.position.set(-s[0]*0.18,0,0); mesh.add(d); }                               // diff housing
+      else if (nm.includes('sub')) { [s[2]*0.25,-s[2]*0.25].forEach(z=>{ const cone=new THREE.Mesh(new THREE.ConeGeometry(Math.min(s[1],s[2])*0.32,0.1,20), detailMat); cone.rotation.x=-Math.PI/2; cone.position.set(0,0,z+s[2]/2*0.0001); mesh.add(cone);} ); }   // speaker cones
+    };
     (cfg.components || []).forEach(c => {
-      const mesh = B(c.size[0],c.size[1],c.size[2], new THREE.MeshStandardMaterial({color:c.color, transparent:true, opacity:0.92, metalness:0.2, roughness:0.6}), c.pos[0],c.pos[1],c.pos[2]);
-      car.add(mesh); comps.push({mesh, mass:c.mass_kg||0, pos:c.pos});
+      const mat = new THREE.MeshStandardMaterial({color:c.color, transparent:true, opacity:0.92, metalness:0.35, roughness:0.45});
+      let mesh;
+      if (c.role === 'motor') {                            // motor reads as a cylinder along the driveline (X)
+        const r = Math.min(c.size[1], c.size[2]) / 2;
+        mesh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, c.size[0], 28), mat); mesh.rotation.z = Math.PI/2;
+      } else {
+        mesh = new THREE.Mesh(new THREE.BoxGeometry(c.size[0], c.size[1], c.size[2]), mat); addDetail(mesh, c);
+      }
+      mesh.position.set(c.pos[0], c.pos[1], c.pos[2]); car.add(mesh); comps.push({mesh, mass:c.mass_kg||0, pos:c.pos});
       const l = addLabel(c.name + (c.mass_kg ? ' (' + c.mass_kg + 'kg)' : ''), mesh);
       if (c.role === 'motor') { motorComp = comps[comps.length - 1]; motorLabel = l; }
       const b = document.createElement('button'); b.textContent = c.name; b.style.background = c.color; b.className = 'active';
@@ -892,7 +907,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
       const applyMotor = name => {
         const m = cfg.motors.find(x => x.name === name); if (!m || !motorComp) return;
         motorComp.mass = m.mass_kg;
-        if (m.size) { motorComp.mesh.geometry.dispose(); motorComp.mesh.geometry = new THREE.BoxGeometry(m.size[0], m.size[1], m.size[2]); }
+        if (m.size) { const r = Math.min(m.size[1], m.size[2]) / 2; motorComp.mesh.geometry.dispose(); motorComp.mesh.geometry = new THREE.CylinderGeometry(r, r, m.size[0], 28); }
         if (motorLabel) motorLabel.textContent = name + ' (' + m.mass_kg + 'kg)';
         const used = Math.min(m.T_nm, lim), capped = m.T_nm > lim;
         const el = document.getElementById('motorinfo');
