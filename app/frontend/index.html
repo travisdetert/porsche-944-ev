@@ -1100,10 +1100,11 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
   const tg = document.getElementById('tgrip'), tp = document.getElementById('tpsi');
   if (tg) tg.oninput = updateTires; if (tp) tp.oninput = updateTires; updateTires();
 
-  let hoodOpen = false, hoodT = 0, popOpen = false, popT = 0, wheelsSpin = false;
+  let hoodOpen = false, hoodT = 0, popOpen = false, popT = 0, wheelsSpin = false, popAuto = true;
   // hood/pop/wheels are rigged on the schematic; if the photo body is showing, flip to the schematic so they animate
   const hb = document.getElementById('hoodBtn'); if (hb) hb.onclick = () => { if (showReal) showRealistic(false); hoodOpen = !hoodOpen; hb.textContent = hoodOpen ? 'Close hood ▼' : 'Open hood ▲'; hb.classList.toggle('active', hoodOpen); };
-  const pb = document.getElementById('popBtn'); if (pb) pb.onclick = () => { if (showReal) showRealistic(false); popOpen = !popOpen; pb.textContent = popOpen ? 'Pop-up lights ▼' : 'Pop-up lights ▲'; pb.classList.toggle('active', popOpen); };
+  const pb = document.getElementById('popBtn'); if (pb) pb.onclick = () => { if (showReal) { showRealistic(false); popAuto = true; } else { popAuto = !popAuto; } if (!popAuto) popOpen = false; pb.textContent = popAuto ? '💡 Pop-ups: Auto' : 'Pop-ups: Off'; pb.classList.toggle('active', popAuto); };
+  if (pb) { pb.textContent = '💡 Pop-ups: Auto'; pb.classList.add('active'); }
   const wb = document.getElementById('wheelBtn'); if (wb) wb.onclick = () => { if (showReal) showRealistic(false); wheelsSpin = !wheelsSpin; wb.classList.toggle('active', wheelsSpin); };
   const gh = document.getElementById('ghost'); if (gh) gh.oninput = e => applyGhost(e.target.value/100);
 
@@ -1184,6 +1185,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
   (function loop(){
     requestAnimationFrame(loop);
     hoodT += ((hoodOpen ? 1.0 : 0) - hoodT) * 0.12; hood.rotation.z = hoodT;
+    if (popAuto) popOpen = (performance.now() % 7000) < 3500;   // auto-wink: up ~3.5s, down ~3.5s
     popT += ((popOpen ? 0.9 : 0) - popT) * 0.15; pods.forEach(p => p.rotation.z = popT);
     lensMat.emissive.setHex(popOpen ? 0xffffee : 0x000000);
     if (wheelsSpin) wheels.forEach(w => w.rotateOnAxis(yAxis, 0.3));
