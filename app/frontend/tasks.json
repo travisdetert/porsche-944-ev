@@ -40,6 +40,7 @@
     { "id": "T16", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Northern-WI route study (distance, range margin)", "dep": "" },
     { "id": "T17", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Charging map (AC L2 only, ADR-0006)", "dep": "" },
     { "id": "T18", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Charging strategy / DCFC retrofit (ADR-0015)", "dep": "" },
-    { "id": "T19", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Add WI routes as in-app presets", "dep": "" }
+    { "id": "T19", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Add WI routes as in-app presets", "dep": "" },
+    { "id": "FIN", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Toxic Green finish — wrap then respray (ADR-0017, post-MVP)", "dep": "after it drives + bodywork" }
   ]
 }

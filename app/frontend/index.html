@@ -160,7 +160,7 @@
       <span style="color:#aaa;font-size:12px">Ghost</span>
       <input type="range" id="ghost" min="0" max="100" value="70" style="accent-color:#4a9eff;width:88px">
       <span style="color:#aaa;font-size:12px">Paint</span>
-      <input type="color" id="paintpick" value="#17191d" title="Pick any shade" style="width:30px;height:22px;border:0;background:none;cursor:pointer;padding:0">
+      <input type="color" id="paintpick" value="#62e32b" title="Pick any shade" style="width:30px;height:22px;border:0;background:none;cursor:pointer;padding:0">
       <span id="swatches" style="display:inline-flex;gap:5px;align-items:center"></span>
     </div>
     <div class="row toolbar">
@@ -1165,11 +1165,12 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
   const setPaint = hex => { paint.color.set(hex); stripeMat.color.set(hex); bodyMats.forEach(m => m.color.set(hex)); if (paintPick) paintPick.value = hex; if (window.__gameBody) window.__gameBody.material.color.set(hex); window.__twinHex = hex; };
   if (paintPick) paintPick.oninput = e => setPaint(e.target.value);
   const swEl = document.getElementById('swatches');
-  if (swEl) [['Viper Green','#86b817'],['Irish Green','#009a3d'],['Oak Green','#3c4a38'],['British Racing','#16412b'],['Signal Green','#2e9e5b'],['Black','#17191d'],['Guards Red','#d81414'],['GT Silver','#c7ccce'],['White','#ececec']].forEach(([name,hex]) => {
+  if (swEl) [['Toxic Green','#62e32b'],['Viper Green','#86b817'],['Irish Green','#009a3d'],['British Racing','#16412b'],['Signal Green','#2e9e5b'],['Black','#17191d'],['Guards Red','#d81414'],['GT Silver','#c7ccce'],['White','#ececec']].forEach(([name,hex]) => {
     const b = document.createElement('button'); b.title = name;
     b.style.cssText = 'width:22px;height:22px;border-radius:50%;border:1px solid #444;background:'+hex+';cursor:pointer;padding:0';
     b.onclick = () => setPaint(hex); swEl.appendChild(b);
   });
+  setPaint('#62e32b');   // planned finish: Toxic Green (ADR-0017) — tune with the picker to a real sample
 
   // ---- Sensorium: the car redrawn as glowing sense-nodes, each sized by sensing weight and pulsing with its live channel ----
   const sens = new THREE.Group(); sens.visible = false; car.add(sens);
