@@ -1,0 +1,45 @@
+{
+  "_README": "Live project board for the PLAN tab. Mirror of the build plan (docs/project-plan.md) + steps/. status: done | doing | todo | blocked. Update as work lands.",
+  "phases": [
+    { "key": "NOW",   "title": "NOW — strip & prep" },
+    { "key": "BUY",   "title": "BUY — donor & parts" },
+    { "key": "BUILD", "title": "BUILD — make it go" },
+    { "key": "DRIVE", "title": "DRIVE — commission" }
+  ],
+  "tracks": [
+    { "key": "APP",     "title": "Head-unit app (parallel)" },
+    { "key": "ONGOING", "title": "Trips & charging (parallel)" }
+  ],
+  "tasks": [
+    { "id": "000", "phase": "NOW", "gate": "",    "status": "doing", "title": "Pull engine, fuel, exhaust + measure + weigh", "dep": "" },
+    { "id": "PF1", "phase": "NOW", "gate": "PF1", "status": "done",  "title": "Verify ZombieVerter ↔ Leaf gen (→ Gen-2 donor)", "dep": "" },
+    { "id": "PF3", "phase": "NOW", "gate": "PF3", "status": "todo",  "title": "Quote the adapter (2 shops)", "dep": "needs 000 dims" },
+    { "id": "PF4", "phase": "NOW", "gate": "PF4", "status": "todo",  "title": "Get HV safety gear + verify-dead drill", "dep": "" },
+    { "id": "SELL","phase": "NOW", "gate": "",    "status": "todo",  "title": "List gas parts for sale", "dep": "needs 000" },
+
+    { "id": "G1a", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Hunt & buy the donor Leaf (LeafSpy SOH)", "dep": "" },
+    { "id": "PF2", "phase": "BUY", "gate": "PF2", "status": "todo",  "title": "Size HV fuse + precharge", "dep": "needs donor specs" },
+    { "id": "G1b", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Extract + label powertrain, pack, PDM, LBC", "dep": "needs G1a" },
+    { "id": "ORD", "phase": "BUY", "gate": "",    "status": "todo",  "title": "Order ZombieVerter + adapter + HV BOM", "dep": "needs PF1,PF3" },
+
+    { "id": "G2",  "phase": "BUILD", "gate": "G2", "status": "todo", "title": "Machine + dry-fit adapter (runout < 0.1 mm)", "dep": "needs 000, ORD" },
+    { "id": "G3",  "phase": "BUILD", "gate": "G3", "status": "todo", "title": "Mount motor to transaxle, driveline true", "dep": "needs G2" },
+    { "id": "G4",  "phase": "BUILD", "gate": "G4", "status": "todo", "title": "Mount pack + skid plate, megger isolation", "dep": "needs G1b" },
+    { "id": "G5",  "phase": "BUILD", "gate": "G5", "status": "todo", "title": "Wire HV loop + bench-verify ZombieVerter", "dep": "needs G3,G4" },
+
+    { "id": "G6",  "phase": "DRIVE", "gate": "G6", "status": "todo", "title": "First power-up on stands (rotation, temps)", "dep": "needs G5" },
+    { "id": "G7",  "phase": "DRIVE", "gate": "G7", "status": "todo", "title": "First drive + grocery loop (verify brakes!)", "dep": "needs G6" },
+    { "id": "REG", "phase": "DRIVE", "gate": "",   "status": "todo", "title": "Register / inspect / insure", "dep": "" },
+
+    { "id": "APP1", "phase": "APP", "gate": "", "status": "done", "title": "Head-unit app: telemetry, DATA, DASH, CAR, sim, game", "dep": "" },
+    { "id": "APP2", "phase": "APP", "gate": "", "status": "done", "title": "ZombieVerter VCU module + can_source", "dep": "" },
+    { "id": "APP3", "phase": "APP", "gate": "", "status": "todo", "title": "Order Pi 5 + 7\" double-DIN touch + CAN HAT", "dep": "" },
+    { "id": "APP4", "phase": "APP", "gate": "", "status": "todo", "title": "Bench the Pi on mock data (deploy/install.sh)", "dep": "needs APP3" },
+    { "id": "APP5", "phase": "APP", "gate": "", "status": "todo", "title": "Wire real CAN: fill can_map.json + ZV param ids", "dep": "needs G5, APP4" },
+
+    { "id": "T16", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Northern-WI route study (distance, range margin)", "dep": "" },
+    { "id": "T17", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Charging map (AC L2 only, ADR-0006)", "dep": "" },
+    { "id": "T18", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Charging strategy / DCFC retrofit (ADR-0015)", "dep": "" },
+    { "id": "T19", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Add WI routes as in-app presets", "dep": "" }
+  ]
+}

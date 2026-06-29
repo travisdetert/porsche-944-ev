@@ -56,6 +56,7 @@
   </header>
   <nav>
     <button data-view="drive">DRIVE</button>
+    <button data-view="plan">PLAN</button>
     <button data-view="data">DATA</button>
     <button data-view="dash">DASH</button>
     <button data-view="tune">TUNE</button>
@@ -112,6 +113,16 @@
     <div class="chart"><div class="lbl">Temps °C — motor (orange) / inverter (blue) / hottest cell (red)</div><canvas id="c-temp"></canvas></div>
     <div class="chart"><div class="lbl">Wh/mile — negative = regen</div><canvas id="c-whmi"></canvas></div>
     <div class="chart"><div class="lbl">Cell imbalance Δ (mV) — pack-health trend</div><canvas id="c-cell"></canvas></div>
+  </section>
+
+  <!-- PLAN: project board -->
+  <section class="view" id="view-plan">
+    <div class="row" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 12px">
+      <span style="font-weight:700">Build plan</span>
+      <span id="plan-prog" style="color:#888;font-size:12px"></span>
+      <div style="flex:1;min-width:120px;height:8px;background:#222;border-radius:6px;overflow:hidden;max-width:320px"><div id="plan-bar" style="height:100%;width:0;background:#39d353"></div></div>
+    </div>
+    <div id="planboard" style="margin:10px 12px 18px"></div>
   </section>
 
   <!-- DATA: full live instrument bus -->
@@ -358,6 +369,35 @@ $('export').onclick = async () => {
   if (id) window.open('/api/trip.csv?id=' + id, '_blank');
 };
 
+// ---- PLAN: project board ----
+const PLAN_C = {done:'#39d353', doing:'#e6c84a', todo:'#555', blocked:'#e0533a'};
+const PLAN_LBL = {done:'DONE', doing:'IN PROGRESS', todo:'TO DO', blocked:'BLOCKED'};
+async function loadPlan() {
+  let d; try { d = await (await fetch('tasks.json')).json(); } catch(e){ return; }
+  const done = d.tasks.filter(t => t.status === 'done').length, n = d.tasks.length;
+  $('plan-prog').textContent = done + ' / ' + n + ' done';
+  const bar = $('plan-bar'); if (bar) bar.style.width = Math.round(done/n*100) + '%';
+  const card = t =>
+    '<div style="background:#15171b;border:1px solid #222;border-left:3px solid ' + (PLAN_C[t.status]||'#555') + ';border-radius:8px;padding:8px 10px;margin-bottom:8px">'
+    + '<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">'
+    + '<span style="font-size:13px;color:#eee">' + t.title + '</span>'
+    + (t.gate ? '<span style="font-size:10px;color:#9aa;border:1px solid #333;border-radius:5px;padding:0 5px;white-space:nowrap">' + t.gate + '</span>' : '')
+    + '</div>'
+    + '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:4px">'
+    + '<span style="font-size:10px;font-weight:700;color:' + (PLAN_C[t.status]||'#888') + '">● ' + (PLAN_LBL[t.status]||t.status) + '</span>'
+    + (t.dep ? '<span style="font-size:10px;color:#777">' + t.dep + '</span>' : '')
+    + '</div></div>';
+  const col = (title, tasks) =>
+    '<div style="background:#0f1013;border-radius:10px;padding:8px 10px">'
+    + '<div style="font-size:12px;font-weight:700;color:#9aa;margin-bottom:8px">' + title + '</div>'
+    + tasks.map(card).join('') + '</div>';
+  const colsFor = keys => keys.map(p => col(p.title, d.tasks.filter(t => t.phase === p.key))).join('');
+  $('planboard').innerHTML =
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">' + colsFor(d.phases) + '</div>'
+    + '<div style="font-size:12px;font-weight:700;color:#9aa;margin:14px 0 6px">Parallel tracks (don\'t block the car)</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">' + colsFor(d.tracks) + '</div>';
+}
+
 // ---- PARTS: custom parts still to prove out ----
 const PART_C = {unproven:'#e0533a', designed:'#e6c84a', proven:'#39d353'};
 const PART_LBL = {unproven:'UNPROVEN', designed:'DESIGNED', proven:'PROVEN'};
@@ -523,7 +563,7 @@ async function tick() {
   if (hist.length > 240) hist.shift();
   if (liveMode && $('view-trips').classList.contains('active')) drawTrips();
 }
-buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(tick, 500);
+buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); setInterval(tick, 500);
 (function(){ const b=document.getElementById('simToggle'), w=document.getElementById('simwrap'); if(b&&w) b.onclick=()=>{ const open=w.style.display==='none'; w.style.display=open?'block':'none'; b.textContent=(open?'▾':'▸')+' Sim table'; b.classList.toggle('active',open); if(open&&window.refreshSim) window.refreshSim(); }; })();
 </script>
 
