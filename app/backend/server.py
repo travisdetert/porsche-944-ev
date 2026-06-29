@@ -204,6 +204,7 @@ class MockCan:
         return {
             "mode": STATE["mode"], "scenario": sc, "status": status, "charging": charging,
             "warnings": warnings, "vcu_state": vcu, "gear": gear,
+            "vcu_fault": ("OVERCURRENT" if sc == "FAULT" else "none"), "fw": "ZV 5.24.R",
             # powertrain
             "speed_mph": round(speed), "power_kw": round(kw, 1),
             "drive_kw": round(drive_kw, 1), "regen_kw": round(regen_kw, 1),
@@ -233,9 +234,18 @@ class MockCan:
         }
 
 
-# Telemetry source: real SocketCAN on the Pi (CAN_IFACE=can0), else the dev mock.
+# Telemetry source: ZombieVerter VCU or generic SocketCAN on the Pi, else the dev mock.
 _iface = os.environ.get("CAN_IFACE")
-if _iface:
+_driver = os.environ.get("CAN_DRIVER", "")           # set CAN_DRIVER=zombieverter to use the VCU module
+if _iface and _driver == "zombieverter":
+    try:
+        from zombieverter import ZombieVerterCAN
+        CAN = ZombieVerterCAN(_iface)
+        print("Telemetry source: ZombieVerter VCU on", _iface)
+    except Exception as e:
+        print("ZombieVerter unavailable (%r) — using MockCan" % e)
+        CAN = MockCan()
+elif _iface:
     try:
         from can_source import SocketCanSource
         CAN = SocketCanSource(_iface, os.path.join(HERE, "..", "can_map.json"))
@@ -244,7 +254,7 @@ if _iface:
         print("SocketCAN unavailable (%r) — using MockCan" % e)
         CAN = MockCan()
 else:
-    print("Telemetry source: MockCan  (set CAN_IFACE=can0 on the Pi for real CAN)")
+    print("Telemetry source: MockCan  (set CAN_IFACE=can0 + CAN_DRIVER=zombieverter on the Pi)")
     CAN = MockCan()
 
 # --- trip persistence (SQLite, stdlib) ---

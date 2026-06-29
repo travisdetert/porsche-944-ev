@@ -92,7 +92,8 @@
 
   <!-- TUNE -->
   <section class="view tune" id="view-tune">
-    <p class="note">Live VCU parameters. These are <b>bounded</b> here — the VCU still clamps everything to its hard safety limits. (ADR-0014)</p>
+    <div id="vcustatus" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:10px"></div>
+    <p class="note">Live <b>ZombieVerter</b> VCU parameters. These are <b>bounded</b> here — the VCU still clamps everything to its hard safety limits. (ADR-0014)</p>
     <div id="params"></div>
   </section>
 
@@ -273,6 +274,18 @@ async function buildScenarios() {
     b.onclick = async () => { await fetch('/api/scenario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scenario:name})}); tick(); };
     box.appendChild(b);
   }
+}
+function renderVcu(t) {
+  const el = $('vcustatus'); if (!el) return;
+  const fault = t.vcu_fault && t.vcu_fault !== 'none';
+  const cell = (k, v, col) => '<div style="background:#1b1b1e;border-radius:10px;padding:8px 10px"><div style="font-size:10px;color:#8a8a90;text-transform:uppercase;letter-spacing:.5px">' + k + '</div><div style="font-size:18px;font-weight:800;color:' + (col || '#eee') + '">' + v + '</div></div>';
+  el.innerHTML =
+    cell('VCU state', t.vcu_state || '—', t.vcu_state === 'Run' ? '#39d353' : t.vcu_state === 'Fault' ? '#e0533a' : '#e6c84a')
+    + cell('DC bus', (t.pack_v ?? '—') + ' V · ' + (t.pack_a ?? '—') + ' A')
+    + cell('Motor rpm', t.motor_rpm ?? '—')
+    + cell('Inv / Motor °C', (t.inverter_c ?? '—') + ' / ' + (t.motor_c ?? '—'))
+    + cell('Last fault', fault ? t.vcu_fault : 'none', fault ? '#e0533a' : '#39d353')
+    + cell('Firmware', t.fw || '—', '#9aa');
 }
 async function buildParams() {
   const d = await (await fetch('/api/params')).json();
@@ -490,6 +503,7 @@ async function tick() {
   window.__lastT = t;
   if ($('view-data').classList.contains('active')) renderData(t);
   if ($('view-dash').classList.contains('active')) renderDash(t);
+  if ($('view-tune').classList.contains('active')) renderVcu(t);
   $('status').textContent = (t.charging ? '🔌 ' : '') + t.status;
   $('status').className = 'status' + (t.charging ? ' charge' : '');
   $('mode').textContent = t.mode;
