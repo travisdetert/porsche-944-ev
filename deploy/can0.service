@@ -1,0 +1,15 @@
+[Unit]
+Description=Bring up SocketCAN can0 (drivetrain bus)
+# Requires the MCP2515 overlay in /boot/firmware/config.txt (see deploy/README.md), then a reboot.
+After=sys-subsystem-net-devices-can0.device
+BindsTo=sys-subsystem-net-devices-can0.device
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Bitrate MUST match the bus — openinverter/Leaf is commonly 500000. Verify before HV power-up.
+ExecStart=/sbin/ip link set can0 up type can bitrate 500000
+ExecStop=/sbin/ip link set can0 down
+
+[Install]
+WantedBy=multi-user.target
