@@ -222,6 +222,7 @@
       <div id="game3d" style="height:62vh;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
       <div id="hud" style="position:absolute;top:12px;left:16px;font-size:28px;font-weight:800;color:#fff;text-shadow:0 1px 4px #000">0 mph</div>
       <div id="lapinfo" style="position:absolute;top:12px;right:16px;font-size:13px;font-weight:700;color:#fff;text-align:right;text-shadow:0 1px 4px #000;line-height:1.5"></div>
+      <div id="gamedata" style="position:absolute;bottom:12px;left:16px;font-size:12px;font-weight:700;color:#eee;background:rgba(10,10,12,0.72);padding:8px 12px;border-radius:8px;line-height:1.7"></div>
     </div>
   </section>
 
@@ -1271,10 +1272,11 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
 
   const Bx = (w,h,d,col,x,y,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshStandardMaterial({color:col,metalness:0.4,roughness:0.45})); m.position.set(x,y,z); return m; };
   const car = new THREE.Group();
-  const gbody = Bx(1.8,0.5,4.2, 0x17191d, 0,0.5,0); car.add(gbody);   // body, length along Z
+  const boxParts = [];
+  const gbody = Bx(1.8,0.5,4.2, 0x62e32b, 0,0.5,0); car.add(gbody); boxParts.push(gbody);   // placeholder until the real model loads
   window.__gameBody = gbody; if (window.__twinHex) gbody.material.color.set(window.__twinHex);   // sync the CAR-tab paint
-  car.add(Bx(1.6,0.45,1.7, 0x0c0f12, 0,0.95,-0.5));    // cabin (rear)
-  car.add(Bx(0.25,0.04,4.0, 0x3a3a3d, 0,0.78,0));      // stripe
+  const gcabin = Bx(1.6,0.45,1.7, 0x0c0f12, 0,0.95,-0.5); car.add(gcabin); boxParts.push(gcabin);   // cabin
+  const gstripe = Bx(0.25,0.04,4.0, 0x111317, 0,0.78,0); car.add(gstripe); boxParts.push(gstripe);
   const tireMat = new THREE.MeshStandardMaterial({color:0x111111, roughness:0.9});
   const rimMat = new THREE.MeshStandardMaterial({color:0x33373f, metalness:0.85, roughness:0.35});
   function makeWheel(R, width) {
@@ -1287,8 +1289,22 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
     return g;
   }
   const wheels = [], steerWheels = [];
-  const GW = (x,z,steer) => { const mount = new THREE.Group(); mount.position.set(x,0.45,z); car.add(mount); const w = makeWheel(0.45,0.3); w.rotation.z = Math.PI/2; mount.add(w); wheels.push(w); if (steer) steerWheels.push(mount); };
+  const GW = (x,z,steer) => { const mount = new THREE.Group(); mount.position.set(x,0.45,z); car.add(mount); boxParts.push(mount); const w = makeWheel(0.45,0.3); w.rotation.z = Math.PI/2; mount.add(w); wheels.push(w); if (steer) steerWheels.push(mount); };
   GW(1.0,1.35,true); GW(-1.0,1.35,true); GW(1.0,-1.35,false); GW(-1.0,-1.35,false);
+
+  // load the real 944 model as the player car (toxic green); keep the box as fallback if it fails
+  if (THREE.GLTFLoader) new THREE.GLTFLoader().load('models/944.glb', g => {
+    const mdl = g.scene; mdl.updateMatrixWorld(true);
+    let bb = new THREE.Box3().setFromObject(mdl), sz = bb.getSize(new THREE.Vector3());
+    mdl.rotation.y = (sz.x > sz.z ? Math.PI/2 : 0);            // long axis → Z (game forward); flip with +Math.PI if backwards
+    mdl.updateMatrixWorld(true);
+    bb = new THREE.Box3().setFromObject(mdl); sz = bb.getSize(new THREE.Vector3());
+    mdl.scale.setScalar(4.3 / Math.max(sz.z, 0.001)); mdl.updateMatrixWorld(true);
+    bb = new THREE.Box3().setFromObject(mdl); const ct = bb.getCenter(new THREE.Vector3());
+    mdl.position.set(-ct.x, -bb.min.y, -ct.z);
+    mdl.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); const c = o.material.color; if (!o.material.map && c && c.r > 0.22 && c.r > c.g*1.6 && c.r > c.b*1.6) c.set(window.__twinHex || '#62e32b'); } });
+    car.add(mdl); boxParts.forEach(p => p.visible = false);   // real model in → hide the placeholder
+  }, undefined, () => {});
 
   // traffic: a few cars circulating the oval (GTA-ish life; no collision — dodge them)
   const traffic = [], tCols = [0x8a4b2a, 0x2a4f8a, 0x4f8a2a, 0xb0b0b8];
@@ -1363,6 +1379,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
   window.addEventListener('gamepaddisconnected', () => { if (status) status.textContent = ''; });
 
   let heading = Math.PI/2, speed = 0, px = 0, pz = -RMID, last = performance.now(), slip = 0;   // start on the start line
+  let gsoc = 80, gmotorC = 30, gpw = 0;     // game-derived telemetry (the car reporting its data as you drive)
   let lapStart = performance.now(), lastLap = 0, bestLap = 0, prevPx = px;
   const lapinfo = document.getElementById('lapinfo');
   const MAXF = 32, MAXR = 9, ACC = 16, BRK = 26, TURN = 1.8, yAxis = new THREE.Vector3(0,1,0);
@@ -1425,6 +1442,17 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
     }
     rnd.render(scene, cam);
     if (hud) hud.textContent = Math.abs(Math.round(speed * 2.237)) + ' mph' + (speed < -0.5 ? ' (R)' : '') + ' · grip ' + (window.gripFactor || 1).toFixed(2) + (inp.hb ? ' · DRIFT' : '');
+    // game-derived telemetry — the car reports its data as you drive
+    const mph = Math.abs(speed) * 2.237, rpm = Math.round(mph * 95);
+    const pwTarget = inp.thr * Math.min(120, 25 + mph * 1.2) - ((inp.brk > 0 && speed > 0.5) ? Math.min(45, mph * 0.6) : 0);
+    gpw += (pwTarget - gpw) * 0.2;
+    gsoc = Math.max(0, Math.min(100, gsoc - gpw * dt * 0.012));        // power drains, regen tops up
+    gmotorC += ((28 + Math.abs(gpw) * 0.45) - gmotorC) * 0.02;
+    window.__gameTele = {mph: Math.round(mph), kw: Math.round(gpw), rpm, soc: +gsoc.toFixed(1), motor_c: Math.round(gmotorC)};
+    const gd = document.getElementById('gamedata');
+    if (gd) gd.innerHTML = '🟢 944 EV<br><b style="font-size:15px">' + Math.round(mph) + '</b> mph · '
+      + (gpw < -1 ? '<span style="color:#7fd1ff">REGEN ' + Math.abs(Math.round(gpw)) + '</span>' : '<span style="color:#9be29b">' + Math.round(gpw) + '</span>') + ' kW<br>'
+      + rpm + ' rpm · ' + gsoc.toFixed(0) + '% SOC · ' + Math.round(gmotorC) + '°C motor';
     if (lapinfo) lapinfo.innerHTML = 'LAP ' + ((now - lapStart) / 1000).toFixed(1) + 's<br>last ' + (lastLap ? lastLap.toFixed(1) : '—') + 's<br>best ' + (bestLap ? bestLap.toFixed(1) : '—') + 's';
     if (status) { const g0 = navigator.getGamepads && navigator.getGamepads()[0]; status.textContent = g0 ? ('🎮 ' + g0.id.slice(0, 26)) : '🎮 no pad — connect USB/BT, then press a button'; status.style.color = g0 ? '#39d353' : '#e6a86a'; }
   })(performance.now());
