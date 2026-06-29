@@ -22,11 +22,12 @@ USD_PER_KWH = 130          # Tesla salvage modules, cheapest vendor (~$690 / 5.3
 TX_TORQUE_LIMIT = 350      # Nm the stock transaxle input will take (ADR-0004) -- verify
 
 # Motor catalog: torque Nm, power W, max rpm, mass kg, approx salvage/kit $
+# Specs from vendor/conversion sources (HyPer9 NetGain sheet; EM57 Nissan/openinverter). Verify on the unit.
 MOTORS = {
-    "HyPer9":     dict(T=160, P=88000,  rpm=8000,  kg=68,  usd=5400),
-    "Leaf EM57":  dict(T=320, P=110000, rpm=10500, kg=70,  usd=1000),  # baseline
-    "HiTorque AC":dict(T=350, P=130000, rpm=9000,  kg=80,  usd=3000),
-    "Dual EM57":  dict(T=640, P=220000, rpm=10500, kg=140, usd=2200),  # torque clamped by transaxle
+    "HyPer9":      dict(T=235, P=95000,  rpm=8000,  kg=59,  usd=5400),  # NetGain kit (bolt-in)
+    "Leaf EM57":   dict(T=320, P=110000, rpm=10500, kg=60,  usd=1000),  # baseline (ZE1 donor)
+    "Leaf EM57 e+":dict(T=340, P=160000, rpm=10500, kg=62,  usd=1500),  # 62 kWh e+ donor, same motor
+    "Dual EM57":   dict(T=640, P=220000, rpm=10500, kg=120, usd=2200),  # torque clamped by transaxle
 }
 
 
@@ -180,7 +181,7 @@ def scatter():
     configs = [
         ("a", "Leaf EM57", 30), ("b", "Leaf EM57", 50),
         ("c", "Leaf EM57", 74), ("d", "Leaf EM57", 90),
-        ("e", "HyPer9", 50), ("f", "HiTorque AC", 74),
+        ("e", "HyPer9", 50), ("f", "Leaf EM57 e+", 74),
         ("g", "Dual EM57", 40), ("h", "Dual EM57", 74),
     ]
     legend = []

@@ -5,14 +5,15 @@
   "axles": { "front_x": 1.25, "rear_x": -1.15 },
   "tires": { "compound": 1.0, "inflation_psi": 32, "optimal_psi": 32 },
   "transaxle_torque_limit_nm": 350,
+  "_motors_note": "Real specs: HyPer9 (NetGain vendor sheet) ø8.66in×13.98in, 130lb, 95kW/235Nm@8000. Leaf EM57 cross-section ~320×317mm (conversion sources), 110kW/320Nm@10500 (e+ 160kW/340Nm). Axial length + bare-motor mass are best estimates — VERIFY on the actual unit / vendor drawing. size=[axialLen, dia, dia] in metres.",
   "motors": [
-    { "name": "HyPer9",      "P_kw": 88,  "T_nm": 160, "rpm": 8000,  "mass_kg": 68,  "size": [0.5, 0.42, 0.5] },
-    { "name": "Leaf EM57",   "P_kw": 110, "T_nm": 320, "rpm": 10500, "mass_kg": 80,  "size": [0.58, 0.48, 0.55] },
-    { "name": "HiTorque AC", "P_kw": 130, "T_nm": 350, "rpm": 9000,  "mass_kg": 90,  "size": [0.6, 0.5, 0.55] },
-    { "name": "Dual EM57",   "P_kw": 220, "T_nm": 640, "rpm": 10500, "mass_kg": 150, "size": [0.7, 0.5, 0.9] }
+    { "name": "HyPer9",       "P_kw": 95,  "T_nm": 235, "rpm": 8000,  "mass_kg": 59,  "size": [0.36, 0.22, 0.22] },
+    { "name": "Leaf EM57",    "P_kw": 110, "T_nm": 320, "rpm": 10500, "mass_kg": 60,  "size": [0.30, 0.32, 0.32] },
+    { "name": "Leaf EM57 e+", "P_kw": 160, "T_nm": 340, "rpm": 10500, "mass_kg": 62,  "size": [0.30, 0.32, 0.32] },
+    { "name": "Dual EM57",    "P_kw": 220, "T_nm": 640, "rpm": 10500, "mass_kg": 120, "size": [0.30, 0.32, 0.64] }
   ],
   "components": [
-    { "name": "EM57 motor",      "role": "motor", "color": "#1565c0", "mass_kg": 80,  "size": [0.58, 0.48, 0.55], "pos": [1.05, 0.48, 0.0] },
+    { "name": "EM57 motor",      "role": "motor", "color": "#1565c0", "mass_kg": 60,  "size": [0.30, 0.32, 0.32], "pos": [1.05, 0.45, 0.0] },
     { "name": "Inverter + VCU",  "color": "#0d47a1", "mass_kg": 15,  "size": [0.5, 0.18, 0.5],   "pos": [1.05, 0.82, 0.0] },
     { "name": "Charger / DC-DC", "color": "#5c6bc0", "mass_kg": 12,  "size": [0.35, 0.28, 0.35], "pos": [1.45, 0.5, 0.5] },
     { "name": "Front pack (6)",  "color": "#1976d2", "mass_kg": 180, "size": [0.8, 0.26, 1.2],   "pos": [0.5, 0.36, 0.0] },
