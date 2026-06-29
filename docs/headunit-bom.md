@@ -19,6 +19,16 @@ acts as the car's **Wi-Fi AP** (phone joins → same URL). Architecture + safety
 | 9 | Wiring | inline fuse, CAN/Dupont harness, connectors | 15 | tidy + fused |
 | | | **Subtotal** | **~$230–260** | |
 
+### Audio path (the Pi has no power amp — ADR-0009/0010/0016)
+The Pi is the head unit, so audio comes off the Pi to a small amp → the subs. (The old Pioneer
+AVH-X1600DVD is **removed**, not reused — it's a closed appliance that can't run the app, ADR-0016.)
+| Part | Pick | ~$ | Why |
+|---|---|---|---|
+| Line-out | **USB DAC** (Pi 5 has no 3.5 mm jack) *or* Bluetooth to the amp | 10 | clean analog out |
+| Amp | **4-channel class-D car amp** | 40–70 | powers the subs + any speakers |
+| Cabling | RCA + speaker wire, inline fuse | 10 | |
+| | **Audio subtotal** | **~$60–90** | drives the ADR-0010 subwoofers |
+
 ## Path B — reuse an Android double-DIN as the display (cheapest if you already have one)
 Keep the Android double-DIN as the screen; run the app in a **kiosk browser** (e.g. *Fully
 Kiosk Browser*) pointed at the Pi. You still need the **Pi + CAN HAT + power** behind it

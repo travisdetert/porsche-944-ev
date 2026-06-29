@@ -21,6 +21,7 @@ a reversal gets a new ADR that supersedes the old one. The value is the *why* an
 | [0013](0013-electric-power-steering.md) | Retain power steering via an electric hydraulic pump | Accepted |
 | [0014](0014-pi-infotainment-control-app.md) | Custom Pi infotainment + telemetry app (web/PWA), outside the safety loop | Accepted |
 | [0015](0015-dcfc-ccs-retrofit-for-road-trips.md) | DC fast charging (CCS) — a v2 retrofit for long trips, not v1 | Accepted |
+| [0016](0016-pi-head-unit-replaces-pioneer.md) | Pi head unit replaces the Pioneer; audio via Pi → amp → subs | Accepted |
 
 ## Decisions still open (future ADRs)
 - Final HV protection values (fuse/precharge) once the EM57 inverter spec is confirmed (PF2).
