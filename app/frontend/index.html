@@ -137,6 +137,7 @@
       <button class="clearbtn" id="bayBtn">🔧 Bay</button>
       <button class="clearbtn" id="sensBtn">🫧 Senses</button>
       <button class="clearbtn" id="hvBtn">⚡ HV+cool</button>
+      <button class="clearbtn" id="dlBtn">🔩 Driveline</button>
       <span class="sep"></span>
       <button class="clearbtn" id="hoodBtn" title="Animates on the schematic (the photo model is one fused mesh)">Hood ▲</button>
       <button class="clearbtn" id="popBtn" title="Animates on the schematic">Lights ▲</button>
@@ -759,9 +760,9 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
 
   // driveline: motor → adapter → torque tube → transaxle (the kept Porsche driveline)
   const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,2.25,16), new THREE.MeshStandardMaterial({color:0x2e7d32, metalness:0.3, roughness:0.6}));
-  tube.rotation.z = Math.PI/2; tube.position.set(-0.18,0.4,0); car.add(tube);
+  tube.rotation.z = Math.PI/2; tube.position.set(-0.18,0.45,0); car.add(tube);     // on the shared driveline axis y=0.45
   const adapter = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.12,20), new THREE.MeshStandardMaterial({color:0xe67e22, metalness:0.4, roughness:0.5}));
-  adapter.rotation.z = Math.PI/2; adapter.position.set(0.78,0.46,0); car.add(adapter);
+  adapter.rotation.z = Math.PI/2; adapter.position.set(0.78,0.45,0); car.add(adapter);
 
   let glider = {mass_kg:980, cg:[0.05,0.5,0]}, axles = {front_x:1.25, rear_x:-1.15};
   const comps = [], labels = [], motorOptData = []; let motorComp = null, motorLabel = null, LAYOUT = null, curRear = 0.52, motorOpts = null;
@@ -792,6 +793,34 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   const hvBtn = document.getElementById('hvBtn');
   function setHV(on) { hvcool.visible = on; hvAnchors.forEach(a => a.visible = on); if (hvBtn) hvBtn.classList.toggle('active', on); }
   if (hvBtn) hvBtn.onclick = () => setHV(!hvcool.visible);
+
+  // ---- Driveline detail for alignment vetting: motor → adapter plate → coupler → torque tube → transaxle input ----
+  const DLY = 0.45;                                        // the one axis everything must share (concentric)
+  const dl = new THREE.Group(); dl.visible = false; car.add(dl);
+  const dlAnchors = [];
+  const steelMat = new THREE.MeshStandardMaterial({color:0x9aa3ad, metalness:0.85, roughness:0.3});
+  const plateMat = new THREE.MeshStandardMaterial({color:0xe67e22, metalness:0.5, roughness:0.45});
+  const dlAxisX = (mesh) => { mesh.rotation.z = Math.PI/2; return mesh; };
+  const axisLine = dlAxisX(new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,2.5,8), new THREE.MeshBasicMaterial({color:0xffe14a}))); axisLine.position.set(-0.1, DLY, 0); dl.add(axisLine);   // rotational centerline
+  const oshaft = dlAxisX(new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.22,12), steelMat)); oshaft.position.set(0.82, DLY, 0); dl.add(oshaft);   // motor output shaft
+  const plate  = dlAxisX(new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.19,0.025,28), plateMat)); plate.position.set(0.7, DLY, 0); dl.add(plate);     // adapter plate (bellhousing face)
+  const coupler= dlAxisX(new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.14,16), steelMat)); coupler.position.set(0.58, DLY, 0); dl.add(coupler); // coupler/hub
+  const txflange = dlAxisX(new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.04,20), steelMat)); txflange.position.set(-1.12, DLY, 0); dl.add(txflange);  // transaxle input flange
+  const dlLab = (t,x,y,z,col) => { const a = new THREE.Object3D(); a.visible = false; a.position.set(x,y,z); dl.add(a); addLabel(t,a,col); dlAnchors.push(a); };
+  dlLab('motor output', 0.92, DLY+0.18, 0, '#cfe8ff'); dlLab('adapter plate', 0.7, DLY-0.27, 0, '#ffd2a6');
+  dlLab('coupler', 0.5, DLY+0.2, 0, '#cfe8ff'); dlLab('torque tube', -0.15, DLY-0.22, 0, '#9be29b');
+  dlLab('transaxle input', -1.12, DLY+0.22, 0, '#cfe8ff'); dlLab('⟲ shared axis — vet runout < 0.1 mm, faces parallel', 0.0, DLY+0.42, 0, '#ffe14a');
+  const dlBtn = document.getElementById('dlBtn');
+  function showDriveline(on) {
+    dl.visible = on; dlAnchors.forEach(a => a.visible = on); if (dlBtn) dlBtn.classList.toggle('active', on);
+    showRealistic(false);                                  // schematic, so we can see the shafts
+    applyGhost(on ? 0.08 : (document.getElementById('ghost') || {value:70}).value / 100);
+    comps.forEach(c => c.mesh.visible = on ? (c === motorComp) : true);   // keep only the motor; transaxle shown as its input flange
+    if (typeof cgDot !== 'undefined') { cgDot.visible = !on; cgStem.visible = !on; }
+    if (motorOpts) motorOpts.visible = false;
+    if (controls) { if (on) { cam.position.set(0.4, 1.15, 4.0); controls.target.set(-0.1, DLY, 0); } else { cam.position.set(5.6, 3, 6.6); controls.target.set(0, 0.6, 0); } controls.update(); }
+  }
+  if (dlBtn) dlBtn.onclick = () => showDriveline(!dl.visible);
 
   function updateBalance() {
     let m = glider.mass_kg, mx = m*glider.cg[0], my = m*glider.cg[1], mz = m*glider.cg[2];
