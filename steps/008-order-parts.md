@@ -19,3 +19,20 @@ Everything new is ordered in one go (reusing donor HV wherever possible).
 
 ## Notes
 - **Reuse the donor's contactors/fuse/cable if undamaged** — cheapest path (ADR-0011).
+
+<!-- tips-v1 -->
+
+## Tools
+- The BOM (`../docs/mvp-sourcing.md`, `../docs/headunit-bom.md`)
+
+## Time & difficulty
+order day · easy (then lead times)
+
+## Tips & gotchas
+- Order the **ZombieVerter early** — ~4-week lead from EVBMW.
+- Batch the small HV parts (lugs, cable, fuse, glands) in one order to save shipping.
+- Lock the **adapter** quote before this step.
+- Head-unit parts can come last — bench it on mock data meanwhile.
+
+## Avoid
+- Ordering battery hardware before the bays are measured (step 000).

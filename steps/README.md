@@ -4,6 +4,9 @@ The 944 gas→electric conversion as ordered, self-contained steps — one file 
 `NNN-slug.md`. Work top to bottom; honor each step's **Blocked by**. One-page overview:
 `../docs/next-steps.md`. Tracked as tasks #1–#15.
 
+Every step now carries **Tools**, **Time & difficulty**, **Tips & gotchas**, and **Avoid**
+(plus **⚠ Safety** on the HV/rotating steps) — read those before starting the checklist.
+
 | Step | Title | Phase | Gate | Task |
 |---|---|---|---|---|
 | [000](000-pull-the-engine.md) | Pull the engine | NOW | — | #8 |

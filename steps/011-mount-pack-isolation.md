@@ -18,3 +18,26 @@ Pack mounted low + secure, terminals covered, LBC connected, **isolation check p
 
 ## Notes
 - Confirm the **fuel-tank-bay length vs the modules** here (the one fit risk — `battery-fit.md`).
+
+<!-- tips-v1 -->
+
+## Tools
+- Megger / insulation tester (500–1000 V)
+- Torque wrench
+- Skid plate (PARTS)
+
+## Time & difficulty
+2–4 days · moderate (HV)
+
+## ⚠ Safety
+- Pass a megger isolation test before the pack ever sees the contactors.
+
+## Tips & gotchas
+- Mount **low + central** (ADR-0005) for the CG; flanges to **frame rails/floor hardpoints**.
+- **Megger the pack-to-chassis isolation** — should read many MΩ; investigate anything low.
+- Vent the enclosure; protect the low main box with the **skid plate**.
+- Strain-relieve every HV cable; nothing rubbing or pinched.
+
+## Avoid
+- Bolting a crash load to sheetmetal.
+- Skipping the isolation test 'just to see if it runs'.

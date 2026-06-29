@@ -19,3 +19,26 @@ Correct rotation, smooth driveline, stable temps, **no faults** — under power,
 
 ## Notes
 - Anything wrong → **kill power, walk away, diagnose de-energized.** Never "just try it again" live.
+
+<!-- tips-v1 -->
+
+## Tools
+- Sturdy jack stands
+- Fire extinguisher + a helper
+- IR thermometer / thermal cam
+
+## Time & difficulty
+1 day · moderate (HV + rotating)
+
+## ⚠ Safety
+- Car ON STANDS, wheels off the ground, everyone clear of the driveline. Disconnect = e-stop.
+
+## Tips & gotchas
+- **Low power first.** Confirm rotation direction = forward.
+- Watch **motor/inverter temps and fault codes** live (DATA tab); stop on anything odd.
+- Keep the **service disconnect** within reach as a kill switch.
+- Short bursts, let it cool, repeat — don't hold load on stands.
+
+## Avoid
+- Anyone near the spinning driveline/wheels.
+- Full throttle on stands.

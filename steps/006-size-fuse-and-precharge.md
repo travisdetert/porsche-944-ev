@@ -18,3 +18,23 @@ You have specific, justified fuse + precharge values to order against.
 ## Notes
 - **Don't order the fuse/precharge until this is closed** — they're sized to *your* inverter.
 - DC-rated fuse only — an AC fuse won't interrupt a DC arc.
+
+<!-- tips-v1 -->
+
+## Tools
+- Pack + inverter datasheets
+- Inrush/precharge calculator (or the formula)
+
+## Time & difficulty
+1–2 hrs · moderate
+
+## ⚠ Safety
+- Fuse + precharge are your HV fault protection — size them right.
+
+## Tips & gotchas
+- Main fuse just **above** the system's max continuous current, **below** the wiring/pack limit — use a proper HV fuse (e.g. Bussmann).
+- Size the **precharge resistor** to limit inrush into the inverter caps (RC to ~95 % in <1 s), then the main contactor closes.
+- Confirm **contactor coil voltage + contact rating** vs your pack.
+
+## Avoid
+- A fuse rated way over the wiring (won't protect it) or barely over draw (nuisance trips).

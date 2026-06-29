@@ -18,3 +18,22 @@ Gas parts are listed (eBay / FB Marketplace / 944 forums) and money starts comin
 
 ## Notes
 - This is the funding loop: **the dead engine pays for the donor's electric one.**
+
+<!-- tips-v1 -->
+
+## Tools
+- Clean background + good light for photos
+- Sold-listing comps (eBay 'sold' filter)
+
+## Time & difficulty
+ongoing · easy
+
+## Tips & gotchas
+- **Complete sets sell for more** — engine + ECU + harness together beats piecemeal.
+- List on Pelican Parts, Rennlist/944 forums, FB Marketplace, eBay.
+- Price from **sold** comps, not asking prices.
+- This cash offsets the donor — track it against the budget.
+
+## Avoid
+- Scrapping the valuable bits (ECU, AC compressor, alternator).
+- Tossing brackets you might reuse for mounts.

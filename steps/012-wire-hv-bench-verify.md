@@ -18,3 +18,26 @@ Isolation passes; control **sequences precharge→main** and reads pedal/inverte
 
 ## Notes
 - ⚠️ Build this **de-energized**. A bad crimp is a fire; verify control before the full pack is live.
+
+<!-- tips-v1 -->
+
+## Tools
+- Multimeter
+- Laptop + ZombieVerter web UI (Wi-Fi)
+- candump / the head-unit DATA tab
+
+## Time & difficulty
+2–4 days · hard (HV)
+
+## ⚠ Safety
+- Bench-verify the control logic at LOW/again before full HV. One-hand rule.
+
+## Tips & gotchas
+- Wire per the **openinverter ZombieVerter diagram**; double-check contactor + precharge wiring.
+- Sequence: **precharge → main contactor** (the VCU manages it — confirm it does).
+- Configure the VCU over Wi-Fi; watch **opmode/faults** in the app's **TUNE/DATA** tabs.
+- Verify **CAN comms** (`candump can0`) before expecting telemetry.
+
+## Avoid
+- Closing the main contactor without precharge.
+- Guessing pin-outs — verify continuity first.

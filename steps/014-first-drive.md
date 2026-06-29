@@ -19,3 +19,26 @@ The 944 drives under its own power and completes a grocery loop. **Stage 1 done.
 ## Notes
 - Log real Wh/mi — it validates the range model and sizes the Stage-2 pack.
 - This is the moment the whole plan was built for. Enjoy it.
+
+<!-- tips-v1 -->
+
+## Tools
+- Empty private lot
+- Helper + phone (log via the app)
+- Charged 12 V + HV pack
+
+## Time & difficulty
+1 day · moderate
+
+## ⚠ Safety
+- Private lot first. CONFIRM BRAKES before any speed — no engine vacuum now.
+
+## Tips & gotchas
+- **Brakes first:** the 944 booster used engine vacuum — verify your **electric vacuum pump / booster** works before driving.
+- Parking-lot shakedown: gentle accel, brake, **regen feel**, reverse.
+- **Log the run** in the head-unit TRIPS — your first real **Wh/mi** calibrates the whole model.
+- Do the short grocery loop only after the lot test passes.
+
+## Avoid
+- Public roads before brakes + steering are confirmed.
+- Long first drive — start short, build trust.

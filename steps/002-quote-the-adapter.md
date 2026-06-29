@@ -20,3 +20,22 @@ Two quotes in hand with lead times; a shop chosen and a backup lined up.
 ## Notes
 - This is the **critical path** (it's a service, not a shelf part). Start early.
 - Expect a test-fit and **one revision** — build it into your schedule.
+
+<!-- tips-v1 -->
+
+## Tools
+- EM57 face dims + bolt pattern (calipers)
+- 944 bellhousing dims + bolt pattern
+- Your 944 clutch disc (spline reference)
+
+## Time & difficulty
+1 wk lead (quotes) · easy
+
+## Tips & gotchas
+- Get **two** quotes — a BRAT/EVcreate blank coupler + a local machine shop for the plate.
+- Hand the shop your **944 clutch disc** so the coupler spline matches exactly.
+- Spec **register/pilot fits** (not just bolt holes) so it self-centers.
+- See `../cad/adapter-spec.md` — bring those variables filled in.
+
+## Avoid
+- Quoting from guesses — measure the actual motor + bellhousing first.

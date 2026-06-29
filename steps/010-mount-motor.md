@@ -18,3 +18,24 @@ Motor mounted; driveline **turns smoothly by hand, runout in spec, no bind**.
 
 ## Notes
 - **Do NOT proceed to the pack until this is green** — fixing alignment is cheap now, agony later.
+
+<!-- tips-v1 -->
+
+## Tools
+- Dial indicator
+- Bubble/torque level
+- Poly/rubber mount bushings
+- Welder or bolt-in bracket stock
+
+## Time & difficulty
+1–2 days · moderate
+
+## Tips & gotchas
+- Mount so motor + adapter + torque tube share **one axis** (app Driveline view).
+- **Rotate the driveline by hand** — it should turn smooth and true, no bind.
+- Mounts tie to **factory crossmember hardpoints, never sheetmetal**.
+- Bushings isolate motor/gear whine — firm enough to still locate.
+
+## Avoid
+- Any angular/parallel misalignment — it eats bearings and buzzes.
+- Welding to thin floor pan.

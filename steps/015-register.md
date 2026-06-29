@@ -19,3 +19,23 @@ The car is legally registered/inspected for public-road use.
 ## Notes
 - Partly out of your hands (DMV timelines) — **drive private property until cleared.**
 - No engine = no free heat; the **electric defroster is required** for legal/safe driving.
+
+<!-- tips-v1 -->
+
+## Tools
+- Build receipts + photos
+- Weight slip (before/after)
+- WI DMV / inspection requirements
+
+## Time & difficulty
+varies (DMV) · easy–moderate
+
+## Tips & gotchas
+- Check **WI** rules for a converted-vehicle title + any inspection; EVs are emissions-exempt.
+- Keep **receipts + the weight change** — some states re-class by weight.
+- Tell your **insurer** it's an EV conversion (declared value/agreed value helps).
+- Photos of the HV install help inspection go smoothly.
+
+## Avoid
+- Driving unregistered beyond shakedown.
+- Losing documentation of the build.

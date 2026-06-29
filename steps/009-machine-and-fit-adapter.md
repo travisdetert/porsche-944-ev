@@ -18,3 +18,27 @@ The adapter + coupler dry-fit cleanly to **both** the motor and the bellhousing.
 
 ## Notes
 - This is the **one custom part** and the schedule's biggest risk — don't rush the fit.
+
+<!-- tips-v1 -->
+
+## Tools
+- Machine shop
+- Dial indicator + magnetic base
+- Calipers, feeler gauges
+- Engineer's square
+
+## Time & difficulty
+1–2 wks (shop) · hard
+
+## ⚠ Safety
+- Spinning driveline later depends on this being true. Measure it.
+
+## Tips & gotchas
+- **Dry-fit before final cuts.** Bolt up, then check.
+- Verify **concentricity with a dial indicator — runout < 0.1 mm**; faces parallel.
+- Let the **register/pilot fit** do the centering, not the bolts.
+- Use the app's **🔩 Driveline** view as the visual reference for what aligns to what.
+
+## Avoid
+- Trusting bolt-hole clearance to align the shafts.
+- Final-machining before a successful dry-fit.

@@ -19,3 +19,26 @@ All reusable parts extracted, labeled, and stored; harness documented; EM57 meas
 
 ## Notes
 - The battery pack is heavy — keep it level, terminals covered.
+
+<!-- tips-v1 -->
+
+## Tools
+- Your HV PPE (step 003)
+- Service-disconnect removal tools
+- Labels + camera
+
+## Time & difficulty
+1 day · moderate (HV)
+
+## ⚠ Safety
+- The donor pack is LIVE at 300+ V. De-energize + verify-dead before touching HV.
+
+## Tips & gotchas
+- **Pull the HV service disconnect first**, wait, then verify-dead at the terminals.
+- Keep the **LBC (BMS) + its harness + PDM + pedal + charge port together** — they're paired to the pack.
+- Label and photograph every HV connector and the 12 V control wiring as you go.
+- Bag the small brackets/bolts — you'll want them at mount time.
+
+## Avoid
+- Cutting any orange cable before it's confirmed dead.
+- Separating the LBC from its pack (loses calibration/pairing).

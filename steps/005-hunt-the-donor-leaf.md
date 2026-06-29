@@ -18,3 +18,23 @@ Donor bought; LeafSpy SOH recorded; price reflects pack health.
 
 ## Notes
 - A **running** donor cuts the commissioning gremlin phase dramatically — worth paying for.
+
+<!-- tips-v1 -->
+
+## Tools
+- LeafSpy Pro + an ELM327 OBD dongle
+- The donor vetting checklist (`../docs/mvp-sourcing.md`)
+- A broker/membership for Copart/IAAI if needed
+
+## Time & difficulty
+days–weeks (hunting) · moderate
+
+## Tips & gotchas
+- Target **2018+ 40 kWh, SOH > 85 %**, pack undamaged.
+- Buy the **whole car** — you want the charge port, pedal, PDM, LBC and harness too.
+- If you can, **LeafSpy the pack before bidding**; photos rarely show pack health.
+- Front-end damage is fine; **rear/side impact risks the pack**.
+
+## Avoid
+- Water-damaged cars (HV + water = scrap).
+- Salvage with airbag/pack-area impact.
