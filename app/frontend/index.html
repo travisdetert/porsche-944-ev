@@ -133,6 +133,7 @@
       <button class="clearbtn" id="realBtn">Realistic body</button>
       <button class="clearbtn" id="sensBtn">🫧 Sensorium</button>
       <button class="clearbtn" id="bayBtn">🔧 Engine bay</button>
+      <button class="clearbtn" id="hvBtn">⚡ HV + cooling</button>
       <span style="color:#aaa;font-size:12px">Ghost</span>
       <input type="range" id="ghost" min="0" max="100" value="70" style="accent-color:#4a9eff">
       <span style="color:#aaa;font-size:12px">Paint</span>
@@ -762,6 +763,31 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
   const addLabel = (t, mesh, color) => { const l = document.createElement('div'); l.textContent = t; l.style.cssText = 'position:absolute;padding:2px 7px;border-radius:6px;background:rgba(10,10,12,0.72);color:' + (color||'#fff') + ';font-size:11px;font-weight:700;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)'; wrap.appendChild(l); labels.push({l, mesh}); return l; };
   addLabel('torque tube', tube, '#9be29b'); addLabel('adapter', adapter, '#ffb27a');
 
+  // ---- HV cabling (orange) + cooling loop (cyan) routed through the bay ----
+  const hvcool = new THREE.Group(); hvcool.visible = false; car.add(hvcool);
+  const hvAnchors = [];
+  const HVCOL = 0xff7a00, COOLCOL = 0x18b6d6;
+  const routeTube = (pts, color, r) => {
+    const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(p[0], p[1], p[2])));
+    hvcool.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 44, r, 8, false),
+      new THREE.MeshStandardMaterial({color, metalness:0.2, roughness:0.55, emissive:color, emissiveIntensity:0.18})));
+  };
+  // HV DC bus: main pack → front pack → inverter (two-cable bundle)
+  [0.06, -0.06].forEach(dz => routeTube([[-0.75,0.5,dz],[-0.1,0.42,dz],[0.5,0.5,dz],[0.95,0.78,dz],[1.05,0.84,dz]], HVCOL, 0.03));
+  routeTube([[1.02,0.82,0],[1.02,0.6,0],[1.04,0.5,0]], HVCOL, 0.035);                 // inverter → motor (3-phase)
+  routeTube([[1.45,0.5,0.5],[1.25,0.62,0.35],[1.08,0.78,0.15]], HVCOL, 0.028);        // charger/DC-DC → DC bus
+  routeTube([[1.86,0.5,0.28],[1.5,0.46,0.26],[1.1,0.42,0.22],[1.05,0.86,0.22]], COOLCOL, 0.026);  // radiator → motor → inverter (supply)
+  routeTube([[1.05,0.9,-0.22],[1.5,0.6,-0.26],[1.86,0.56,-0.28]], COOLCOL, 0.026);    // inverter → radiator (return)
+  const radMat = new THREE.MeshStandardMaterial({color:0x1a3540, metalness:0.3, roughness:0.7});
+  const rad = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.42,0.9), radMat); rad.position.set(1.9,0.5,0); hvcool.add(rad);
+  const cpump = new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,0.16,16), radMat); cpump.rotation.z = Math.PI/2; cpump.position.set(1.45,0.42,0.24); hvcool.add(cpump);
+  const hvLab = (t,x,y,z,col) => { const a = new THREE.Object3D(); a.visible = false; a.position.set(x,y,z); hvcool.add(a); addLabel(t,a,col); hvAnchors.push(a); };
+  hvLab('⚡ HV DC bus', 0.15, 0.64, 0.2, '#ffb27a'); hvLab('3-phase', 1.0, 0.66, 0.18, '#ffb27a');
+  hvLab('coolant loop', 1.5, 0.76, -0.32, '#8fe3f2'); hvLab('radiator', 1.98, 0.8, 0, '#8fe3f2'); hvLab('pump', 1.45, 0.28, 0.24, '#8fe3f2');
+  const hvBtn = document.getElementById('hvBtn');
+  function setHV(on) { hvcool.visible = on; hvAnchors.forEach(a => a.visible = on); if (hvBtn) hvBtn.classList.toggle('active', on); }
+  if (hvBtn) hvBtn.onclick = () => setHV(!hvcool.visible);
+
   function updateBalance() {
     let m = glider.mass_kg, mx = m*glider.cg[0], my = m*glider.cg[1], mz = m*glider.cg[2];
     comps.forEach(c => { if (!c.mesh.visible) return; m += c.mass; mx += c.mass*c.pos[0]; my += c.mass*c.pos[1]; mz += c.mass*c.pos[2]; });
@@ -956,6 +982,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); tick(); setInterval(
     if (motorOpts) motorOpts.visible = on;
     motorOptData.forEach(o => o.anchor.visible = on);
     if (motorComp) motorComp.mesh.visible = !on;             // hide the solid box; ghosts show all options
+    setHV(on);                                               // bay view shows the HV cabling + cooling routing
     if (controls) {
       if (on) { cam.position.set(3.3, 1.8, 2.5); controls.target.set(1.05, 0.62, 0); }
       else { cam.position.set(5.6, 3, 6.6); controls.target.set(0, 0.6, 0); }
