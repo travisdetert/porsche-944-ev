@@ -24,10 +24,11 @@ The Pi is the head unit, so audio comes off the Pi to a small amp → the subs. 
 AVH-X1600DVD is **removed**, not reused — it's a closed appliance that can't run the app, ADR-0016.)
 | Part | Pick | ~$ | Why |
 |---|---|---|---|
-| Line-out | **USB DAC** (Pi 5 has no 3.5 mm jack) *or* Bluetooth to the amp | 10 | clean analog out |
-| Amp | **4-channel class-D car amp** | 40–70 | powers the subs + any speakers |
-| Cabling | RCA + speaker wire, inline fuse | 10 | |
-| | **Audio subtotal** | **~$60–90** | drives the ADR-0010 subwoofers |
+| Line-out | **USB DAC** (Pi 5 has no 3.5 mm jack) *or* Bluetooth | 10 | clean line-level out |
+| Sub | **Kicker powered sub** in the spare well (ADR-0010) — **on hand** | 0 | **built-in amp** → takes line-level straight from the Pi |
+| Amp | 4-ch class-D — **OPTIONAL**, only if you add door speakers | 0–60 | the sub doesn't need it |
+| Cabling | RCA + (speaker wire if door speakers), inline fuse | 10 | |
+| | **Audio subtotal** | **~$20** (sub on hand, no amp) | Pi → DAC → powered sub |
 
 ## Path B — reuse an Android double-DIN as the display (cheapest if you already have one)
 Keep the Android double-DIN as the screen; run the app in a **kiosk browser** (e.g. *Fully
