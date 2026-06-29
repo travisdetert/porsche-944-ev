@@ -176,8 +176,17 @@
       <span style="color:#666;font-size:11px">drag to orbit · ghost to x-ray</span>
     </div>
     <div class="row" style="padding-top:0"><span id="tirenote" style="color:#888;font-size:12px"></span><span id="motorinfo" style="color:#888;font-size:12px;margin-left:12px"></span></div>
+    <div class="row toolbar">
+      <span style="color:#aaa;font-size:12px">Layers</span>
+      <button class="clearbtn active" id="lyShell">Shell</button>
+      <button class="clearbtn active" id="lyInt">Interior</button>
+      <button class="clearbtn active" id="lyDrive">Drivetrain</button>
+      <button class="clearbtn active" id="lyBatt">Battery/HV</button>
+      <button class="clearbtn active" id="lyChas">Chassis</button>
+      <span style="color:#666;font-size:11px">toggle to strip the car</span>
+    </div>
     <div id="car-wrap" style="position:relative;margin:0 12px">
-      <div id="car3d" style="height:calc(100vh - 252px);min-height:360px;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
+      <div id="car3d" style="height:calc(100vh - 300px);min-height:360px;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
       <div id="balance" style="position:absolute;bottom:10px;left:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.72);padding:8px 12px;border-radius:8px;line-height:1.5;pointer-events:none"></div>
       <div id="senslegend" style="display:none;position:absolute;top:10px;right:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.78);padding:8px 12px;border-radius:8px;line-height:1.6;pointer-events:none;max-width:60%"></div>
     </div>
@@ -792,6 +801,14 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
   const refMat = new THREE.MeshBasicMaterial({color:0x5a6170});
   [1.35,-1.4].forEach(x => { const a = new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.022,1.7,8), refMat); a.rotation.x = Math.PI/2; a.position.set(x,0.32,0); chassis.add(a); });
   const spine = new THREE.Mesh(new THREE.BoxGeometry(3.0,0.022,0.022), refMat); spine.position.set(-0.02,0.32,0); chassis.add(spine);
+
+  // simple interior (seats + dash + console) — the Interior layer revealed when the shell is stripped
+  const interior = new THREE.Group(); car.add(interior);
+  const trimI = new THREE.MeshStandardMaterial({color:0x202227, roughness:0.85, metalness:0.1});
+  const seatAt = (z) => { interior.add(B(0.5,0.12,0.46, trimI, -0.32,0.62,z)); interior.add(B(0.12,0.5,0.46, trimI, -0.56,0.86,z)); };
+  seatAt(0.32); seatAt(-0.32);
+  interior.add(B(1.35,0.16,1.5, trimI, 0.6,0.94,0));     // dashboard
+  interior.add(B(0.28,0.3,0.7, trimI, -0.05,0.64,0));    // center console
   const hood = new THREE.Group(); hood.position.set(0.35,0.7,0);
   hood.add(B(1.55,0.08,1.62, paint, 0.78,0,0)); hood.add(B(1.55,0.03,0.26, stripeMat, 0.78,0.06,0)); schem.add(hood);
   const pods = [];
@@ -820,6 +837,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
 
   let glider = {mass_kg:980, cg:[0.05,0.5,0]}, axles = {front_x:1.25, rear_x:-1.15};
   const comps = [], labels = [], motorOptData = []; let motorComp = null, motorLabel = null, LAYOUT = null, curRear = 0.52, motorOpts = null;
+  const LAYERS = {shell:[], interior:[], drivetrain:[], battery:[], chassis:[]};   // strip-the-car layer registry
   const addLabel = (t, mesh, color) => { const l = document.createElement('div'); l.textContent = t; l.style.cssText = 'position:absolute;padding:2px 7px;border-radius:6px;background:rgba(10,10,12,0.72);color:' + (color||'#fff') + ';font-size:11px;font-weight:700;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)'; wrap.appendChild(l); labels.push({l, mesh}); return l; };
   addLabel('torque tube', tube, '#9be29b'); addLabel('adapter', adapter, '#ffb27a');
 
@@ -1019,6 +1037,20 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
     window.refreshSim = runSim;
     updateTires();
     runSim();
+
+    // ---- assign meshes to layers + wire the strip-the-car toggles ----
+    const catOf = nm => /pack|inverter|charger|vcu|dc-dc/i.test(nm) ? 'battery'
+      : /motor|transaxle/i.test(nm) ? 'drivetrain' : /sub|kicker/i.test(nm) ? 'interior' : 'battery';
+    comps.forEach((c, i) => LAYERS[catOf((cfg.components[i] || {}).name || '')].push(c.mesh));
+    LAYERS.shell.push(schem); if (realModel) LAYERS.shell.push(realModel);
+    LAYERS.interior.push(interior);
+    LAYERS.drivetrain.push(tube, adapter, drvln);
+    LAYERS.battery.push(hvcool);
+    LAYERS.chassis.push(chassis);
+    [['lyShell', 'shell'], ['lyInt', 'interior'], ['lyDrive', 'drivetrain'], ['lyBatt', 'battery'], ['lyChas', 'chassis']].forEach(([id, k]) => {
+      const b = document.getElementById(id); if (!b) return;
+      b.onclick = () => { const on = !b.classList.contains('active'); b.classList.toggle('active', on); LAYERS[k].forEach(o => { o.visible = on; }); };
+    });
   });
 
   // realistic glTF body (ghostable shell)
@@ -1048,7 +1080,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
           if (!o.material.map && c && c.r > 0.22 && c.r > c.g*1.6 && c.r > c.b*1.6) bodyMats.push(o.material);
         });
         if (window.__twinHex) bodyMats.forEach(m => m.color.set(window.__twinHex));
-        car.add(mdl); realModel = mdl; const gh = document.getElementById('ghost'); applyGhost(gh ? gh.value/100 : 0.7);
+        car.add(mdl); realModel = mdl; LAYERS.shell.push(mdl); const gh = document.getElementById('ghost'); applyGhost(gh ? gh.value/100 : 0.7);
       }, undefined, () => { schem.visible = true; showReal = false; if (realBtn) realBtn.classList.remove('active'); });
     }
     if (realModel) realModel.visible = on;
