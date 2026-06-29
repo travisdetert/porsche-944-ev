@@ -150,6 +150,7 @@
       <button class="clearbtn" id="sensBtn">🫧 Senses</button>
       <button class="clearbtn" id="hvBtn">⚡ HV+cool</button>
       <button class="clearbtn" id="dlBtn">🔩 Driveline</button>
+      <button class="clearbtn" id="liveBtn">📈 Live forces</button>
       <span class="sep"></span>
       <button class="clearbtn" id="hoodBtn" title="Animates on the schematic (the photo model is one fused mesh)">Hood ▲</button>
       <button class="clearbtn" id="popBtn" title="Animates on the schematic">Lights ▲</button>
@@ -188,6 +189,7 @@
     <div id="car-wrap" style="position:relative;margin:0 12px">
       <div id="car3d" style="height:calc(100vh - 300px);min-height:360px;border-radius:12px;overflow:hidden;background:#0a0a0c"></div>
       <div id="balance" style="position:absolute;bottom:10px;left:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.72);padding:8px 12px;border-radius:8px;line-height:1.5;pointer-events:none"></div>
+      <div id="livehud" style="display:none;position:absolute;top:10px;left:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.78);padding:8px 12px;border-radius:8px;line-height:1.6;pointer-events:none"></div>
       <div id="senslegend" style="display:none;position:absolute;top:10px;right:14px;font-size:12px;color:#eee;background:rgba(10,10,12,0.78);padding:8px 12px;border-radius:8px;line-height:1.6;pointer-events:none;max-width:60%"></div>
     </div>
     <div class="row"><div class="btns" id="complist"></div></div>
@@ -806,10 +808,10 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
   // simple interior (seats + dash + console) — the Interior layer revealed when the shell is stripped
   const interior = new THREE.Group(); car.add(interior);
   const trimI = new THREE.MeshStandardMaterial({color:0x202227, roughness:0.85, metalness:0.1});
-  const seatAt = (z) => { interior.add(B(0.5,0.12,0.46, trimI, -0.32,0.62,z)); interior.add(B(0.12,0.5,0.46, trimI, -0.56,0.86,z)); };
-  seatAt(0.32); seatAt(-0.32);
-  interior.add(B(1.35,0.16,1.5, trimI, 0.6,0.94,0));     // dashboard
-  interior.add(B(0.28,0.3,0.7, trimI, -0.05,0.64,0));    // center console
+  const seatAt = (z) => { interior.add(B(0.5,0.12,0.44, trimI, -0.35,0.6,z)); interior.add(B(0.12,0.46,0.44, trimI, -0.58,0.82,z)); };
+  seatAt(0.3); seatAt(-0.3);
+  interior.add(B(0.22,0.14,1.4, trimI, 0.42,0.82,0));    // dashboard — thin, across the cabin front
+  interior.add(B(0.6,0.2,0.26, trimI, -0.15,0.58,0));    // center console — along the tunnel
   const hood = new THREE.Group(); hood.position.set(0.35,0.7,0);
   hood.add(B(1.55,0.08,1.62, paint, 0.78,0,0)); hood.add(B(1.55,0.03,0.26, stripeMat, 0.78,0.06,0)); schem.add(hood);
   const pods = [];
@@ -894,6 +896,35 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
     if (controls) { if (on) { cam.position.set(0.4, 1.15, 4.0); controls.target.set(-0.1, DLY, 0); } else { cam.position.set(5.6, 3, 6.6); controls.target.set(0, 0.6, 0); } controls.update(); }
   }
   if (dlBtn) dlBtn.onclick = () => showDriveline(!drvln.visible);
+
+  // ---- Live forces: drive the twin from live telemetry (speed, power, rpm, drive/regen) ----
+  const liveFx = new THREE.Group(); liveFx.visible = false; car.add(liveFx);
+  const momentumArr = new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(0.1,0.72,0), 0.4, 0xffffff, 0.3, 0.2); liveFx.add(momentumArr);
+  const driveArr = new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(-1.2,0.5,0), 0.3, 0x39d353, 0.3, 0.2); liveFx.add(driveArr);
+  const flowArr = new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(0.1,0.56,0.2), 0.3, 0xff7a00, 0.25, 0.18); liveFx.add(flowArr);
+  let liveS = {spd:0, pw:0, rpm:0};
+  const liveBtn = document.getElementById('liveBtn');
+  function showLive(on) { liveFx.visible = on; if (liveBtn) liveBtn.classList.toggle('active', on); const h = document.getElementById('livehud'); if (h) h.style.display = on ? 'block' : 'none'; }
+  if (liveBtn) liveBtn.onclick = () => showLive(!liveFx.visible);
+  function updateLive() {
+    if (!liveFx.visible) return;
+    const t = window.__lastT; if (!t) return;
+    liveS.spd += ((t.speed_mph||0) - liveS.spd) * 0.15;       // smooth between 0.5s telemetry samples
+    liveS.pw  += ((t.power_kw||0)  - liveS.pw)  * 0.15;
+    liveS.rpm += ((t.motor_rpm||0) - liveS.rpm) * 0.15;
+    const regen = liveS.pw < -0.5;
+    momentumArr.setLength(0.25 + Math.abs(liveS.spd)/120*3.4, 0.3, 0.2);   // forward momentum ∝ speed
+    driveArr.setDirection(new THREE.Vector3(regen ? -1 : 1, 0, 0));        // thrust vs braking at the rear
+    driveArr.setColor(new THREE.Color(regen ? 0x18b6d6 : 0x39d353));
+    driveArr.setLength(0.2 + Math.abs(liveS.pw)/120*2.6, 0.3, 0.2);
+    flowArr.setDirection(new THREE.Vector3(liveS.pw >= 0 ? 1 : -1, 0, 0));  // energy: pack→motor (drive) / motor→pack (regen)
+    flowArr.setColor(new THREE.Color(liveS.pw >= 0 ? 0xff7a00 : 0x18b6d6));
+    flowArr.setLength(0.25 + Math.abs(liveS.pw)/120*1.8, 0.25, 0.18);
+    if (motorComp) motorComp.mesh.rotateOnAxis(new THREE.Vector3(0,1,0), liveS.rpm/10500*0.6);   // motor spins ∝ rpm
+    const h = document.getElementById('livehud');
+    if (h) h.innerHTML = '▶ <b>' + Math.round(liveS.spd) + '</b> mph · ' + (regen ? '<span style="color:#7fd1ff">REGEN</span> ' : '<span style="color:#9be29b">DRIVE</span> ')
+      + Math.abs(Math.round(liveS.pw)) + ' kW · ' + Math.round(liveS.rpm) + ' rpm · ' + (t.torque_act_nm||0) + ' Nm<br><span style="color:#888">white=momentum · green=drive/cyan=regen · orange=energy flow</span>';
+  }
 
   function updateBalance() {
     let m = glider.mass_kg, mx = m*glider.cg[0], my = m*glider.cg[1], mz = m*glider.cg[2];
@@ -1191,6 +1222,7 @@ buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); 
     lensMat.emissive.setHex(popOpen ? 0xffffee : 0x000000);
     if (wheelsSpin) wheels.forEach(w => w.rotateOnAxis(yAxis, 0.3));
     updateSenses();
+    updateLive();
     if (controls) controls.update();
     rnd.render(scene, cam);
     const r = host.getBoundingClientRect(), hr = wrap.getBoundingClientRect();
