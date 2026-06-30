@@ -86,6 +86,25 @@ Gen2/3** (PF1). Sell the gas parts to offset.
 | Insulation tester (megger) | [Amazon](https://www.amazon.com/s?k=insulation+tester+megohmmeter) | $60–400 |
 | CO₂ / ABC extinguisher | [Amazon](https://www.amazon.com/s?k=co2+fire+extinguisher) | $40–80 |
 
+## 🔎 Search terms — finding the rest (after a motor+inverter buy)
+Pair the EM57 motor+inverter with these. **Match Gen-2 / 2018+ ZE1 / 40 kWh** to your motor
+(`290A05…`). **Avoid** 2011–17 Gen-1 (24/30 kWh — different protocol, no PDM support, PF1) and,
+unless you want it, the 62 kWh e+. Verify part numbers with the seller.
+
+| Need | Search terms | Filter / notes |
+|---|---|---|
+| **40 kWh battery pack** (the big one) | `Nissan Leaf 40kwh battery` · `Leaf ZE1 battery pack` · `2018-2022 Leaf traction battery` · [eBay](https://www.ebay.com/sch/i.html?_nkw=nissan+leaf+40kwh+battery) | 2018+ ZE1, **ask SOH / GIDs / bars (LeafSpy), want >85%**. Pack ≈ P/N `295B0-…`. |
+| **BMS / LBC** | usually **inside the pack** — buy the pack, you get it · `Nissan Leaf LBC` · `Leaf lithium battery controller` | match the pack's gen; LBC ≈ `293B0-…` |
+| **Junction box** (contactors + main fuse + current sensor) | **inside the pack case** — comes with the pack · `Leaf battery junction box` | reuse it = your Stage-1 HV gear ($0) |
+| **PDM** (charger + DC-DC) | `Nissan Leaf PDM` · `Leaf onboard charger 2018` · `Leaf 6.6kW charger ZE1` · [eBay](https://www.ebay.com/sch/i.html?_nkw=nissan+leaf+PDM) | **MUST be Gen-2** (ZombieVerter PDM support, PF1). ≈ `292B0-…` |
+| **Accelerator pedal** | `Nissan Leaf accelerator pedal 2018-2022` · [eBay](https://www.ebay.com/sch/i.html?_nkw=nissan+leaf+accelerator+pedal) | dual-Hall, ~$30–60 |
+| **Charge port (J1772 inlet)** | `Nissan Leaf charge port` · `Leaf J1772 inlet 2018` | comes with a donor |
+| **Whole-donor shortcut** | `2018 2019 2020 2021 2022 Nissan Leaf` on [Copart](https://www.copart.com/vehicle-search-model/nissan/leaf) / [IAAI](https://www.iaai.com) / [eRepairables](https://erepairables.com/salvage-cars-auction/nissan/leaf) | front/minor damage, **pack intact** → pack+PDM+LBC+pedal+port (and a motor) in **one buy** |
+
+> **Cheapest clean path for the rest:** one **crashed-but-pack-healthy 2018+ Leaf** gives the pack,
+> LBC, junction box, PDM, pedal and charge port together — matched. (It also has a motor, so if you
+> buy a whole donor you may **not need the \$921 motor** — that's the real either/or.)
+
 ## Totals
 | Build | Net cost |
 |---|---|
