@@ -28,6 +28,8 @@ flowchart LR
 ```
 The two **120 Ω terminators live at the two physical ends** of the bus — not at every node.
 
+**Wiring diagram:** `../images/pi-vcu-can-wiring.svg` (bus, terminators, nodes, ground, power).
+
 ## Physical hookup (CAN HAT → bus)
 - **CANH ↔ CANH, CANL ↔ CANL**, as a **twisted pair**, tapped into the VCU's CAN connector (or a
   bus junction). Keep the pair **away from the inverter/HV cables** (noise) and short stubs.

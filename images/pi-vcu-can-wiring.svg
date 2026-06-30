@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 600" width="940" height="600" font-family="system-ui, Arial, sans-serif">
+  <rect width="940" height="600" fill="#0e1014"/>
+  <text x="470" y="34" font-size="20" font-weight="800" fill="#f2f2f4" text-anchor="middle">Pi ↔ ZombieVerter — CAN Integration</text>
+  <text x="470" y="56" font-size="13" fill="#9aa" text-anchor="middle">one drivetrain CAN bus @ 500 kbit/s · twisted pair CANH / CANL · Pi is just another node (non-safety)</text>
+
+  <!-- bus lines -->
+  <line x1="70" y1="150" x2="850" y2="150" stroke="#ff8a3c" stroke-width="3"/>
+  <line x1="70" y1="186" x2="850" y2="186" stroke="#34d6ff" stroke-width="3"/>
+  <text x="40" y="154" font-size="12" font-weight="700" fill="#ff8a3c" text-anchor="end">CANH</text>
+  <text x="40" y="190" font-size="12" font-weight="700" fill="#34d6ff" text-anchor="end">CANL</text>
+  <!-- twist hint -->
+  <path d="M120,150 q12,18 24,18 q-12,0 0,18 M120,168 q12,-18 24,-18" fill="none" stroke="#444" stroke-width="1" opacity="0.0"/>
+
+  <!-- terminators at the two ENDS -->
+  <g>
+    <rect x="63" y="150" width="14" height="36" rx="2" fill="#1a1d22" stroke="#888"/>
+    <text x="70" y="210" font-size="11" font-weight="700" fill="#cfcfd4" text-anchor="middle">120 Ω</text>
+    <rect x="843" y="150" width="14" height="36" rx="2" fill="#1a1d22" stroke="#888"/>
+    <text x="850" y="210" font-size="11" font-weight="700" fill="#cfcfd4" text-anchor="middle">120 Ω</text>
+  </g>
+  <text x="460" y="100" font-size="12" fill="#e6c84a" text-anchor="middle">⚑ 120 Ω at the two ENDS only — ~60 Ω across CANH–CANL, power off</text>
+
+  <!-- nodes -->
+  <g font-size="12" font-weight="700" text-anchor="middle">
+    <!-- generic node = box + stub touching both bus lines -->
+    <!-- VCU -->
+    <line x1="150" y1="186" x2="150" y2="250" stroke="#666" stroke-width="2"/><circle cx="150" cy="150" r="3.5" fill="#ff8a3c"/><circle cx="150" cy="186" r="3.5" fill="#34d6ff"/>
+    <rect x="100" y="250" width="100" height="62" rx="8" fill="#1a1d22" stroke="#5a6270"/>
+    <text x="150" y="278" fill="#fff">ZombieVerter</text><text x="150" y="296" fill="#9be29b" font-size="11">VCU</text>
+    <!-- Inverter -->
+    <line x1="300" y1="186" x2="300" y2="250" stroke="#666" stroke-width="2"/><circle cx="300" cy="150" r="3.5" fill="#ff8a3c"/><circle cx="300" cy="186" r="3.5" fill="#34d6ff"/>
+    <rect x="252" y="250" width="96" height="62" rx="8" fill="#1a1d22" stroke="#3a3f47"/>
+    <text x="300" y="278" fill="#fff">Leaf</text><text x="300" y="296" fill="#9aa" font-size="11">inverter → EM57</text>
+    <!-- BMS -->
+    <line x1="440" y1="186" x2="440" y2="250" stroke="#666" stroke-width="2"/><circle cx="440" cy="150" r="3.5" fill="#ff8a3c"/><circle cx="440" cy="186" r="3.5" fill="#34d6ff"/>
+    <rect x="392" y="250" width="96" height="62" rx="8" fill="#1a1d22" stroke="#3a3f47"/>
+    <text x="440" y="278" fill="#fff">BMS / LBC</text><text x="440" y="296" fill="#9aa" font-size="11">limits, SOC, temps</text>
+    <!-- PDM -->
+    <line x1="575" y1="186" x2="575" y2="250" stroke="#666" stroke-width="2"/><circle cx="575" cy="150" r="3.5" fill="#ff8a3c"/><circle cx="575" cy="186" r="3.5" fill="#34d6ff"/>
+    <rect x="527" y="250" width="96" height="62" rx="8" fill="#1a1d22" stroke="#3a3f47"/>
+    <text x="575" y="278" fill="#fff">PDM</text><text x="575" y="296" fill="#9aa" font-size="11">charger + DC-DC</text>
+    <!-- Gauge -->
+    <line x1="705" y1="186" x2="705" y2="250" stroke="#666" stroke-width="2"/><circle cx="705" cy="150" r="3.5" fill="#ff8a3c"/><circle cx="705" cy="186" r="3.5" fill="#34d6ff"/>
+    <rect x="657" y="250" width="96" height="62" rx="8" fill="#1a1d22" stroke="#3a3f47"/>
+    <text x="705" y="278" fill="#fff">CAN→gauge</text><text x="705" y="296" fill="#9aa" font-size="11">adapter (ADR-0012)</text>
+    <!-- Pi (highlight, at the bus end) -->
+    <line x1="820" y1="186" x2="820" y2="250" stroke="#666" stroke-width="2"/><circle cx="820" cy="150" r="3.5" fill="#ff8a3c"/><circle cx="820" cy="186" r="3.5" fill="#34d6ff"/>
+    <rect x="766" y="250" width="108" height="62" rx="8" fill="#13261a" stroke="#62e32b" stroke-width="2"/>
+    <text x="820" y="276" fill="#cfffb0">Raspberry Pi</text><text x="820" y="294" fill="#9be29b" font-size="11">+ CAN HAT (120Ω on)</text>
+  </g>
+
+  <!-- data direction -->
+  <text x="150" y="338" font-size="11" fill="#7fd1ff" text-anchor="middle">▲ spot frames → telemetry</text>
+  <text x="150" y="352" font-size="10" fill="#778" text-anchor="middle">(decode: app/can_map.json)</text>
+  <text x="820" y="338" font-size="11" fill="#9be29b" text-anchor="middle">▼ bounded params → VCU</text>
+  <text x="820" y="352" font-size="10" fill="#778" text-anchor="middle">SDO 0x601/0x581 · re-clamped</text>
+
+  <!-- common ground -->
+  <line x1="150" y1="312" x2="150" y2="412" stroke="#9aa" stroke-width="2"/>
+  <line x1="820" y1="312" x2="820" y2="412" stroke="#9aa" stroke-width="2"/>
+  <line x1="150" y1="412" x2="820" y2="412" stroke="#9aa" stroke-width="2"/>
+  <g stroke="#9aa" stroke-width="2"><line x1="478" y1="412" x2="498" y2="412"/><line x1="481" y1="418" x2="495" y2="418"/><line x1="484" y1="424" x2="492" y2="424"/></g>
+  <text x="488" y="448" font-size="12" font-weight="700" fill="#cfcfd4" text-anchor="middle">common 0 V — tie Pi/HAT ground to VCU signal ground (not just chassis)</text>
+
+  <!-- power inset -->
+  <g transform="translate(70,480)">
+    <rect x="0" y="0" width="800" height="48" rx="8" fill="#101417" stroke="#243"/>
+    <text x="16" y="29" font-size="13" font-weight="700" fill="#cfd6dd">⚡ Power:</text>
+    <text x="86" y="29" font-size="13" fill="#cfd6dd">12 V (ignition / switched) → buck 5 V·5 A → Pi · ignition-shutdown UPS HAT (no SD corruption) · keep CAN pair away from HV/inverter</text>
+  </g>
+
+  <!-- non-safety footer -->
+  <text x="470" y="556" font-size="12" font-weight="700" fill="#e6c84a" text-anchor="middle">NON-SAFETY (ADR-0014): the VCU + BMS own ALL real-time safety — precharge, contactors, interlocks, limits, charge-inhibit.</text>
+  <text x="470" y="576" font-size="12" fill="#9aa" text-anchor="middle">The Pi only listens + writes bounded presets the firmware re-clamps. Pi off → car still drives.</text>
+</svg>
