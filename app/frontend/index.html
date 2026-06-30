@@ -65,6 +65,7 @@
     <button data-view="car" class="active">CAR</button>
     <button data-view="parts">PARTS</button>
     <button data-view="bom">BOM</button>
+    <button data-view="diagrams">DIAGRAMS</button>
     <button data-view="game">GAME</button>
   </nav>
   <div id="warn"></div>
@@ -227,6 +228,38 @@
     <div id="bomview" style="margin:8px 14px 24px;max-width:1000px"></div>
   </section>
 
+  <!-- DIAGRAMS: prove-out gallery of the build SVGs -->
+  <section class="view" id="view-diagrams">
+    <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 14px">
+      <span style="color:#aaa;font-size:12px">📐 Diagram</span>
+      <select id="diagsel" class="clearbtn">
+        <optgroup label="Wiring &amp; systems">
+          <option value="images|pi-vcu-can-wiring">Pi ↔ VCU — CAN wiring</option>
+          <option value="images|adapter-joint">Driveline / adapter joint</option>
+          <option value="images|top-down-layout">Top-down layout</option>
+        </optgroup>
+        <optgroup label="Build sequence">
+          <option value="images|step-1-stock">1 · Stock 944</option>
+          <option value="images|step-2-stripped">2 · Stripped</option>
+          <option value="images|step-3-motor-mounted">3 · Motor mounted</option>
+          <option value="images|step-4-batteries">4 · Batteries in</option>
+          <option value="images|step-5-complete">5 · Complete</option>
+        </optgroup>
+        <optgroup label="CAD parts">
+          <option value="cad|adapter-plate">Adapter plate</option>
+          <option value="cad|motor-mount">Motor mount</option>
+          <option value="cad|battery-enclosure">Battery enclosure</option>
+          <option value="cad|skid-plate">Skid plate</option>
+          <option value="cad|dash-panel">Dash panel</option>
+        </optgroup>
+      </select>
+      <span style="color:#666;font-size:11px">proving-out views — not all of these ship in the final app</span>
+    </div>
+    <div style="margin:10px 14px 24px;background:#16181c;border:1px solid #222;border-radius:10px;padding:12px;text-align:center">
+      <img id="diagimg" alt="diagram" style="max-width:100%;border-radius:6px">
+    </div>
+  </section>
+
   <!-- GAME (drive it) -->
   <section class="view" id="view-game">
     <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -255,6 +288,7 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   b.classList.add('active'); $('view-' + b.dataset.view).classList.add('active');
   if (b.dataset.view === 'trips') { loadTrips(); drawTrips(); }
   if (b.dataset.view === 'bom') loadDoc(($('docsel')||{value:'BOM'}).value);
+  if (b.dataset.view === 'diagrams') loadDiagram(($('diagsel')||{value:''}).value);
   if (b.dataset.view === 'data' && window.__lastT) renderData(window.__lastT);
   if (b.dataset.view === 'dash' && window.__lastT) renderDash(window.__lastT);
   if (b.dataset.view === 'car' && window.carResize) setTimeout(window.carResize, 60);
@@ -437,6 +471,7 @@ async function loadDoc(name) {
   try { el.innerHTML = renderMarkdown(await (await fetch('/api/doc?name=' + encodeURIComponent(name))).text()); }
   catch (e) { el.innerHTML = '<p style="color:#e0533a">Could not load ' + name + '.</p>'; }
 }
+function loadDiagram(v) { const img = $('diagimg'); if (!img || !v) return; const p = v.split('|'); img.src = '/api/svg?dir=' + encodeURIComponent(p[0]) + '&name=' + encodeURIComponent(p[1]); }
 
 // ---- PLAN: project board ----
 const PLAN_C = {done:'#39d353', doing:'#e6c84a', todo:'#555', blocked:'#e0533a'};
@@ -671,7 +706,7 @@ async function tick() {
   if (liveMode && $('view-trips').classList.contains('active')) drawTrips();
 }
 buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); setInterval(tick, 500);
-(function(){ const ds=document.getElementById('docsel'); if(ds) ds.onchange=()=>loadDoc(ds.value); })();
+(function(){ const ds=document.getElementById('docsel'); if(ds) ds.onchange=()=>loadDoc(ds.value); const dg=document.getElementById('diagsel'); if(dg) dg.onchange=()=>loadDiagram(dg.value); })();
 (function(){ const b=document.getElementById('simToggle'), w=document.getElementById('simwrap'); if(b&&w) b.onclick=()=>{ const open=w.style.display==='none'; w.style.display=open?'block':'none'; b.textContent=(open?'▾':'▸')+' Sim table'; b.classList.toggle('active',open); if(open&&window.refreshSim) window.refreshSim(); }; })();
 </script>
 

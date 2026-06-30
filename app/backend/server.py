@@ -397,6 +397,16 @@ class Handler(BaseHTTPRequestHandler):
                     self._send(200, f.read(), "text/markdown; charset=utf-8")
             except FileNotFoundError:
                 self._send(404, "doc not found")
+        elif self.path.startswith("/api/svg"):
+            q = parse_qs(urlparse(self.path).query)
+            d = q.get("dir", ["images"])[0]; name = q.get("name", [""])[0]
+            if d not in ("images", "cad") or not all(c.isalnum() or c in "-_" for c in name):
+                self._send(400, "bad svg"); return
+            try:
+                with open(os.path.join(HERE, "..", "..", d, name + ".svg"), encoding="utf-8") as f:
+                    self._send(200, f.read(), "image/svg+xml")
+            except FileNotFoundError:
+                self._send(404, "svg not found")
         elif self.path == "/api/trips":
             self._send(200, json.dumps({"trips": list_trips()}))
         elif self.path.startswith("/api/trip.csv?"):
