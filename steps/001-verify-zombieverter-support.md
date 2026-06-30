@@ -1,5 +1,8 @@
 # Step 001 — Verify ZombieVerter ↔ Leaf generation (PF1)
 
+<!-- stepcard -->
+![Step 001 — Verify ZombieVerter ↔ gen](../images/stepcard-001.svg)
+
 **Phase:** NOW · **Task:** #1 · **Gate:** PF1 · **Cost:** $0
 **Blocked by:** nothing
 **Blocks:** 005 (buying the donor)

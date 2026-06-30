@@ -1,5 +1,8 @@
 # Step 000 — Pull the engine
 
+<!-- stepcard -->
+![Step 000 — Pull the engine](../images/stepcard-000.svg)
+
 **Phase:** NOW · **Task:** #8 · **Cost:** $0 (net positive — you'll sell the parts)
 **Blocked by:** nothing — *this is where the project starts.*
 **Blocks:** 002, 004, 007→009

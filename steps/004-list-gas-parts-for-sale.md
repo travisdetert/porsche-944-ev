@@ -1,5 +1,8 @@
 # Step 004 — List the gas parts for sale
 
+<!-- stepcard -->
+![Step 004 — List gas parts for sale](../images/stepcard-004.svg)
+
 **Phase:** NOW · **Task:** #8 · **Cost:** income (+$500–1,500)
 **Blocked by:** 000 (parts removed)
 **Blocks:** nothing (funds 005)

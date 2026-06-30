@@ -1,5 +1,8 @@
 # Step 005 — Hunt the donor Leaf (G1)
 
+<!-- stepcard -->
+![Step 005 — Hunt the donor Leaf](../images/stepcard-005.svg)
+
 **Phase:** BUY · **Task:** #5 · **Gate:** G1 · **Cost:** ~$2,500–4,500 (the big buy)
 **Blocked by:** 001 (PF1 — confirm the year is supported)
 **Blocks:** 006, 007

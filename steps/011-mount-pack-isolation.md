@@ -1,5 +1,8 @@
 # Step 011 — Mount the pack + isolation check (G4)
 
+<!-- stepcard -->
+![Step 011 — Mount pack + isolation](../images/stepcard-011.svg)
+
 **Phase:** BUILD · **Task:** #11 · **Gate:** G4 · **Cost:** ~$240–630 (enclosures)
 **Blocked by:** 010 (driveline true), 007 (have the pack)
 **Blocks:** 012

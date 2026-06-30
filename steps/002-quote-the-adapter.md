@@ -1,5 +1,8 @@
 # Step 002 — Quote the adapter (PF3)
 
+<!-- stepcard -->
+![Step 002 — Quote the adapter](../images/stepcard-002.svg)
+
 **Phase:** NOW · **Task:** #3 · **Gate:** PF3 · **Cost:** $0 (quotes)
 **Blocked by:** 000 (need the torque-tube flange measurements)
 **Blocks:** 009

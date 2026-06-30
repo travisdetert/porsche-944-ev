@@ -1,5 +1,8 @@
 # Step 003 — Get HV safety gear (PF4)
 
+<!-- stepcard -->
+![Step 003 — Get HV safety gear](../images/stepcard-003.svg)
+
 **Phase:** NOW · **Task:** #4 · **Gate:** PF4 · **Cost:** ~$300–600 (one-time, reusable)
 **Blocked by:** nothing
 **Blocks:** 012 (any live HV work)

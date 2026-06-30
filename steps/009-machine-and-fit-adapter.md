@@ -1,5 +1,8 @@
 # Step 009 — Machine + dry-fit the adapter (G2)
 
+<!-- stepcard -->
+![Step 009 — Machine + fit adapter](../images/stepcard-009.svg)
+
 **Phase:** BUILD · **Task:** #9 · **Gate:** G2 · **Cost:** ~$520–860
 **Blocked by:** 002 (shop), 007 (EM57 measured), 000 (flange measured)
 **Blocks:** 010

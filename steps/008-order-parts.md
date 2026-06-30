@@ -1,5 +1,8 @@
 # Step 008 — Order parts (batched)
 
+<!-- stepcard -->
+![Step 008 — Order parts](../images/stepcard-008.svg)
+
 **Phase:** BUY · **Task:** #7 · **Cost:** ~$700–1,200 new
 **Blocked by:** 006 (fuse/precharge sized)
 **Blocks:** 012

@@ -1,5 +1,8 @@
 # Step 007 — Extract & label donor parts (G1)
 
+<!-- stepcard -->
+![Step 007 — Extract donor parts](../images/stepcard-007.svg)
+
 **Phase:** BUY · **Task:** #6 · **Gate:** G1 · **Cost:** $0 (labor)
 **Blocked by:** 005 (have the donor)
 **Blocks:** 009, 011

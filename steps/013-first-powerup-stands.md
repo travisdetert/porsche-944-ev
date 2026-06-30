@@ -1,5 +1,8 @@
 # Step 013 — First power-up on stands (G6)
 
+<!-- stepcard -->
+![Step 013 — First power-up on stands](../images/stepcard-013.svg)
+
 **Phase:** DRIVE · **Task:** #13 · **Gate:** G6 · **Cost:** ~$0
 **Blocked by:** 012
 **Blocks:** 014

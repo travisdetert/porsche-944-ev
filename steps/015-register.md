@@ -1,5 +1,8 @@
 # Step 015 — Register / inspect (parallel)
 
+<!-- stepcard -->
+![Step 015 — Register / inspect](../images/stepcard-015.svg)
+
 **Phase:** DRIVE · **Task:** #15 · **Cost:** fees
 **Blocked by:** nothing (start early — it trails)
 **Blocks:** nothing (does **not** gate "it drives")

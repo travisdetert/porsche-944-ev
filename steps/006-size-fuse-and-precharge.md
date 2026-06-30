@@ -1,5 +1,8 @@
 # Step 006 — Size the fuse + precharge (PF2)
 
+<!-- stepcard -->
+![Step 006 — Size fuse + precharge](../images/stepcard-006.svg)
+
 **Phase:** BUY · **Task:** #2 · **Gate:** PF2 · **Cost:** $0 (research)
 **Blocked by:** 005 (know the exact inverter), or do from the wiki anytime
 **Blocks:** 008 (ordering the HV fuse + precharge)

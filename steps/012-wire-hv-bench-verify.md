@@ -1,5 +1,8 @@
 # Step 012 — Wire HV + bench-verify control (G5)
 
+<!-- stepcard -->
+![Step 012 — Wire HV + bench-verify](../images/stepcard-012.svg)
+
 **Phase:** BUILD · **Task:** #12 · **Gate:** G5 · **Cost:** (parts from 008)
 **Blocked by:** 011 (pack in), 008 (parts), 003 (safety gear)
 **Blocks:** 013

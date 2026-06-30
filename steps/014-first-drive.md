@@ -1,5 +1,8 @@
 # Step 014 — First drive + grocery loop (G7 = DONE)
 
+<!-- stepcard -->
+![Step 014 — First drive + grocery loop](../images/stepcard-014.svg)
+
 **Phase:** DRIVE · **Task:** #14 · **Gate:** G7 — **the goal** · **Cost:** ~$0
 **Blocked by:** 013
 **Blocks:** nothing — *this is it.*

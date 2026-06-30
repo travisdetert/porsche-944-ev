@@ -1,5 +1,8 @@
 # Step 010 — Mount the motor; verify driveline true (G3)
 
+<!-- stepcard -->
+![Step 010 — Mount the motor](../images/stepcard-010.svg)
+
 **Phase:** BUILD · **Task:** #10 · **Gate:** G3 · **Cost:** ~$60–150 (mounts)
 **Blocked by:** 009 (adapter fits)
 **Blocks:** 011
