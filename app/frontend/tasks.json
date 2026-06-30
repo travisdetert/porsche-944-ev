@@ -1,5 +1,10 @@
 {
-  "_README": "Live project board for the PLAN tab. Mirror of the build plan (docs/project-plan.md) + steps/. status: done | doing | todo | blocked. Update as work lands.",
+  "_README": "Live project board for the PLAN tab. status: done|doing|todo|blocked. time/cost are realistic part-time estimates (see docs/project-plan.md, mvp-sourcing.md, headunit-bom.md). Update as work lands.",
+  "summary": {
+    "mvp_cost": "≈ $6,500–8,000",
+    "mvp_time": "≈ 8–14 months part-time",
+    "note": "Car owned + DIY labor. Finish (Toxic Green) and DCFC are post-MVP. Gas-part sales offset ~$0.5–1.5k."
+  },
   "phases": [
     { "key": "NOW",   "title": "NOW — strip & prep" },
     { "key": "BUY",   "title": "BUY — donor & parts" },
@@ -8,39 +13,39 @@
   ],
   "tracks": [
     { "key": "APP",     "title": "Head-unit app (parallel)" },
-    { "key": "ONGOING", "title": "Trips & charging (parallel)" }
+    { "key": "ONGOING", "title": "Trips · charging · finish (parallel)" }
   ],
   "tasks": [
-    { "id": "000", "phase": "NOW", "gate": "",    "status": "doing", "title": "Pull engine, fuel, exhaust + measure + weigh", "dep": "" },
-    { "id": "PF1", "phase": "NOW", "gate": "PF1", "status": "done",  "title": "Verify ZombieVerter ↔ Leaf gen (→ Gen-2 donor)", "dep": "" },
-    { "id": "PF3", "phase": "NOW", "gate": "PF3", "status": "todo",  "title": "Quote the adapter (2 shops)", "dep": "needs 000 dims" },
-    { "id": "PF4", "phase": "NOW", "gate": "PF4", "status": "todo",  "title": "Get HV safety gear + verify-dead drill", "dep": "" },
-    { "id": "SELL","phase": "NOW", "gate": "",    "status": "todo",  "title": "List gas parts for sale", "dep": "needs 000" },
+    { "id": "000", "phase": "NOW", "gate": "",    "status": "doing", "title": "Pull engine, fuel, exhaust + measure + weigh", "dep": "", "time": "2–3 days", "cost": "$0 (net +)" },
+    { "id": "PF1", "phase": "NOW", "gate": "PF1", "status": "done",  "title": "Verify ZombieVerter ↔ Leaf gen (→ Gen-2)", "dep": "", "time": "done", "cost": "$0" },
+    { "id": "PF3", "phase": "NOW", "gate": "PF3", "status": "todo",  "title": "Quote the adapter (2 shops)", "dep": "needs 000 dims", "time": "~1 wk (quotes)", "cost": "$0" },
+    { "id": "PF4", "phase": "NOW", "gate": "PF4", "status": "todo",  "title": "Get HV safety gear + verify-dead drill", "dep": "", "time": "1–2 days", "cost": "$250–400" },
+    { "id": "SELL","phase": "NOW", "gate": "",    "status": "todo",  "title": "List gas parts for sale", "dep": "needs 000", "time": "ongoing", "cost": "+$500–1,500" },
 
-    { "id": "G1a", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Hunt & buy the donor Leaf (LeafSpy SOH)", "dep": "" },
-    { "id": "PF2", "phase": "BUY", "gate": "PF2", "status": "todo",  "title": "Size HV fuse + precharge", "dep": "needs donor specs" },
-    { "id": "G1b", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Extract + label powertrain, pack, PDM, LBC", "dep": "needs G1a" },
-    { "id": "ORD", "phase": "BUY", "gate": "",    "status": "todo",  "title": "Order ZombieVerter + adapter + HV BOM", "dep": "needs PF1,PF3" },
+    { "id": "G1a", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Hunt & buy the donor Leaf (LeafSpy SOH)", "dep": "", "time": "weeks (hunt)", "cost": "$4,500–6,500" },
+    { "id": "PF2", "phase": "BUY", "gate": "PF2", "status": "todo",  "title": "Size HV fuse + precharge", "dep": "needs donor specs", "time": "1–2 hrs", "cost": "$0 (design)" },
+    { "id": "G1b", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Extract + label powertrain, pack, PDM, LBC", "dep": "needs G1a", "time": "1 day", "cost": "$0" },
+    { "id": "ORD", "phase": "BUY", "gate": "",    "status": "todo",  "title": "Order ZombieVerter + adapter + HV BOM", "dep": "needs PF1,PF3", "time": "~4 wk lead", "cost": "$1,200–1,800" },
 
-    { "id": "G2",  "phase": "BUILD", "gate": "G2", "status": "todo", "title": "Machine + dry-fit adapter (runout < 0.1 mm)", "dep": "needs 000, ORD" },
-    { "id": "G3",  "phase": "BUILD", "gate": "G3", "status": "todo", "title": "Mount motor to transaxle, driveline true", "dep": "needs G2" },
-    { "id": "G4",  "phase": "BUILD", "gate": "G4", "status": "todo", "title": "Mount pack + skid plate, megger isolation", "dep": "needs G1b" },
-    { "id": "G5",  "phase": "BUILD", "gate": "G5", "status": "todo", "title": "Wire HV loop + bench-verify ZombieVerter", "dep": "needs G3,G4" },
+    { "id": "G2",  "phase": "BUILD", "gate": "G2", "status": "todo", "title": "Machine + dry-fit adapter (runout < 0.1 mm)", "dep": "needs 000, ORD", "time": "1–2 wk (shop)", "cost": "$250–500" },
+    { "id": "G3",  "phase": "BUILD", "gate": "G3", "status": "todo", "title": "Mount motor to transaxle, driveline true", "dep": "needs G2", "time": "1–2 days", "cost": "$150" },
+    { "id": "G4",  "phase": "BUILD", "gate": "G4", "status": "todo", "title": "Mount pack + skid plate, megger isolation", "dep": "needs G1b", "time": "2–4 days", "cost": "$200" },
+    { "id": "G5",  "phase": "BUILD", "gate": "G5", "status": "todo", "title": "Wire HV loop + bench-verify ZombieVerter", "dep": "needs G3,G4", "time": "2–4 days", "cost": "$200" },
 
-    { "id": "G6",  "phase": "DRIVE", "gate": "G6", "status": "todo", "title": "First power-up on stands (rotation, temps)", "dep": "needs G5" },
-    { "id": "G7",  "phase": "DRIVE", "gate": "G7", "status": "todo", "title": "First drive + grocery loop (verify brakes!)", "dep": "needs G6" },
-    { "id": "REG", "phase": "DRIVE", "gate": "",   "status": "todo", "title": "Register / inspect / insure", "dep": "" },
+    { "id": "G6",  "phase": "DRIVE", "gate": "G6", "status": "todo", "title": "First power-up on stands (rotation, temps)", "dep": "needs G5", "time": "1 day", "cost": "$0" },
+    { "id": "G7",  "phase": "DRIVE", "gate": "G7", "status": "todo", "title": "First drive + grocery loop (verify brakes!)", "dep": "needs G6", "time": "1 day", "cost": "$0" },
+    { "id": "REG", "phase": "DRIVE", "gate": "",   "status": "todo", "title": "Register / inspect / insure", "dep": "", "time": "varies (DMV)", "cost": "$100–400" },
 
-    { "id": "APP1", "phase": "APP", "gate": "", "status": "done", "title": "Head-unit app: telemetry, DATA, DASH, CAR, sim, game", "dep": "" },
-    { "id": "APP2", "phase": "APP", "gate": "", "status": "done", "title": "ZombieVerter VCU module + can_source", "dep": "" },
-    { "id": "APP3", "phase": "APP", "gate": "", "status": "todo", "title": "Order Pi 5 + 7\" double-DIN touch + CAN HAT", "dep": "" },
-    { "id": "APP4", "phase": "APP", "gate": "", "status": "todo", "title": "Bench the Pi on mock data (deploy/install.sh)", "dep": "needs APP3" },
-    { "id": "APP5", "phase": "APP", "gate": "", "status": "todo", "title": "Wire real CAN: fill can_map.json + ZV param ids", "dep": "needs G5, APP4" },
+    { "id": "APP1", "phase": "APP", "gate": "", "status": "done", "title": "Head-unit app: telemetry, DATA, DASH, CAR, sim, game", "dep": "", "time": "done", "cost": "$0" },
+    { "id": "APP2", "phase": "APP", "gate": "", "status": "done", "title": "ZombieVerter VCU module + can_source", "dep": "", "time": "done", "cost": "$0" },
+    { "id": "APP3", "phase": "APP", "gate": "", "status": "todo", "title": "Order Pi 5 + 7\" double-DIN touch + CAN HAT", "dep": "", "time": "~1 wk ship", "cost": "$230–260" },
+    { "id": "APP4", "phase": "APP", "gate": "", "status": "todo", "title": "Bench the Pi on mock data (deploy/install.sh)", "dep": "needs APP3", "time": "1 day", "cost": "$0" },
+    { "id": "APP5", "phase": "APP", "gate": "", "status": "todo", "title": "Wire real CAN: can_map.json + ZV param ids + DAC→amp", "dep": "needs G5, APP3", "time": "1–2 days", "cost": "$20+ (amp opt.)" },
 
-    { "id": "T16", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Northern-WI route study (distance, range margin)", "dep": "" },
-    { "id": "T17", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Charging map (AC L2 only, ADR-0006)", "dep": "" },
-    { "id": "T18", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Charging strategy / DCFC retrofit (ADR-0015)", "dep": "" },
-    { "id": "T19", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Add WI routes as in-app presets", "dep": "" },
-    { "id": "FIN", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Toxic Green finish — wrap then respray (ADR-0017, post-MVP)", "dep": "after it drives + bodywork" }
+    { "id": "T16", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Northern-WI route study (distance, range margin)", "dep": "", "time": "few hrs", "cost": "$0" },
+    { "id": "T17", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Charging map (AC L2 only, ADR-0006)", "dep": "", "time": "few hrs", "cost": "$0" },
+    { "id": "T18", "phase": "ONGOING", "gate": "", "status": "todo", "title": "DCFC retrofit eval (ADR-0015, post-MVP)", "dep": "", "time": "later", "cost": "$2,000–4,000" },
+    { "id": "T19", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Add WI routes as in-app presets", "dep": "", "time": "1 day", "cost": "$0" },
+    { "id": "FIN", "phase": "ONGOING", "gate": "", "status": "todo", "title": "Toxic Green finish — wrap then respray (ADR-0017, post-MVP)", "dep": "after it drives + bodywork", "time": "1 wk wrap / 2–4 wk paint", "cost": "$600–4k wrap · $4–9k paint" }
   ]
 }
