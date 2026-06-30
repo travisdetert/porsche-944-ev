@@ -211,8 +211,19 @@
     <div id="partsgrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin:8px 12px 18px"></div>
   </section>
 
-  <!-- BOM: the sourcing list (rendered from docs/BOM.md) -->
+  <!-- BOM / docs viewer (rendered from docs/*.md) -->
   <section class="view" id="view-bom">
+    <div class="row" style="display:flex;gap:8px;align-items:center;margin:0 14px">
+      <span style="color:#aaa;font-size:12px">📄 Doc</span>
+      <select id="docsel" class="clearbtn">
+        <option value="BOM">Master BOM (sourcing + links)</option>
+        <option value="mvp-sourcing">MVP sourcing strategy</option>
+        <option value="project-plan">Project plan</option>
+        <option value="headunit-bom">Head-unit BOM</option>
+        <option value="pi-vcu-integration">Pi ↔ VCU integration</option>
+        <option value="paint-toxic-green">Toxic Green paint plan</option>
+      </select>
+    </div>
     <div id="bomview" style="margin:8px 14px 24px;max-width:1000px"></div>
   </section>
 
@@ -243,7 +254,7 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   b.classList.add('active'); $('view-' + b.dataset.view).classList.add('active');
   if (b.dataset.view === 'trips') { loadTrips(); drawTrips(); }
-  if (b.dataset.view === 'bom') loadBom();
+  if (b.dataset.view === 'bom') loadDoc(($('docsel')||{value:'BOM'}).value);
   if (b.dataset.view === 'data' && window.__lastT) renderData(window.__lastT);
   if (b.dataset.view === 'dash' && window.__lastT) renderDash(window.__lastT);
   if (b.dataset.view === 'car' && window.carResize) setTimeout(window.carResize, 60);
@@ -421,11 +432,10 @@ function renderMarkdown(md) {
   }
   return html;
 }
-let __bomLoaded = false;
-async function loadBom() {
-  if (__bomLoaded) return; const el = $('bomview'); if (!el) return;
-  try { el.innerHTML = renderMarkdown(await (await fetch('/api/doc?name=BOM')).text()); __bomLoaded = true; }
-  catch (e) { el.innerHTML = '<p style="color:#e0533a">Could not load BOM.</p>'; }
+async function loadDoc(name) {
+  const el = $('bomview'); if (!el) return; el.innerHTML = '<p style="color:#888">loading…</p>';
+  try { el.innerHTML = renderMarkdown(await (await fetch('/api/doc?name=' + encodeURIComponent(name))).text()); }
+  catch (e) { el.innerHTML = '<p style="color:#e0533a">Could not load ' + name + '.</p>'; }
 }
 
 // ---- PLAN: project board ----
@@ -661,6 +671,7 @@ async function tick() {
   if (liveMode && $('view-trips').classList.contains('active')) drawTrips();
 }
 buildModes(); buildScenarios(); buildParams(); loadParts(); loadPlan(); tick(); setInterval(tick, 500);
+(function(){ const ds=document.getElementById('docsel'); if(ds) ds.onchange=()=>loadDoc(ds.value); })();
 (function(){ const b=document.getElementById('simToggle'), w=document.getElementById('simwrap'); if(b&&w) b.onclick=()=>{ const open=w.style.display==='none'; w.style.display=open?'block':'none'; b.textContent=(open?'▾':'▸')+' Sim table'; b.classList.toggle('active',open); if(open&&window.refreshSim) window.refreshSim(); }; })();
 </script>
 
