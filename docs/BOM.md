@@ -16,7 +16,7 @@ Gen2/3** (PF1). Sell the gas parts to offset.
 ## A. Drivetrain & control
 | Part | Source | ~$ | Note |
 |---|---|---|---|
-| Nissan Leaf **EM57 motor + inverter** | [Copart](https://www.copart.com/vehicle-search-model/nissan/leaf) · [eRepairables](https://erepairables.com/salvage-cars-auction/nissan/leaf) · [Car-Part](https://www.car-part.com) | [DONOR] | 2018+ ZE1 (PF1) |
+| Nissan Leaf **EM57 motor + inverter** | [eBay traction motor](https://www.ebay.com/sch/i.html?_nkw=nissan+leaf+traction+motor) · [Copart](https://www.copart.com/vehicle-search-model/nissan/leaf) · [Car-Part](https://www.car-part.com) | $600–1,200 | 2018+ ZE1 (PF1) · **candidate found: 2022, 25k mi, P/N 290A05SA0A, $921** |
 | **ZombieVerter VCU** (built) | [EVBMW shop](https://www.evbmw.com/index.php/evbmw-webshop/vcu-boards/zombieverter-vcu-built) · [setup wiki](https://openinverter.org/wiki/Nissan_Leaf_VCU) | $380–810 | the brain |
 | BMS Stage 1 — **reuse Leaf LBC** | donor (read by ZombieVerter) | [DONOR] | no new BMS |
 | BMS Stage 2 — **simpBMS** / Orion 2 | [openinverter](https://openinverter.org) · [Orion](https://www.orionbms.com) | $150–900 | Tesla pack only |
@@ -66,7 +66,7 @@ Gen2/3** (PF1). Sell the gas parts to offset.
 ## G. Battery
 | Part | Source | ~$ | Note |
 |---|---|---|---|
-| **Stage 1 — donor Leaf pack** (40 kWh) | donor | [DONOR] | ~120 mi |
+| **Stage 1 — 40 kWh pack** (donor reuse, or **used ~$2.5–4.5k** if piecemeal) | donor / [dismantler](https://evshop.eu/en/battery-pack/1707-nissan-leaf-40kwh-battery-pack-used.html) | $0–4,500 | ~120 mi; **carries the LBC + junction box** (contactors/fuse/sensor) |
 | **Stage 2 — Tesla 5.3 kWh ×14** | [ampREVOLT](https://amprevolt.com) · [EV West](https://www.evwest.com) · [Stealth EV](https://www.stealthev.com) | ~$9.7k | shop the ~2× spread |
 
 ## H. Head unit + control computer  → full list in `headunit-bom.md`
@@ -93,7 +93,7 @@ unless you want it, the 62 kWh e+. Verify part numbers with the seller.
 
 | Need | Search terms | Filter / notes |
 |---|---|---|
-| **40 kWh battery pack** (the big one) | `Nissan Leaf 40kwh battery` · `Leaf ZE1 battery pack` · `2018-2022 Leaf traction battery` · [eBay](https://www.ebay.com/sch/i.html?_nkw=nissan+leaf+40kwh+battery) | 2018+ ZE1, **ask SOH / GIDs / bars (LeafSpy), want >85%**. Pack ≈ P/N `295B0-…`. |
+| **40 kWh battery pack** (the big one) | `Nissan Leaf 40kwh battery` · `Leaf ZE1 battery pack` · `2018-2022 Leaf traction battery` · [eBay](https://www.ebay.com/sch/i.html?_nkw=nissan+leaf+40kwh+battery) | 2018+ ZE1, **ask SOH / GIDs / bars (LeafSpy), >85%**. **Used salvage ~$2,500–4,500 (no core)** — avoid reman+core, new $9–11k. P/N ≈ `295B0-…`. |
 | **BMS / LBC** | usually **inside the pack** — buy the pack, you get it · `Nissan Leaf LBC` · `Leaf lithium battery controller` | match the pack's gen; LBC ≈ `293B0-…` |
 | **Junction box** (contactors + main fuse + current sensor) | **inside the pack case** — comes with the pack · `Leaf battery junction box` | reuse it = your Stage-1 HV gear ($0) |
 | **PDM** (charger + DC-DC) | `Nissan Leaf PDM` · `Leaf onboard charger 2018` · `Leaf 6.6kW charger ZE1` · [eBay](https://www.ebay.com/sch/i.html?_nkw=nissan+leaf+PDM) | **MUST be Gen-2** (ZombieVerter PDM support, PF1). ≈ `292B0-…` |

@@ -5,7 +5,7 @@
   "axles": { "front_x": 1.25, "rear_x": -1.15 },
   "tires": { "compound": 1.0, "inflation_psi": 32, "optimal_psi": 32 },
   "transaxle_torque_limit_nm": 350,
-  "_motors_note": "Real specs: HyPer9 (NetGain vendor sheet) ø8.66in×13.98in, 130lb, 95kW/235Nm@8000. Leaf EM57 cross-section ~320×317mm (conversion sources), 110kW/320Nm@10500 (e+ 160kW/340Nm). Axial length + bare-motor mass are best estimates — VERIFY on the actual unit / vendor drawing. size=[axialLen, dia, dia] in metres.",
+  "_motors_note": "IDENTIFIED MOTOR (candidate, not yet bought): 2022 Leaf EM57 motor+inverter, P/N 290A05SA0A, VIN 1N4AZ1BV0NC558791, 25k mi, $921 free ship — Gen-2 ZE1 110kW, matches the 'Leaf EM57' spec below. Real specs: HyPer9 (NetGain sheet) ø8.66in×13.98in, 130lb, 95kW/235Nm@8000. Leaf EM57 cross-section ~320×317mm, 110kW/320Nm@10500 (e+ 160kW/340Nm). Axial length + bare-motor mass are best estimates — VERIFY on the actual unit. size=[axialLen, dia, dia] in metres.",
   "motors": [
     { "name": "HyPer9",       "P_kw": 95,  "T_nm": 235, "rpm": 8000,  "mass_kg": 59,  "size": [0.36, 0.22, 0.22] },
     { "name": "Leaf EM57",    "P_kw": 110, "T_nm": 320, "rpm": 10500, "mass_kg": 60,  "size": [0.30, 0.32, 0.32] },

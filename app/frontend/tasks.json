@@ -22,9 +22,10 @@
     { "id": "PF4", "phase": "NOW", "gate": "PF4", "status": "todo",  "title": "Get HV safety gear + verify-dead drill", "dep": "", "time": "1–2 days", "cost": "$250–400" },
     { "id": "SELL","phase": "NOW", "gate": "",    "status": "todo",  "title": "List gas parts for sale", "dep": "needs 000", "time": "ongoing", "cost": "+$500–1,500" },
 
-    { "id": "G1a", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Hunt & buy the donor Leaf (LeafSpy SOH)", "dep": "", "time": "weeks (hunt)", "cost": "$4,500–6,500" },
+    { "id": "G1a", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Buy EM57 motor+inverter — candidate 2022, 25k mi, P/N 290A05SA0A", "dep": "confirm inverter incl + return window", "time": "now", "cost": "$921" },
+    { "id": "G1c", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Find 40 kWh ZE1 pack, SOH>85% (brings LBC + junction box)", "dep": "match Gen-2; verify not swapped to 24 kWh", "time": "weeks (hunt)", "cost": "$2,500–4,500" },
     { "id": "PF2", "phase": "BUY", "gate": "PF2", "status": "todo",  "title": "Size HV fuse + precharge", "dep": "needs donor specs", "time": "1–2 hrs", "cost": "$0 (design)" },
-    { "id": "G1b", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Extract + label powertrain, pack, PDM, LBC", "dep": "needs G1a", "time": "1 day", "cost": "$0" },
+    { "id": "G1b", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Receive + inspect motor, pack, PDM, LBC, pedal", "dep": "needs G1a, G1c", "time": "1 day", "cost": "$0" },
     { "id": "ORD", "phase": "BUY", "gate": "",    "status": "todo",  "title": "Order ZombieVerter + adapter + HV BOM", "dep": "needs PF1,PF3", "time": "~4 wk lead", "cost": "$1,200–1,800" },
 
     { "id": "G2",  "phase": "BUILD", "gate": "G2", "status": "todo", "title": "Machine + dry-fit adapter (runout < 0.1 mm)", "dep": "needs 000, ORD", "time": "1–2 wk (shop)", "cost": "$250–500" },
