@@ -105,11 +105,34 @@ unless you want it, the 62 kWh e+. Verify part numbers with the seller.
 > LBC, junction box, PDM, pedal and charge port together — matched. (It also has a motor, so if you
 > buy a whole donor you may **not need the \$921 motor** — that's the real either/or.)
 
+## 🔧 Recommissioning consumables (it's been sitting)
+A 944 parked for years needs a chassis refresh **regardless of the EV swap.** Inspect at teardown
+(step 000); budget for what's tired. **Brakes must be 100% before G7 (first drive).**
+| Item | ~$ | Why / where |
+|---|---|---|
+| **4 tires** (dry-rot / flat-spotted from sitting) | $400–800 | sitting destroys tires — replace; verify size on the door jamb |
+| **Brake refresh** — pads + rotors | $150–400 | scored/rusty after years · [RockAuto](https://www.rockauto.com) · [Pelican Parts](https://www.pelicanparts.com) |
+| **Calipers** (seized) — rebuild or reman | $60–400 | 944 calipers commonly seize after sitting |
+| **Brake hoses** (rubber, perished) | $60–120 | crack/swell with age — safety item |
+| **Brake fluid** flush (DOT 4) | $15–30 | old fluid is water-logged |
+| **Transaxle gear oil** (kept transaxle) | $30–60 | fresh fill |
+| **Coolant** (EV cooling loop) | $20–40 | |
+| **12 V battery** (dead after sitting) | $120–200 | DC-DC keeps it charged, but start with a good one |
+| **Suspension** — control-arm/sway bushings, ball joints, **CV/axle boots** (inspect) | $100–500 | 944 weak points; do as condition dictates |
+| **Wipers / bulbs / weatherstrip** (as needed) | $30–100 | perish with age |
+| | **~$1,000–2,600** | swings on brake + suspension condition |
+
+> ⚠️ **Brakes can't be deferred.** No engine vacuum anymore, so the **electric booster + a fully
+> working hydraulic brake system** get verified **before** the first drive (G7). Regen *reduces*
+> brake wear later, but the brakes must be 100% on day one. Assume a full brake refresh until
+> inspection proves otherwise.
+
 ## Totals
 | Build | Net cost |
 |---|---|
 | **Cheapest-viable Stage-1** (cheap donor, reuse all HV, sell gas parts) | **~$2.5–3.5k** |
 | **Comfortable Stage-1 MVP** (good Gen-2 donor + new safety bits + head unit) | **~$6.5–8k** |
+| **Recommissioning** (sat-for-a-while: tires, brakes, fluids, bushings) | +$1,000–2,600 |
 | Stage-2 (Tesla 74 kWh pack) | +~$9.7k |
 | Finish (Toxic Green wrap→paint, ADR-0017) | +$0.6–9k (post-MVP) |
 

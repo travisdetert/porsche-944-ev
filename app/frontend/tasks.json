@@ -21,6 +21,7 @@
     { "id": "PF3", "phase": "NOW", "gate": "PF3", "status": "todo",  "title": "Quote the adapter (2 shops)", "dep": "needs 000 dims", "time": "~1 wk (quotes)", "cost": "$0" },
     { "id": "PF4", "phase": "NOW", "gate": "PF4", "status": "todo",  "title": "Get HV safety gear + verify-dead drill", "dep": "", "time": "1–2 days", "cost": "$250–400" },
     { "id": "SELL","phase": "NOW", "gate": "",    "status": "todo",  "title": "List gas parts for sale", "dep": "needs 000", "time": "ongoing", "cost": "+$500–1,500" },
+    { "id": "RECOM","phase": "NOW", "gate": "",   "status": "todo",  "title": "Recommission (sat-for-a-while): tires, brakes, fluids, bushings", "dep": "brakes 100% before G7 first drive", "time": "spread", "cost": "$1,000–2,600" },
 
     { "id": "G1a", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Buy EM57 motor+inverter — candidate 2022, 25k mi, P/N 290A05SA0A", "dep": "confirm inverter incl + return window", "time": "now", "cost": "$921" },
     { "id": "G1c", "phase": "BUY", "gate": "G1",  "status": "todo",  "title": "Find 40 kWh ZE1 pack, SOH>85% (brings LBC + junction box)", "dep": "match Gen-2; verify not swapped to 24 kWh", "time": "weeks (hunt)", "cost": "$2,500–4,500" },
