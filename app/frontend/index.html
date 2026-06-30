@@ -64,6 +64,7 @@
     <button data-view="trips">TRIPS</button>
     <button data-view="car" class="active">CAR</button>
     <button data-view="parts">PARTS</button>
+    <button data-view="bom">BOM</button>
     <button data-view="game">GAME</button>
   </nav>
   <div id="warn"></div>
@@ -210,6 +211,11 @@
     <div id="partsgrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin:8px 12px 18px"></div>
   </section>
 
+  <!-- BOM: the sourcing list (rendered from docs/BOM.md) -->
+  <section class="view" id="view-bom">
+    <div id="bomview" style="margin:8px 14px 24px;max-width:1000px"></div>
+  </section>
+
   <!-- GAME (drive it) -->
   <section class="view" id="view-game">
     <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -237,6 +243,7 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   b.classList.add('active'); $('view-' + b.dataset.view).classList.add('active');
   if (b.dataset.view === 'trips') { loadTrips(); drawTrips(); }
+  if (b.dataset.view === 'bom') loadBom();
   if (b.dataset.view === 'data' && window.__lastT) renderData(window.__lastT);
   if (b.dataset.view === 'dash' && window.__lastT) renderDash(window.__lastT);
   if (b.dataset.view === 'car' && window.carResize) setTimeout(window.carResize, 60);
@@ -382,6 +389,44 @@ $('export').onclick = async () => {
   if (id === 'live') { const d = await (await fetch('/api/trips')).json(); id = d.trips[0] && d.trips[0].id; }
   if (id) window.open('/api/trip.csv?id=' + id, '_blank');
 };
+
+// ---- BOM: render docs/BOM.md (tiny markdown → linked tables) ----
+function renderMarkdown(md) {
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline = s => esc(s)
+    .replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:#7fd1ff;text-decoration:none">$1↗</a>')
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/`([^`]+)`/g, '<code style="background:#1b1d22;padding:1px 5px;border-radius:4px;font-size:12px">$1</code>');
+  const lines = md.split('\n'); let html = '', i = 0;
+  const cells = r => r.replace(/^\||\|$/g,'').split('|').map(c => c.trim());
+  while (i < lines.length) {
+    const l = lines[i];
+    if (/^\|/.test(l)) {
+      const rows = []; while (i < lines.length && /^\|/.test(lines[i])) { rows.push(lines[i]); i++; }
+      const head = cells(rows[0]), body = rows.slice(2);
+      html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0">'
+        + '<thead><tr>' + head.map(h => '<th style="text-align:left;color:#9aa;border-bottom:1px solid #333;padding:5px 8px;white-space:nowrap">' + inline(h) + '</th>').join('') + '</tr></thead><tbody>'
+        + body.map(r => '<tr>' + cells(r).map(c => '<td style="border-bottom:1px solid #1e1e22;padding:5px 8px;vertical-align:top">' + inline(c) + '</td>').join('') + '</tr>').join('')
+        + '</tbody></table></div>';
+      continue;
+    }
+    if (/^### /.test(l)) { html += '<h4 style="margin:12px 0 4px">' + inline(l.slice(4)) + '</h4>'; }
+    else if (/^## /.test(l)) { html += '<h3 style="margin:18px 0 6px;color:#fff;border-bottom:1px solid #222;padding-bottom:4px">' + inline(l.slice(3)) + '</h3>'; }
+    else if (/^# /.test(l)) { html += '<h2 style="margin:6px 0 8px">' + inline(l.slice(2)) + '</h2>'; }
+    else if (/^> /.test(l)) { html += '<div style="border-left:3px solid #4a5;padding:5px 10px;color:#9aa;margin:8px 0;font-size:12px;background:#101417">' + inline(l.slice(2)) + '</div>'; }
+    else if (/^- /.test(l)) { const it = []; while (i < lines.length && /^- /.test(lines[i])) { it.push(lines[i].slice(2)); i++; } html += '<ul style="margin:4px 0 8px 18px;color:#cfcfd4">' + it.map(x => '<li style="margin:2px 0">' + inline(x) + '</li>').join('') + '</ul>'; continue; }
+    else if (/^---\s*$/.test(l)) { /* skip rule */ }
+    else if (l.trim()) { html += '<p style="margin:4px 0;color:#cfcfd4">' + inline(l) + '</p>'; }
+    i++;
+  }
+  return html;
+}
+let __bomLoaded = false;
+async function loadBom() {
+  if (__bomLoaded) return; const el = $('bomview'); if (!el) return;
+  try { el.innerHTML = renderMarkdown(await (await fetch('/api/doc?name=BOM')).text()); __bomLoaded = true; }
+  catch (e) { el.innerHTML = '<p style="color:#e0533a">Could not load BOM.</p>'; }
+}
 
 // ---- PLAN: project board ----
 const PLAN_C = {done:'#39d353', doing:'#e6c84a', todo:'#555', blocked:'#e0533a'};

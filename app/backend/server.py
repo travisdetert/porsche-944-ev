@@ -388,6 +388,15 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, json.dumps({"active": STATE["route"], "routes": [
                 {"name": k, "dist_mi": v.get("dist_mi", 0), "loop": v.get("loop", False)}
                 for k, v in ROUTES.items()]}))
+        elif self.path.startswith("/api/doc"):
+            name = parse_qs(urlparse(self.path).query).get("name", ["BOM"])[0]
+            if not all(c.isalnum() or c in "-_" for c in name):     # whitelist → no traversal
+                self._send(400, "bad doc name"); return
+            try:
+                with open(os.path.join(HERE, "..", "..", "docs", name + ".md"), encoding="utf-8") as f:
+                    self._send(200, f.read(), "text/markdown; charset=utf-8")
+            except FileNotFoundError:
+                self._send(404, "doc not found")
         elif self.path == "/api/trips":
             self._send(200, json.dumps({"trips": list_trips()}))
         elif self.path.startswith("/api/trip.csv?"):
