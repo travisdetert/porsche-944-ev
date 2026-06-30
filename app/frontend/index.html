@@ -386,8 +386,23 @@ $('export').onclick = async () => {
 // ---- PLAN: project board ----
 const PLAN_C = {done:'#39d353', doing:'#e6c84a', todo:'#555', blocked:'#e0533a'};
 const PLAN_LBL = {done:'DONE', doing:'IN PROGRESS', todo:'TO DO', blocked:'BLOCKED'};
+const MVP_PHASES = ['NOW','BUY','BUILD','DRIVE','APP'];
+function parseCost(s) {                       // → [lo,hi] $; income (leading +) counts negative
+  if (!s) return [0,0];
+  const income = /^\s*\+/.test(s);
+  const nums = []; s.replace(/\$?\s*([\d,.]+)\s*(k)?/gi, (m,n,k) => { let v = parseFloat(n.replace(/,/g,'')); if (k) v *= 1000; if (!isNaN(v)) nums.push(v); return m; });
+  if (!nums.length) return [0,0];
+  let lo = Math.min(...nums), hi = Math.max(...nums);
+  return income ? [-hi,-lo] : [lo,hi];
+}
+const usd = v => (v < 0 ? '−$' : '$') + Math.abs(Math.round(v)).toLocaleString();
+const sumCost = tasks => tasks.reduce((a,t) => { const [lo,hi] = parseCost(t.cost); return [a[0]+lo, a[1]+hi]; }, [0,0]);
+const spentKey = id => 'plan_spent_' + id;
+const getSpent = id => parseFloat(localStorage.getItem(spentKey(id)) || '0') || 0;
+
 async function loadPlan() {
   let d; try { d = await (await fetch('tasks.json')).json(); } catch(e){ return; }
+  window.__planTasks = d.tasks;
   const done = d.tasks.filter(t => t.status === 'done').length, n = d.tasks.length;
   $('plan-prog').textContent = done + ' / ' + n + ' done';
   const bar = $('plan-bar'); if (bar) bar.style.width = Math.round(done/n*100) + '%';
@@ -397,28 +412,42 @@ async function loadPlan() {
     + '<span style="font-size:13px;color:#eee">' + t.title + '</span>'
     + (t.gate ? '<span style="font-size:10px;color:#9aa;border:1px solid #333;border-radius:5px;padding:0 5px;white-space:nowrap">' + t.gate + '</span>' : '')
     + '</div>'
-    + '<div style="display:flex;gap:10px;margin-top:5px;font-size:11px">'
+    + '<div style="display:flex;gap:10px;margin-top:5px;font-size:11px;align-items:center;flex-wrap:wrap">'
     + '<span style="color:#9ac4e0">⏱ ' + (t.time||'—') + '</span>'
     + '<span style="color:#9be29b">💲 ' + (t.cost||'—') + '</span>'
+    + '<span style="color:#888">spent $<input type="number" min="0" class="spentin" data-id="' + t.id + '" value="' + (getSpent(t.id)||'') + '" style="width:64px;background:#0c0d10;border:1px solid #333;border-radius:5px;color:#eee;padding:1px 4px;font-size:11px"></span>'
     + '</div>'
     + '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:4px">'
     + '<span style="font-size:10px;font-weight:700;color:' + (PLAN_C[t.status]||'#888') + '">● ' + (PLAN_LBL[t.status]||t.status) + '</span>'
     + (t.dep ? '<span style="font-size:10px;color:#777">' + t.dep + '</span>' : '')
     + '</div></div>';
-  const col = (title, tasks) =>
-    '<div style="background:#0f1013;border-radius:10px;padding:8px 10px">'
-    + '<div style="font-size:12px;font-weight:700;color:#9aa;margin-bottom:8px">' + title + '</div>'
-    + tasks.map(card).join('') + '</div>';
+  const col = (title, tasks) => {
+    const [lo,hi] = sumCost(tasks);
+    const sub = (lo||hi) ? ' <span style="color:#9be29b;font-weight:600">' + (lo===hi ? usd(lo) : usd(lo)+'–'+usd(hi).replace('$','')) + '</span>' : '';
+    return '<div style="background:#0f1013;border-radius:10px;padding:8px 10px">'
+      + '<div style="font-size:12px;font-weight:700;color:#9aa;margin-bottom:8px">' + title + sub + '</div>'
+      + tasks.map(card).join('') + '</div>';
+  };
   const colsFor = keys => keys.map(p => col(p.title, d.tasks.filter(t => t.phase === p.key))).join('');
   const s = d.summary || {};
-  const banner = s.mvp_cost ? '<div style="background:#101417;border:1px solid #243; border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;gap:18px;flex-wrap:wrap;align-items:center">'
+  const banner = s.mvp_cost ? '<div style="background:#101417;border:1px solid #243;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;gap:18px;flex-wrap:wrap;align-items:center">'
     + '<span style="font-weight:800;font-size:15px">MVP ' + s.mvp_cost + '</span>'
     + '<span style="color:#9ac4e0;font-weight:700">⏱ ' + s.mvp_time + '</span>'
+    + '<span id="plan-spend" style="font-weight:700"></span>'
     + '<span style="color:#888;font-size:12px">' + (s.note||'') + '</span></div>' : '';
   $('planboard').innerHTML = banner
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">' + colsFor(d.phases) + '</div>'
     + '<div style="font-size:12px;font-weight:700;color:#9aa;margin:14px 0 6px">Parallel tracks (don\'t block the car)</div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">' + colsFor(d.tracks) + '</div>';
+  document.querySelectorAll('.spentin').forEach(inp => inp.oninput = () => { localStorage.setItem(spentKey(inp.dataset.id), inp.value || '0'); updateSpend(); });
+  updateSpend();
+}
+function updateSpend() {
+  const el = document.getElementById('plan-spend'), tasks = window.__planTasks; if (!el || !tasks) return;
+  const mvp = tasks.filter(t => MVP_PHASES.includes(t.phase));
+  const [lo,hi] = sumCost(mvp);
+  const spent = mvp.reduce((a,t) => a + getSpent(t.id), 0);
+  el.innerHTML = '· spent <span style="color:#e6c84a">' + usd(spent) + '</span> · remaining <span style="color:#39d353">' + usd(Math.max(0,lo-spent)) + '–' + usd(Math.max(0,hi-spent)).replace('$','') + '</span>';
 }
 
 // ---- PARTS: custom parts still to prove out ----
